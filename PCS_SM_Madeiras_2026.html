@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PCS — SM Madeiras 2026 | Instituto Primazia</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #B8963E;
+    --gold-light: #D4AF6A;
+    --gold-pale: #F0E4C8;
+    --beige: #F5F0E8;
+    --beige-mid: #EDE5D5;
+    --beige-dark: #D6C9B0;
+    --gray-900: #1C1A17;
+    --gray-700: #3D3A35;
+    --gray-500: #6B6560;
+    --gray-300: #B0A99F;
+    --gray-100: #E8E4DF;
+    --white: #FAFAF8;
+    --green-ok: #4A7C59;
+    --amber: #C17A2A;
+    --shadow: 0 2px 16px rgba(28,26,23,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--beige);
+    color: var(--gray-700);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--gray-900);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg, transparent, transparent 40px,
+      rgba(184,150,62,0.04) 40px, rgba(184,150,62,0.04) 80px
+    );
+  }
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 40px 32px;
+    position: relative;
+  }
+  .header-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 4px 12px;
+    margin-bottom: 20px;
+  }
+  .header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .header h1 span { color: var(--gold-light); }
+  .header-sub {
+    font-size: 13px;
+    color: var(--gray-300);
+    letter-spacing: 0.05em;
+    margin-bottom: 28px;
+  }
+  .header-meta {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .meta-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .meta-value { font-size: 13px; color: var(--gray-300); }
+  .meta-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--gray-500);
+    color: var(--gray-300);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+    width: 180px;
+    padding: 2px 0;
+    cursor: text;
+  }
+  .meta-input:focus { border-bottom-color: var(--gold); color: var(--white); }
+  .meta-input::placeholder { color: var(--gray-500); font-style: italic; }
+
+  /* PROGRESS */
+  .progress-section {
+    background: var(--gray-900);
+    border-top: 1px solid rgba(184,150,62,0.2);
+    padding: 0 40px 28px;
+  }
+  .progress-inner { max-width: 1100px; margin: 0 auto; }
+  .progress-label {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--gray-300); margin-bottom: 10px;
+  }
+  .progress-bar-track {
+    height: 4px; background: rgba(255,255,255,0.08);
+    border-radius: 2px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    border-radius: 2px; transition: width 0.5s ease;
+  }
+  .progress-count {
+    font-size: 11px; color: var(--gold); margin-top: 6px; text-align: right;
+  }
+
+  /* TIMELINE */
+  .timeline-section {
+    max-width: 1100px; margin: 0 auto; padding: 40px 40px 0;
+  }
+  .section-eyebrow {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--gold); margin-bottom: 16px;
+  }
+  .timeline {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    background: var(--white); border: 1px solid var(--beige-dark);
+    border-radius: 2px; overflow: hidden; box-shadow: var(--shadow);
+  }
+  .timeline-phase {
+    padding: 20px 16px; border-right: 1px solid var(--beige-dark);
+    cursor: pointer; transition: background 0.2s; position: relative;
+  }
+  .timeline-phase:last-child { border-right: none; }
+  .timeline-phase:hover { background: var(--beige); }
+  .timeline-phase.active { background: var(--gray-900); }
+  .timeline-phase.active .tl-month { color: var(--gold); }
+  .timeline-phase.active .tl-title { color: var(--white); }
+  .timeline-phase.active .tl-num { color: var(--gold-light); }
+  .tl-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px; font-weight: 700; color: var(--beige-dark);
+    line-height: 1; margin-bottom: 6px; transition: color 0.2s;
+  }
+  .tl-month {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--gold); margin-bottom: 4px;
+  }
+  .tl-title { font-size: 12px; font-weight: 500; color: var(--gray-700); transition: color 0.2s; }
+  .tl-arrow {
+    position: absolute; right: -8px; top: 50%; transform: translateY(-50%);
+    width: 16px; height: 16px; background: var(--gold);
+    clip-path: polygon(0 0, 100% 50%, 0 100%); z-index: 1; display: none;
+  }
+  .timeline-phase.active .tl-arrow { display: block; }
+
+  /* MAIN */
+  .main { max-width: 1100px; margin: 0 auto; padding: 40px 40px 80px; }
+
+  /* PHASE BLOCK */
+  .phase-block {
+    margin-bottom: 40px; background: var(--white);
+    border: 1px solid var(--beige-dark); border-radius: 2px;
+    box-shadow: var(--shadow); overflow: hidden; transition: box-shadow 0.2s;
+  }
+  .phase-block:hover { box-shadow: 0 4px 24px rgba(28,26,23,0.13); }
+  .phase-header {
+    display: flex; align-items: stretch; cursor: pointer; user-select: none;
+  }
+  .phase-num-col {
+    background: var(--gray-900); width: 56px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .phase-num-text {
+    font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700;
+    color: var(--gold); writing-mode: vertical-rl; transform: rotate(180deg); letter-spacing: 0.05em;
+  }
+  .phase-title-col {
+    flex: 1; padding: 20px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--beige-dark);
+  }
+  .phase-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--gold); margin-bottom: 4px;
+  }
+  .phase-name {
+    font-family: 'Cormorant Garamond', serif; font-size: 22px;
+    font-weight: 600; color: var(--gray-900);
+  }
+  .phase-period { font-size: 11px; color: var(--gray-300); margin-top: 2px; }
+  .phase-toggle { font-size: 20px; color: var(--gray-300); transition: transform 0.3s; margin-left: 16px; }
+  .phase-block.collapsed .phase-toggle { transform: rotate(-90deg); }
+  .phase-progress-mini { display: flex; align-items: center; gap: 10px; margin-left: 24px; }
+  .phase-pct { font-size: 12px; font-weight: 600; color: var(--gold); min-width: 36px; text-align: right; }
+  .mini-track { width: 80px; height: 3px; background: var(--beige-dark); border-radius: 2px; overflow: hidden; }
+  .mini-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.4s; }
+  .phase-body { display: block; }
+  .phase-block.collapsed .phase-body { display: none; }
+
+  /* TABLE */
+  .task-table { width: 100%; border-collapse: collapse; }
+  .task-table thead tr { background: var(--beige); border-bottom: 1px solid var(--beige-dark); }
+  .task-table thead th {
+    padding: 10px 16px; font-size: 10px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray-500); text-align: left;
+  }
+  .task-table tbody tr { border-bottom: 1px solid var(--gray-100); transition: background 0.15s; }
+  .task-table tbody tr:last-child { border-bottom: none; }
+  .task-table tbody tr:hover { background: var(--beige); }
+  .task-table tbody tr.done { opacity: 0.55; }
+  .task-table tbody tr.done td { text-decoration: line-through; text-decoration-color: var(--gold); }
+  .task-table td { padding: 14px 16px; vertical-align: top; font-size: 13px; color: var(--gray-700); }
+  .task-table td:first-child { width: 36px; padding-right: 0; }
+
+  /* CHECKBOX */
+  .task-check {
+    appearance: none; -webkit-appearance: none;
+    width: 18px; height: 18px; border: 2px solid var(--beige-dark);
+    border-radius: 2px; cursor: pointer; background: var(--white);
+    position: relative; transition: border-color 0.2s, background 0.2s; display: block; margin-top: 1px;
+  }
+  .task-check:checked { background: var(--gold); border-color: var(--gold); }
+  .task-check:checked::after {
+    content: ''; position: absolute; left: 4px; top: 1px;
+    width: 6px; height: 10px; border: 2px solid white;
+    border-top: none; border-left: none; transform: rotate(45deg);
+  }
+
+  /* BADGES */
+  .resp-badge {
+    display: inline-block; font-size: 10px; font-weight: 600;
+    padding: 3px 8px; border-radius: 2px; background: var(--beige);
+    color: var(--gray-500); border: 1px solid var(--beige-dark); white-space: nowrap;
+  }
+  .resp-badge.primazia { background: var(--gold-pale); color: var(--amber); border-color: var(--gold-light); }
+  .entregavel-text { font-size: 12px; color: var(--gray-500); font-style: italic; }
+
+  /* OBS ROW */
+  .obs-row { background: var(--beige) !important; border-left: 3px solid var(--gold) !important; }
+  .obs-row td { padding: 12px 16px !important; text-decoration: none !important; }
+  .obs-text { font-size: 12px; color: var(--amber); font-weight: 500; }
+
+  /* STATUS SELECT */
+  .status-select {
+    appearance: none; background: var(--white); border: 1px solid var(--beige-dark);
+    border-radius: 2px; padding: 3px 24px 3px 8px; font-family: 'DM Sans', sans-serif;
+    font-size: 11px; color: var(--gray-700); cursor: pointer; outline: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%236B6560' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 8px center; transition: border-color 0.2s;
+  }
+  .status-select.s-pendente { color: var(--gray-500); }
+  .status-select.s-andamento { color: var(--amber); border-color: var(--gold-light); }
+  .status-select.s-concluido { color: var(--green-ok); border-color: var(--green-ok); }
+
+  /* NOTES */
+  .notes-area { padding: 16px 20px; border-top: 1px solid var(--beige-dark); background: var(--beige); }
+  .notes-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray-300); margin-bottom: 8px; }
+  .notes-input {
+    width: 100%; min-height: 60px; background: var(--white); border: 1px solid var(--beige-dark);
+    border-radius: 2px; padding: 10px 12px; font-family: 'DM Sans', sans-serif;
+    font-size: 13px; color: var(--gray-700); resize: vertical; outline: none; transition: border-color 0.2s;
+  }
+  .notes-input:focus { border-color: var(--gold); }
+  .notes-input::placeholder { color: var(--gray-300); font-style: italic; }
+
+  /* HIERARCHY */
+  .hier-section {
+    margin-bottom: 40px; background: var(--white);
+    border: 1px solid var(--beige-dark); border-radius: 2px; box-shadow: var(--shadow); overflow: hidden;
+  }
+  .hier-header {
+    background: var(--gray-900); padding: 20px 24px; display: flex; align-items: center; gap: 16px;
+  }
+  .hier-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; color: var(--white); }
+  .hier-body { padding: 32px 40px; display: flex; flex-direction: column; align-items: center; }
+  .hier-node { text-align: center; }
+  .hier-card {
+    display: inline-block; padding: 12px 28px; border: 1px solid var(--beige-dark);
+    border-radius: 2px; background: var(--beige);
+  }
+  .hier-card.top { border-color: var(--gold); background: var(--gold-pale); }
+  .hier-role { font-size: 10px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); margin-bottom: 2px; }
+  .hier-name { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; color: var(--gray-900); }
+  .hier-arrow {
+    width: 1px; height: 28px; background: var(--gold); margin: 0 auto; position: relative;
+  }
+  .hier-arrow::after {
+    content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
+    width: 0; height: 0; border-left: 5px solid transparent;
+    border-right: 5px solid transparent; border-top: 7px solid var(--gold);
+  }
+  .hier-multi { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+  /* MARCOS */
+  .marcos-section {
+    margin-bottom: 40px; background: var(--white);
+    border: 1px solid var(--beige-dark); border-radius: 2px; box-shadow: var(--shadow); overflow: hidden;
+  }
+  .marcos-header { background: var(--gray-900); padding: 20px 24px; }
+  .marcos-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; color: var(--white); }
+  .marcos-table { width: 100%; border-collapse: collapse; }
+  .marcos-table thead tr { background: var(--beige); border-bottom: 1px solid var(--beige-dark); }
+  .marcos-table thead th {
+    padding: 10px 20px; font-size: 10px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray-500); text-align: left;
+  }
+  .marcos-table tbody tr { border-bottom: 1px solid var(--gray-100); transition: background 0.15s; }
+  .marcos-table tbody tr:last-child { border-bottom: none; }
+  .marcos-table tbody tr:hover { background: var(--beige); }
+  .marcos-table td { padding: 16px 20px; font-size: 13px; color: var(--gray-700); vertical-align: middle; }
+  .marco-badge {
+    display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px;
+    border-radius: 2px; font-size: 11px; font-weight: 600; cursor: pointer;
+    user-select: none; transition: all 0.2s;
+  }
+  .marco-badge.pendente { background: var(--gray-100); color: var(--gray-500); }
+  .marco-badge.andamento { background: #FEF3CD; color: var(--amber); }
+  .marco-badge.concluido { background: #E8F4EC; color: var(--green-ok); }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 48px 0;
+  }
+
+  /* FOOTER */
+  .footer { background: var(--gray-900); padding: 24px 40px; }
+  .footer-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+  .footer-logo { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--gold-light); font-weight: 600; }
+  .footer-copy { font-size: 11px; color: var(--gray-500); }
+
+  /* PRINT BTN */
+  .print-btn {
+    position: fixed; bottom: 32px; right: 32px; background: var(--gray-900);
+    color: var(--gold); border: 1px solid var(--gold); padding: 12px 20px;
+    font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+    display: flex; align-items: center; gap: 8px; transition: background 0.2s;
+    border-radius: 2px; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+  .print-btn:hover { background: var(--gold); color: var(--gray-900); }
+
+  /* SAVE */
+  .save-indicator {
+    position: fixed; top: 16px; right: 16px; background: var(--gray-900);
+    color: var(--gold); font-size: 11px; font-weight: 500; padding: 6px 14px;
+    border-radius: 2px; opacity: 0; transition: opacity 0.3s; pointer-events: none;
+    border: 1px solid var(--gold);
+  }
+  .save-indicator.show { opacity: 1; }
+
+  [contenteditable] { outline: none; border-bottom: 1px dashed transparent; transition: border-color 0.2s; cursor: text; }
+  [contenteditable]:hover { border-bottom-color: var(--gold-light); }
+  [contenteditable]:focus { border-bottom-color: var(--gold); }
+
+  @media print {
+    .print-btn, .save-indicator { display: none !important; }
+    .phase-block.collapsed .phase-body { display: block !important; }
+    body { background: white; }
+  }
+</style>
+</head>
+<body>
+
+<div class="save-indicator" id="saveIndicator">✓ Salvo automaticamente</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <div class="header-badge">Instituto Primazia · Consultoria Estratégica</div>
+    <h1>Plano de <span>Cargo e Salário</span></h1>
+    <div class="header-sub">SM MADEIRAS E LAMINADOS LTDA &nbsp;·&nbsp; UNIDADE ARIPUANÃ &nbsp;·&nbsp; 2026</div>
+    <div class="header-meta">
+      <div class="meta-item">
+        <span class="meta-label">Período</span>
+        <span class="meta-value">Maio → Setembro 2026</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Status</span>
+        <span class="meta-value" style="color:var(--gold-light)">● Em Andamento</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Responsável Primazia</span>
+        <input class="meta-input" id="resp-primazia" placeholder="Nome do consultor..." />
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Versão</span>
+        <input class="meta-input" id="doc-versao" placeholder="v1.0" style="width:100px" />
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Link do Projeto</span>
+        <input class="meta-input" id="doc-link" placeholder="Cole o link aqui..." style="width:220px" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-section">
+  <div class="progress-inner">
+    <div class="progress-label">Progresso Geral do Projeto</div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="globalProgress" style="width:0%"></div>
+    </div>
+    <div class="progress-count" id="globalCount">0 de 18 atividades concluídas</div>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<div class="timeline-section">
+  <div class="section-eyebrow">Fluxo Geral — Maio a Setembro 2026</div>
+  <div class="timeline">
+    <div class="timeline-phase active" onclick="scrollToPhase(1)">
+      <div class="tl-num">01</div>
+      <div class="tl-month">Maio</div>
+      <div class="tl-title">Levantamento e Diagnóstico</div>
+      <div class="tl-arrow"></div>
+    </div>
+    <div class="timeline-phase" onclick="scrollToPhase(2)">
+      <div class="tl-num">02</div>
+      <div class="tl-month">Junho</div>
+      <div class="tl-title">Descrição de Cargos</div>
+      <div class="tl-arrow"></div>
+    </div>
+    <div class="timeline-phase" onclick="scrollToPhase(3)">
+      <div class="tl-num">03</div>
+      <div class="tl-month">Julho</div>
+      <div class="tl-title">Avaliação e Pontuação</div>
+      <div class="tl-arrow"></div>
+    </div>
+    <div class="timeline-phase" onclick="scrollToPhase(4)">
+      <div class="tl-num">04</div>
+      <div class="tl-month">Agosto</div>
+      <div class="tl-title">Estrutura Salarial</div>
+      <div class="tl-arrow"></div>
+    </div>
+    <div class="timeline-phase" onclick="scrollToPhase(5)">
+      <div class="tl-num">05</div>
+      <div class="tl-month">Setembro</div>
+      <div class="tl-title">Implantação</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- FASE 1 -->
+  <div class="phase-block" id="phase-1">
+    <div class="phase-header" onclick="togglePhase(1)">
+      <div class="phase-num-col"><span class="phase-num-text">FASE 01</span></div>
+      <div class="phase-title-col">
+        <div>
+          <div class="phase-tag">Maio · Semanas 1 e 2</div>
+          <div class="phase-name">Levantamento e Diagnóstico</div>
+          <div class="phase-period">Coleta de dados · Inconsistências · Alinhamento inicial</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="phase-progress-mini">
+            <div class="mini-track"><div class="mini-fill" id="p1-fill" style="width:0%"></div></div>
+            <span class="phase-pct" id="p1-pct">0%</span>
+          </div>
+          <span class="phase-toggle">▾</span>
+        </div>
+      </div>
+    </div>
+    <div class="phase-body">
+      <table class="task-table">
+        <thead><tr><th></th><th>Atividade</th><th>Responsável</th><th>Entregável</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><input type="checkbox" class="task-check" data-phase="1" onchange="handleCheck(this)"></td>
+            <td contenteditable>Coleta de todos os cargos existentes (formais e informais)</td>
+            <td><span class="resp-badge primazia">Primazia + RH SM</span></td>
+            <td><span class="entregavel-text" contenteditable>Lista consolidada de cargos</span></td>
+            <td><select class="status-select s-pendente" onchange="updateStatusStyle(this)"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" class="task-check" data-phase="1" onchange="handleCheck(this)"></td>
+            <td contenteditable>Levantamento de inconsistências salariais internas</td>
+            <td><span class="resp-badge">RH SM (Michele)</span></td>
+            <td><span class="entregavel-text" contenteditable>Relatório de inconsistências</span></td>
+            <td><select class="status-select s-pendente" onchange="updateStatusStyle(this)"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" class="task-check" data-phase="1" onchange="handleCheck(this)"></td>
+            <td contenteditable>Alinhamento inicial com Vilson e Michele sobre escopo e critérios</td>
+            <td><span class="resp-badge primazia">Primazia + Vilson + Michele</span></td>
+            <td><span class="entregavel-text" contenteditable>Diretrizes validadas para início</span></td>
+            <td><select class="status-select s-pendente" onchange="updateStatusStyle(this)"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select></td>
+          </tr>
+          <tr class="obs-row">
+            <td colspan="5"><span style="margin-right:6px">⚠️</span><span class="obs-text" contenteditable>Ponto de atenção: o alinhamento com Vilson e Michele na largada evita retrabalho nas fases seguintes. Eles definem os critérios que a Primazia vai operar.</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="notes-area">
+        <div class="notes-label">Observações e Registros — Fase 1</div>
+        <textarea class="notes-input" data-key="notes1" placeholder="Registre encaminhamentos, decisões, datas de reunião e qualquer informação relevante desta fase..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- FASE 2 -->
+  <div class="phase-block" id="phase-2">
+    <div class="phase-header" onclick="togglePhase(2)">
+      <div class="phase-num-col"><span class="phase-num-text">FASE 02</span></div>
+      <div class="phase-title-col">
+        <div>
+          <div class="phase-tag">Junho · Semanas 1 a 4</div>
+          <div class="phase-name">Descrição de Cargos</div>
+          <div class="phase-period">Elaboração · Agrupamento por famílias · Validação e aprovação executiva</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="phase-progress-mini">
+            <div class="mini-track"><div class="mini-fill" id="p2-fill" style="width:0%"></div></div>
+            <span class="phase-pct" id="p2-pct">0%</span>
+          </div>
+          <span class="phase-toggle">▾</span>
+        </div>
+      </div>
+    </div>
+    <div class="phase-body">
+      <table class="task-table">
+        <thead><tr><th></th><th>Atividade</th><th>Responsável</th><th>Entregável</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><input type="checkbox" class="task-check" data-phase="2" onchange="handleCheck(this)"></td>
+            <td contenteditable>Elaboração das Descrições de Cargo (competências, requisitos, responsabilidades)</td>
+            <td><span class="resp-badge primazia">Primazia</span></td>
+            <td><span class="entregavel-text" contenteditable>Manual de Descrição de Cargos</span></td>
+            <td><select class="status-select s-pendente" onchange="updateStatusStyle(this)"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" class="task-check" data-phase="2" onchange="handleCheck(this)"></td>
+            <td contenteditable>Agrupamento por famílias: Operacional / Técnico / Administrativo / Gestão</td>
+            <td><span class="resp-badge primazia">Primazia</span></td>
+            <td><span class="entregavel-text" contenteditable>Organograma funcional atualizado</span></td>
+            <td><select class="status-select s-pendente" onchange="updateStatusStyle(this)"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" class="task-check" data-phase="2" onchange="handleCheck(this)"></td>
+            <td contenteditable>Validação técnica com Vilson e Michele</td>
+            <td><span class="resp-badge primazia">Primazia + Vilson + Michele</span></td>
+            <td><span class="entregavel-text" contenteditable>Descrições aprovadas na gestão</span></td>
+            <td><select class="status-select s-pendente" onchange="updateStatusStyle(this)"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" class="task-check" data-phase="2" onchange="handleCheck(this)"></td>
+            <td contenteditable>Aprovação final com Diretoria / CEO</td>
+            <td><span class="resp-badge">Primazia + Diretoria</span></td>
+            <td><span class="entregavel-text" contenteditable>Descrições com aval executivo</span></td>
+            <td><select class="status-select s-pendente" onchange="updateStatusStyle(this)"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select></td>
+          </tr>
+          <tr class="obs-row">
+            <td colspan="5"><span style="margin-right:6px">💡</span><span class="obs-text" contenteditable>A validação segue a hierarquia correta: Vilson e Michele → Diretoria/CEO. Líderes operacionais não entram nessa alçada.</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="notes-area">
+        <div class="notes-label">Observações e Registros — Fase 2</div>
+        <textarea class="notes-input" data-key="notes2" placeholder="Registre encaminhamentos, decisões, datas de reunião e qualquer informação relevante desta fase..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- FASE 3 -->
+  <div class="phase-block" id="phase-3">
+    <div class="phase-header" onclick="togglePhase(3)">
+      <div class="phase-num-col"><span class="phase-num-text">FASE 03</span></div>
+      <div class="phase-title-col">
+        <div>
+          <div class="phase-tag">Julho · Semanas 1 a 3</div>
+          <div class="phase-name">Avaliação e Pontuação de Cargos</div>
+          <div class="phase-period">Método de Pontos por Fatores · Fatores compensáveis · Ranking oficial</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="phase-progress-mini">
+            <div class="mini-track"><div class="mini-fill" id="p3-fill" style="width:0%"></div></div>
+            <span class="phase-pct" id="p3-pct">0%</span>
+          </div>
+          <span class="phase-toggle">▾</span>
+        </div>
+      </div>
+    </div>
+    <div class="phase-body">
+      <table class="task-table">
+        <thead><tr><th></th><th>Atividade</th><th>Responsável</th><th>Entregável</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><input type="checkbox" class="task-check" data-phase="3" onchange="handleCheck(this)"></td>
+            <td contenteditable>Aplicação do Método de Pontos por Fatores</td>
+            <td><span class="resp-badge primazia">Primazia</span></td>
+            <td><span class="entregavel-text" contenteditable>Planilha de avaliação preenchida</span></td>
+            <td><select class="status-select s-pendente" onchange="updateStatusStyle(this)"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" class="task-check" data-phase="3" onchange="handleCheck(this)"></td>
+            <td contenteditable>Definição dos fatores compensáveis com pesos (escolaridade, responsabilidade, complexidade, condições de trabalho)</td>
+            <td><span class="resp-badge primazia">Primazia + Vilson</span></td>
+            <td><span class="entregavel-text" contenteditable>Fatores e pesos validados</span></td>
+            <td><select class="status-select s-pendente" onchange="updateStatusStyle(this)"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" class="task-check" data-phase="3" onchange="handleCheck(this)"></td>
+            <td contenteditable>Hierarquização final dos cargos por pontuação</td>
+            <td><span class="resp-badge primazia">Primazia</span></td>
+            <td><span class="entregavel-text" contenteditable>Ranking oficial de cargos</span></td>
+            <td><select class="status-select s-pendente" onchange="updateStatusStyle(this)"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select></td>
+          </tr>
+          <tr class="obs-row">
+            <td colspan="5"><span style="margin-right:6px">💡</span><span class="obs-text" contenteditable>Para SM Madeiras, os fatores condições de trabalho e risco operacional devem ter peso elevado — essencial para cargos florestais e industriais, alinhado com NR-1 e NR-17.</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="notes-area">
+        <div class="notes-label">Observações e Registros — Fase 3</div>
+        <textarea class="notes-input" data-key="notes3" placeholder="Registre encaminhamentos, decisões, datas de reunião e qualquer informação relevante desta fase..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- FASE 4 -->
+  <div class="phase-block" id="phase-4">
+    <div class="phase-header" onclick="togglePhase(4)">
+      <div class="phase-num-col"><span class="phase-num-text">FASE 04</span></div>
+      <div class="phase-title-col">
+        <div>
+          <div class="phase-tag">Agosto · Semanas 1 a 4</div>
+          <div class="phase-name">Estrutura Salarial</div>
+          <div class="phase-period">Benchmark regional · Faixas salariais · Impacto financeiro · Política de progressão</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="phase-progress-mini">
+            <div class="mini-track"><div class="mini-fill" id="p4-fill" style="width:0%"></div></div>
+            <span class="phase-pct" id="p4-pct">0%</span>
+          </div>
+          <span class="phase-toggle">▾</span>
+        </div>
+      </div>
+    </div>
+    <div class="phase-body">
+      <table class="task-table">
+        <thead><tr><th></th><th>Atividade</th><th>Responsável</th><th>Entregável</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><input type="checkbox" class="task-check" data-phase="4" onchange="handleCheck(this)"></td>
+            <td contenteditable>Pesquisa salarial de mercado — setor madeireiro / Mato Grosso</td>
+            <td><span class="resp-badge primazia">Primazia</span></td>
+            <td><span class="entregavel-text" contenteditable>Relatório de benchmark regional</span></td>
+            <td><select class="status-select s-pendente" onchange="updateStatusStyle(this)"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" class="task-check" data-phase="4" onchange="handleCheck(this)"></td>
+            <td contenteditable>Definição das faixas salariais (mínimo / ponto médio / máximo)</td>
+            <td><span class="resp-badge primazia">Primazia</span></td>
+            <td><span class="entregavel-text" contenteditable>Tabela salarial estruturada</span></td>
+            <td><select class="status-select s-pendente" onchange="updateStatusStyle(this)"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" class="task-check" data-phase="4" onchange="handleCheck(this)"></td>
+            <td contenteditable>Cálculo de impacto financeiro na folha</td>
+            <td><span class="resp-badge">Primazia + Financeiro SM</span></td>
+            <td><span class="entregavel-text" contenteditable>Projeção de custo de adequação</span></td>
+            <td><select class="status-select s-pendente" onchange="updateStatusStyle(this)"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" class="task-check" data-phase="4" onchange="handleCheck(this)"></td>
+            <td contenteditable>Política de progressão salarial (mérito, tempo, promoção)</td>
+            <td><span class="resp-badge primazia">Primazia</span></td>
+            <td><span class="entregavel-text" contenteditable>Política de Remuneração documentada</span></td>
+            <td><select class="status-select s-pendente" onchange="updateStatusStyle(this)"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" class="task-check" data-phase="4" onchange="handleCheck(this)"></td>
+            <td contenteditable>Aprovação da estrutura com Diretoria / CEO</td>
+            <td><span class="resp-badge">Primazia + Diretoria</span></td>
+            <td><span class="entregavel-text" contenteditable>PCS aprovado para implantação</span></td>
+            <td><select class="status-select s-pendente" onchange="updateStatusStyle(this)"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="notes-area">
+        <div class="notes-label">Observações e Registros — Fase 4</div>
+        <textarea class="notes-input" data-key="notes4" placeholder="Registre encaminhamentos, decisões, datas de reunião e qualquer informação relevante desta fase..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- FASE 5 -->
+  <div class="phase-block" id="phase-5">
+    <div class="phase-header" onclick="togglePhase(5)">
+      <div class="phase-num-col"><span class="phase-num-text">FASE 05</span></div>
+      <div class="phase-title-col">
+        <div>
+          <div class="phase-tag">Setembro · Semanas 1 a 4</div>
+          <div class="phase-name">Implantação</div>
+          <div class="phase-period">Capacitação · Comunicação · Adequação · Encerramento com Ata de Diretoria</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="phase-progress-mini">
+            <div class="mini-track"><div class="mini-fill" id="p5-fill" style="width:0%"></div></div>
+            <span class="phase-pct" id="p5-pct">0%</span>
+          </div>
+          <span class="phase-toggle">▾</span>
+        </div>
+      </div>
+    </div>
+    <div class="phase-body">
+      <table class="task-table">
+        <thead><tr><th></th><th>Atividade</th><th>Responsável</th><th>Entregável</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><input type="checkbox" class="task-check" data-phase="5" onchange="handleCheck(this)"></td>
+            <td contenteditable>Capacitação de Fabiano, Vanderlei, João, Vandi e Ebner para operar o PCS com suas equipes (apoio DP — Jessica)</td>
+            <td><span class="resp-badge primazia">Primazia</span></td>
+            <td><span class="entregavel-text" contenteditable>Workshop de líderes realizado</span></td>
+            <td><select class="status-select s-pendente" onchange="updateStatusStyle(this)"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" class="task-check" data-phase="5" onchange="handleCheck(this)"></td>
+            <td contenteditable>Comunicação interna escalonada aos colaboradores</td>
+            <td><span class="resp-badge">RH SM + Líderes</span></td>
+            <td><span class="entregavel-text" contenteditable>Comunicado interno formal</span></td>
+            <td><select class="status-select s-pendente" onchange="updateStatusStyle(this)"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" class="task-check" data-phase="5" onchange="handleCheck(this)"></td>
+            <td contenteditable>Adequação das fichas de função e registros</td>
+            <td><span class="resp-badge">RH SM</span></td>
+            <td><span class="entregavel-text" contenteditable>Documentação operacional atualizada</span></td>
+            <td><select class="status-select s-pendente" onchange="updateStatusStyle(this)"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" class="task-check" data-phase="5" onchange="handleCheck(this)"></td>
+            <td contenteditable>Definição do ciclo anual de revisão do PCS</td>
+            <td><span class="resp-badge primazia">Primazia + RH</span></td>
+            <td><span class="entregavel-text" contenteditable>Calendário de manutenção</span></td>
+            <td><select class="status-select s-pendente" onchange="updateStatusStyle(this)"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" class="task-check" data-phase="5" onchange="handleCheck(this)"></td>
+            <td contenteditable>Reunião de Diretoria — Ata de Encerramento e Implantação oficial do PCS</td>
+            <td><span class="resp-badge">Primazia + Diretoria</span></td>
+            <td><span class="entregavel-text" contenteditable>Ata descritiva com marco de implantação</span></td>
+            <td><select class="status-select s-pendente" onchange="updateStatusStyle(this)"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="notes-area">
+        <div class="notes-label">Observações e Registros — Fase 5</div>
+        <textarea class="notes-input" data-key="notes5" placeholder="Registre encaminhamentos, decisões, datas de reunião e qualquer informação relevante desta fase..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- HIERARQUIA -->
+  <div class="hier-section">
+    <div class="hier-header">
+      <span style="font-size:18px;color:var(--gold)">◈</span>
+      <span class="hier-title">Hierarquia de Validação — Fixada</span>
+    </div>
+    <div class="hier-body">
+      <div class="hier-node">
+        <div class="hier-card top">
+          <div class="hier-role">Elaboração</div>
+          <div class="hier-name">Instituto Primazia</div>
+        </div>
+      </div>
+      <div class="hier-arrow"></div>
+      <div class="hier-node">
+        <div class="hier-card">
+          <div class="hier-role">Validação Técnica</div>
+          <div class="hier-name">Vilson &nbsp;+&nbsp; Michele</div>
+        </div>
+      </div>
+      <div class="hier-arrow"></div>
+      <div class="hier-node">
+        <div class="hier-card">
+          <div class="hier-role">Aprovação Executiva</div>
+          <div class="hier-name">Diretoria / CEO</div>
+        </div>
+      </div>
+      <div class="hier-arrow"></div>
+      <div class="hier-multi">
+        <div class="hier-card"><div class="hier-role">Líderes — Comunicação</div><div class="hier-name">Fabiano</div></div>
+        <div class="hier-card"><div class="hier-role">Líderes — Comunicação</div><div class="hier-name">Vanderlei</div></div>
+        <div class="hier-card"><div class="hier-role">Líderes — Comunicação</div><div class="hier-name">João</div></div>
+        <div class="hier-card"><div class="hier-role">Líderes — Comunicação</div><div class="hier-name">Vandi</div></div>
+        <div class="hier-card"><div class="hier-role">Líderes — Comunicação</div><div class="hier-name">Ebner</div></div>
+      </div>
+      <div class="hier-arrow"></div>
+      <div class="hier-node">
+        <div class="hier-card">
+          <div class="hier-role">Apoio DP</div>
+          <div class="hier-name">Jessica</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MARCOS -->
+  <div class="marcos-section">
+    <div class="marcos-header">
+      <div class="marcos-title">Marcos Críticos do Projeto</div>
+    </div>
+    <table class="marcos-table">
+      <thead>
+        <tr>
+          <th>Marco</th><th>Mês</th><th>Quem Autoriza</th>
+          <th>Data Prevista</th><th>Data Realizada</th><th>Situação</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td contenteditable>Cargos levantados e alinhados</td>
+          <td><span class="resp-badge">Maio</span></td>
+          <td contenteditable>Michele + Vilson + Jessica</td>
+          <td contenteditable style="font-size:12px;color:var(--gray-500)">31/05/2026</td>
+          <td contenteditable style="font-size:12px;color:var(--gray-500)">—</td>
+          <td><span class="marco-badge pendente" id="m1">● Pendente</span></td>
+        </tr>
+        <tr>
+          <td contenteditable>Descrições aprovadas</td>
+          <td><span class="resp-badge">Junho</span></td>
+          <td contenteditable>Diretoria / CEO</td>
+          <td contenteditable style="font-size:12px;color:var(--gray-500)">30/06/2026</td>
+          <td contenteditable style="font-size:12px;color:var(--gray-500)">—</td>
+          <td><span class="marco-badge pendente" id="m2">● Pendente</span></td>
+        </tr>
+        <tr>
+          <td contenteditable>Ranking de cargos definido</td>
+          <td><span class="resp-badge">Julho</span></td>
+          <td contenteditable>Vilson</td>
+          <td contenteditable style="font-size:12px;color:var(--gray-500)">25/07/2026</td>
+          <td contenteditable style="font-size:12px;color:var(--gray-500)">—</td>
+          <td><span class="marco-badge pendente" id="m3">● Pendente</span></td>
+        </tr>
+        <tr>
+          <td contenteditable>Tabela salarial aprovada</td>
+          <td><span class="resp-badge">Agosto</span></td>
+          <td contenteditable>Diretoria / CEO</td>
+          <td contenteditable style="font-size:12px;color:var(--gray-500)">29/08/2026</td>
+          <td contenteditable style="font-size:12px;color:var(--gray-500)">—</td>
+          <td><span class="marco-badge pendente" id="m4">● Pendente</span></td>
+        </tr>
+        <tr>
+          <td contenteditable>PCS implantado e comunicado</td>
+          <td><span class="resp-badge">Setembro</span></td>
+          <td contenteditable>Diretoria</td>
+          <td contenteditable style="font-size:12px;color:var(--gray-500)">30/09/2026</td>
+          <td contenteditable style="font-size:12px;color:var(--gray-500)">—</td>
+          <td><span class="marco-badge pendente" id="m5">● Pendente</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="padding:12px 20px;background:var(--beige);border-top:1px solid var(--beige-dark)">
+      <span style="font-size:11px;color:var(--gray-300)">💡 Clique no badge de situação para alternar: Pendente → Em andamento → Concluído. Campos em itálico são editáveis.</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-inner">
+    <div class="footer-logo">Instituto Primazia</div>
+    <div class="footer-copy">SM Madeiras e Laminados Ltda · Plano de Cargo e Salário 2026 · Documento interno de trabalho</div>
+    <div style="font-size:10px;color:var(--gold);letter-spacing:0.1em;font-weight:600">CONFIDENCIAL</div>
+  </div>
+</div>
+
+<button class="print-btn" onclick="window.print()">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+  Imprimir / PDF
+</button>
+
+<script>
+const TOTAL = 18;
+const STOR_KEY = 'pcs_sm_madeiras_2026';
+const M_STATES = ['pendente','andamento','concluido'];
+const M_LABELS = { pendente:'● Pendente', andamento:'● Em andamento', concluido:'✓ Concluído' };
+
+function togglePhase(n){
+  document.getElementById('phase-'+n).classList.toggle('collapsed');
+}
+
+function scrollToPhase(n){
+  document.getElementById('phase-'+n).scrollIntoView({behavior:'smooth',block:'start'});
+  document.querySelectorAll('.timeline-phase').forEach((p,i)=>p.classList.toggle('active',i===n-1));
+}
+
+function handleCheck(cb){
+  const row = cb.closest('tr');
+  row.classList.toggle('done', cb.checked);
+  updateProgress();
+  saveState();
+}
+
+function updateStatusStyle(sel){
+  sel.className = 'status-select s-'+sel.value;
+  const row = sel.closest('tr');
+  row.classList.toggle('done', sel.value==='concluido');
+  updateProgress();
+  saveState();
+}
+
+function updateProgress(){
+  const all = document.querySelectorAll('.task-check');
+  const done = document.querySelectorAll('.task-check:checked').length;
+  const pct = Math.round((done/TOTAL)*100);
+  document.getElementById('globalProgress').style.width = pct+'%';
+  document.getElementById('globalCount').textContent = done+' de '+TOTAL+' atividades concluídas ('+pct+'%)';
+  for(let p=1;p<=5;p++){
+    const pAll = document.querySelectorAll('.task-check[data-phase="'+p+'"]');
+    const pDone = document.querySelectorAll('.task-check[data-phase="'+p+'"]:checked').length;
+    const pp = pAll.length>0 ? Math.round((pDone/pAll.length)*100) : 0;
+    document.getElementById('p'+p+'-fill').style.width=pp+'%';
+    document.getElementById('p'+p+'-pct').textContent=pp+'%';
+  }
+}
+
+// Marco badges
+document.querySelectorAll('.marco-badge').forEach(b=>{
+  b.title='Clique para alterar status';
+  b.addEventListener('click',function(){
+    const cur = M_STATES.find(s=>this.classList.contains(s))||'pendente';
+    const next = M_STATES[(M_STATES.indexOf(cur)+1)%M_STATES.length];
+    M_STATES.forEach(s=>this.classList.remove(s));
+    this.classList.add(next);
+    this.textContent=M_LABELS[next];
+    showSaved();
+    saveState();
+  });
+});
+
+// Save / Load
+let saveTimer;
+function showSaved(){
+  const el=document.getElementById('saveIndicator');
+  el.classList.add('show');
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>el.classList.remove('show'),2000);
+}
+
+function saveState(){
+  try {
+    const s={};
+    document.querySelectorAll('.task-check').forEach((cb,i)=>s['cb'+i]=cb.checked);
+    document.querySelectorAll('.status-select').forEach((sel,i)=>s['sel'+i]=sel.value);
+    document.querySelectorAll('textarea[data-key]').forEach(ta=>s[ta.dataset.key]=ta.value);
+    document.querySelectorAll('.marco-badge').forEach((b,i)=>s['m'+i]=M_STATES.find(st=>b.classList.contains(st))||'pendente');
+    s.resp=document.getElementById('resp-primazia').value;
+    s.vers=document.getElementById('doc-versao').value;
+    s.link=document.getElementById('doc-link').value;
+    localStorage.setItem(STOR_KEY,JSON.stringify(s));
+    showSaved();
+  } catch(e){}
+}
+
+function loadState(){
+  try {
+    const raw=localStorage.getItem(STOR_KEY);
+    if(!raw) return;
+    const s=JSON.parse(raw);
+    document.querySelectorAll('.task-check').forEach((cb,i)=>{
+      if(s['cb'+i]){cb.checked=true;cb.closest('tr').classList.add('done');}
+    });
+    document.querySelectorAll('.status-select').forEach((sel,i)=>{
+      if(s['sel'+i]){sel.value=s['sel'+i];sel.className='status-select s-'+s['sel'+i];}
+    });
+    document.querySelectorAll('textarea[data-key]').forEach(ta=>{
+      if(s[ta.dataset.key]) ta.value=s[ta.dataset.key];
+    });
+    document.querySelectorAll('.marco-badge').forEach((b,i)=>{
+      if(s['m'+i]){
+        M_STATES.forEach(st=>b.classList.remove(st));
+        b.classList.add(s['m'+i]);
+        b.textContent=M_LABELS[s['m'+i]];
+      }
+    });
+    if(s.resp) document.getElementById('resp-primazia').value=s.resp;
+    if(s.vers) document.getElementById('doc-versao').value=s.vers;
+    if(s.link) document.getElementById('doc-link').value=s.link;
+    updateProgress();
+  } catch(e){}
+}
+
+document.addEventListener('change', saveState);
+document.addEventListener('input', saveState);
+window.addEventListener('load', ()=>{ loadState(); updateProgress(); });
+</script>
+</body>
+</html>
