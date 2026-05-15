@@ -5,11 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fase 4 — Estrutura Salarial | PCS SM Madeiras</title>
 <link rel="stylesheet" href="style.css">
-<style>
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
-.sec-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--gray-900);padding-bottom:8px;border-bottom:1px solid var(--beige-dark);margin-bottom:12px}
-</style>
 </head>
 <body>
 <div class="topbar">
@@ -18,6 +13,7 @@
   <span class="topbar-project">PCS · Fase 4 · Estrutura Salarial</span>
   <div class="topbar-right">
     <span class="topbar-user">Olá, <strong id="userName">...</strong></span>
+    <button class="topbar-btn" onclick="window.print()">⬇ PDF</button>
     <button class="topbar-btn" onclick="logout()">Sair</button>
   </div>
 </div>
@@ -36,6 +32,7 @@
     <div class="sidebar-divider"></div>
     <div class="sidebar-section">
       <a href="marcos.html" class="sidebar-link"><span class="icon">🏁</span> Marcos Críticos</a>
+      <a href="seguranca.html" class="sidebar-link"><span class="icon">🛡️</span> Segurança do Trabalho</a>
       <a href="usuarios.html" class="sidebar-link" id="sideUsuarios" style="display:none"><span class="icon">👥</span> Usuários</a>
     </div>
   </div>
@@ -57,35 +54,15 @@
     <div class="card" style="margin-bottom:24px">
       <div class="card-header"><span class="card-title">Atividades da Fase</span></div>
       <table class="table">
-        <thead><tr><th></th><th>Atividade</th><th>Responsável</th><th>Entregável</th><th>Status</th><th>Por</th></tr></thead>
+        <thead><tr><th></th><th>Atividade</th><th>Responsável</th><th>Entregável</th><th>Status</th><th>Atualizado por</th></tr></thead>
         <tbody id="atvsBody"></tbody>
       </table>
-    </div>
-
-    <!-- BENCHMARK -->
-    <div class="card" style="margin-bottom:24px">
-      <div class="card-header">
-        <span class="card-title">Benchmark Salarial Regional</span>
-        <button class="btn btn-primary btn-sm" onclick="salvarBenchmark()">Salvar Benchmark</button>
-      </div>
-      <div class="card-body">
-        <div style="font-size:12px;color:var(--gray-500);margin-bottom:16px">Registre as referências de mercado para o setor madeireiro em Mato Grosso / Aripuanã.</div>
-        <div class="g3" style="margin-bottom:14px">
-          <div class="form-group"><label class="form-label">Fonte da pesquisa</label><input type="text" class="form-input" id="bFonte" placeholder="Ex: SINE-MT, CAGED, pesquisa direta..." /></div>
-          <div class="form-group"><label class="form-label">Data da pesquisa</label><input type="date" class="form-input" id="bData" /></div>
-          <div class="form-group"><label class="form-label">Responsável pela pesquisa</label><input type="text" class="form-input" id="bResponsavel" placeholder="Nome do consultor" /></div>
-        </div>
-        <div class="form-group"><label class="form-label">Resultados e referências encontradas</label><textarea class="form-textarea" id="bResultados" style="min-height:100px" placeholder="Descreva os valores de mercado encontrados por cargo/família..."></textarea></div>
-      </div>
     </div>
 
     <!-- TABELA SALARIAL -->
     <div class="card" style="margin-bottom:24px">
       <div class="card-header">
-        <div>
-          <span class="card-title">Tabela Salarial por Cargo</span>
-          <div style="font-size:11px;color:var(--gray-300);margin-top:2px">Mínimo · Ponto Médio · Máximo</div>
-        </div>
+        <span class="card-title">Tabela Salarial por Cargo</span>
         <button class="btn btn-primary btn-sm" onclick="abrirModal()">+ Adicionar Cargo</button>
       </div>
       <div style="overflow-x:auto">
@@ -96,58 +73,85 @@
               <th style="color:var(--green)">Mínimo (R$)</th>
               <th style="color:var(--gold)">Ponto Médio (R$)</th>
               <th style="color:var(--amber)">Máximo (R$)</th>
-              <th>Amplitude</th><th>Qtd Ocup.</th>
-              <th>Custo Atual</th><th>Aprov. CEO</th><th>Ações</th>
+              <th>Qtd Ocupantes</th><th>Custo Atual (R$)</th><th>Aprovação CEO</th><th></th>
             </tr>
           </thead>
           <tbody id="salariosBody">
-            <tr><td colspan="11"><div class="empty"><div class="empty-icon">💰</div><div class="empty-text">Nenhum cargo cadastrado na tabela salarial.</div></div></td></tr>
+            <tr><td colspan="10"><div class="empty"><div class="empty-icon">💰</div><div class="empty-text">Nenhum cargo cadastrado na tabela salarial.</div></div></td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- SIMULADOR -->
+    <!-- SIMULADOR DE IMPACTO -->
     <div class="card" style="margin-bottom:24px">
       <div class="card-header"><span class="card-title">📊 Simulador de Impacto na Folha</span></div>
       <div class="card-body">
-        <div class="g3" style="margin-bottom:16px">
-          <div style="background:var(--beige);padding:16px;border-radius:2px;border:1px solid var(--beige-dark);text-align:center">
-            <div style="font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-300);margin-bottom:8px">Folha Atual Total</div>
-            <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--gray-900)" id="simAtual">R$ 0,00</div>
+        <div class="grid-3" style="margin-bottom:20px">
+          <div class="stat-card">
+            <div class="stat-label">Custo Folha Atual</div>
+            <div class="stat-value" style="font-size:24px" id="simAtual">R$ 0</div>
+            <div class="stat-sub">Soma dos salários atuais</div>
           </div>
-          <div style="background:var(--gold-pale);padding:16px;border-radius:2px;border:1px solid var(--gold-light);text-align:center">
-            <div style="font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Projeção Ponto Médio</div>
-            <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--gold)" id="simMedio">R$ 0,00</div>
+          <div class="stat-card">
+            <div class="stat-label">Custo com Ponto Médio</div>
+            <div class="stat-value" style="font-size:24px;color:var(--gold)" id="simMedio">R$ 0</div>
+            <div class="stat-sub">Projeção ponto médio</div>
           </div>
-          <div style="background:var(--beige);padding:16px;border-radius:2px;border:1px solid var(--beige-dark);text-align:center">
-            <div style="font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-300);margin-bottom:8px">Impacto Estimado</div>
-            <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700" id="simImpacto">R$ 0,00</div>
-            <div style="font-size:11px;color:var(--gray-300);margin-top:4px" id="simSub">—</div>
+          <div class="stat-card">
+            <div class="stat-label">Impacto Estimado</div>
+            <div class="stat-value" style="font-size:24px" id="simImpacto">R$ 0</div>
+            <div class="stat-sub" id="simImpactoSub">Diferença na folha</div>
           </div>
         </div>
-        <div style="padding:12px 16px;background:var(--beige);border-radius:2px;border-left:3px solid var(--gold);font-size:12px;color:var(--gray-500)">
-          💡 O simulador calcula automaticamente com base nos dados da tabela salarial acima.
+        <div style="padding:12px 16px;background:var(--beige);border-radius:2px;border-left:3px solid var(--gold)">
+          <div style="font-size:12px;color:var(--gray-500)">💡 O simulador calcula automaticamente a partir dos dados da tabela salarial. Os valores são estimativas baseadas nos pontos médios e quantitativo de ocupantes.</div>
         </div>
       </div>
     </div>
 
-    <!-- POLÍTICA DE PROGRESSÃO -->
+    
+    <!-- POLÍTICA POR FUNÇÃO -->
     <div class="card" style="margin-bottom:24px">
       <div class="card-header">
-        <span class="card-title">Política de Progressão Salarial</span>
-        <button class="btn btn-primary btn-sm" onclick="salvarPolitica()">Salvar Política</button>
+        <span class="card-title">📋 Política de Progressão por Função</span>
+        <button class="btn btn-primary btn-sm" onclick="abrirModalPolitica()">+ Adicionar Política por Função</button>
       </div>
-      <div class="card-body" style="display:flex;flex-direction:column;gap:14px">
-        <div class="g2">
-          <div class="form-group"><label class="form-label">Progressão por Mérito</label><textarea class="form-textarea" id="polMerito" placeholder="Critérios de avaliação de desempenho, percentuais, periodicidade..."></textarea></div>
-          <div class="form-group"><label class="form-label">Progressão por Tempo de Casa</label><textarea class="form-textarea" id="polTempo" placeholder="Ex: 3% a cada 2 anos de empresa, limite máximo..."></textarea></div>
+      <div style="padding:10px 16px;background:var(--beige);border-bottom:1px solid var(--beige-dark)">
+        <span style="font-size:12px;color:var(--gray-500)">💡 Defina regras específicas de progressão para cada cargo ou família. Complementa a política geral abaixo.</span>
+      </div>
+      <table class="table">
+        <thead><tr><th>Cargo / Família</th><th>Critério de Progressão</th><th>Percentual / Valor</th><th>Periodicidade</th><th>Requisitos</th><th>Aprovador</th><th>Ações</th></tr></thead>
+        <tbody id="politicaFuncaoBody"><tr><td colspan="7"><div class="empty"><div class="empty-text">Nenhuma política por função cadastrada.</div></div></td></tr></tbody>
+      </table>
+    </div>
+
+<!-- POLÍTICA DE PROGRESSÃO -->
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-header"><span class="card-title">Política de Progressão Salarial</span><button class="btn btn-primary btn-sm" onclick="salvarPolitica()">Salvar Política</button></div>
+      <div class="card-body">
+        <div class="grid-2" style="gap:20px">
+          <div>
+            <div class="form-group">
+              <label class="form-label">Progressão por Mérito</label>
+              <textarea class="form-textarea" id="polMerito" placeholder="Descreva os critérios de progressão por mérito (avaliação de desempenho, percentuais...)"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Progressão por Tempo de Casa</label>
+              <textarea class="form-textarea" id="polTempo" placeholder="Descreva os critérios por tempo (ex: 3% a cada 2 anos...)"></textarea>
+            </div>
+          </div>
+          <div>
+            <div class="form-group">
+              <label class="form-label">Promoção de Cargo</label>
+              <textarea class="form-textarea" id="polPromocao" placeholder="Descreva os critérios para promoção entre cargos..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Periodicidade de Revisão</label>
+              <textarea class="form-textarea" id="polRevisao" placeholder="Ex: Revisão anual em março de cada ano..."></textarea>
+            </div>
+          </div>
         </div>
-        <div class="g2">
-          <div class="form-group"><label class="form-label">Promoção de Cargo</label><textarea class="form-textarea" id="polPromocao" placeholder="Critérios para promoção entre cargos e níveis..."></textarea></div>
-          <div class="form-group"><label class="form-label">Periodicidade de Revisão</label><textarea class="form-textarea" id="polRevisao" placeholder="Ex: Revisão anual em janeiro, considerando INPC/IPCA..."></textarea></div>
-        </div>
-        <div class="form-group"><label class="form-label">Regras para Jovem Aprendiz (Lei 10.097/2000)</label><textarea class="form-textarea" id="polJovem" placeholder="Progressão e enquadramento após o período de aprendizagem..."></textarea></div>
         <span style="font-size:11px;color:var(--gray-300)" id="polSalvas"></span>
       </div>
     </div>
@@ -156,14 +160,10 @@
     <div class="card">
       <div class="card-header"><span class="card-title">📝 Notas e Encaminhamentos da Fase 4</span></div>
       <div class="card-body">
-        <div class="g2" style="margin-bottom:14px">
-          <div class="form-group"><label class="form-label">Data aprovação Diretoria/CEO</label><input type="date" class="form-input" id="dataAprovacao" /></div>
-          <div class="form-group"><label class="form-label">Participantes da reunião de aprovação</label><input type="text" class="form-input" id="participantes" placeholder="Nomes dos presentes..." /></div>
-        </div>
-        <div class="form-group"><label class="form-label">Encaminhamentos e decisões</label><textarea class="form-textarea" id="notasFase" style="min-height:100px" placeholder="Decisões sobre faixas, ajustes solicitados, aprovações..."></textarea></div>
-        <div style="display:flex;justify-content:flex-end;gap:10px;align-items:center;margin-top:12px">
+        <textarea class="form-textarea" id="notasFase" style="min-height:120px" placeholder="Registre decisões sobre faixas, aprovações da diretoria, benchmarks encontrados..."></textarea>
+        <div style="display:flex;justify-content:flex-end;margin-top:12px;gap:10px;align-items:center">
           <span style="font-size:11px;color:var(--gray-300)" id="notasSalvas"></span>
-          <button class="btn btn-primary btn-sm" onclick="salvarNotas()">Salvar</button>
+          <button class="btn btn-primary btn-sm" onclick="salvarNotas()">Salvar Notas</button>
         </div>
       </div>
     </div>
@@ -171,51 +171,59 @@
 </div>
 
 <!-- MODAL SALÁRIO -->
-<div class="modal-overlay" id="modalSal" style="align-items:flex-start;padding:24px 0;overflow-y:auto">
-  <div class="modal" style="width:620px;max-width:96vw">
+<div class="modal-overlay" id="modalSalario">
+  <div class="modal" style="width:580px">
     <div class="modal-header">
-      <span class="modal-title" id="modalTitle">Cadastrar Cargo na Tabela Salarial</span>
+      <span class="modal-title" id="modalTit">Cadastrar Cargo na Tabela Salarial</span>
       <button class="modal-close" onclick="fecharModal()">×</button>
     </div>
-    <div class="modal-body" style="display:flex;flex-direction:column;gap:16px">
-      <div>
-        <div class="sec-title">Identificação</div>
-        <div class="g2">
-          <div class="form-group"><label class="form-label">Nome do Cargo *</label><input type="text" class="form-input" id="sNome" placeholder="Ex: Operador de Máquinas" /></div>
-          <div class="form-group"><label class="form-label">Família</label>
-            <select class="form-select" id="sFamilia">
-              <option>Operacional / Florestal</option><option>Técnico / Manutenção</option>
-              <option>Administrativo</option><option>Comercial / Logística</option><option>Gestão / Liderança</option>
-            </select>
-          </div>
-        </div>
-        <div class="g3">
-          <div class="form-group"><label class="form-label">Nível</label>
-            <select class="form-select" id="sNivel">
-              <option>Auxiliar</option><option>Júnior</option><option>Pleno</option><option>Sênior</option><option>Especialista</option><option>Liderança</option>
-            </select>
-          </div>
-          <div class="form-group"><label class="form-label">Qtd Ocupantes</label><input type="number" class="form-input" id="sQtd" placeholder="0" min="0" /></div>
-          <div class="form-group"><label class="form-label">Custo Atual por Pessoa (R$)</label><input type="number" class="form-input" id="sCustoAtual" placeholder="Salário médio atual" step="0.01" /></div>
-        </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nome do Cargo</label>
+        <input type="text" class="form-input" id="sNome" placeholder="Ex: Operador de Máquinas" />
       </div>
-
-      <div>
-        <div class="sec-title">Faixas Salariais Propostas</div>
-        <div class="g3">
-          <div class="form-group"><label class="form-label">Salário Mínimo (R$)</label><input type="number" class="form-input" id="sMin" placeholder="0,00" step="0.01" oninput="calcMedio()" /></div>
-          <div class="form-group"><label class="form-label">Ponto Médio (R$)</label><input type="number" class="form-input" id="sMedio" placeholder="Auto" style="background:var(--beige)" readonly /></div>
-          <div class="form-group"><label class="form-label">Salário Máximo (R$)</label><input type="number" class="form-input" id="sMax" placeholder="0,00" step="0.01" oninput="calcMedio()" /></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group">
+          <label class="form-label">Família</label>
+          <select class="form-select" id="sFamilia">
+            <option>Operacional / Florestal</option><option>Técnico / Manutenção</option>
+            <option>Administrativo</option><option>Comercial / Logística</option><option>Gestão / Liderança</option>
+          </select>
         </div>
-        <div class="g2">
-          <div class="form-group"><label class="form-label">Referência de mercado utilizada</label><input type="text" class="form-input" id="sReferencia" placeholder="Fonte e valor de referência" /></div>
-          <div class="form-group"><label class="form-label">Aprovação Diretoria/CEO</label>
-            <select class="form-select" id="sAprovacao">
-              <option value="pendente">Pendente</option><option value="aprovado">✓ Aprovado</option><option value="reprovado">Reprovado</option>
-            </select>
-          </div>
+        <div class="form-group">
+          <label class="form-label">Nível</label>
+          <select class="form-select" id="sNivel">
+            <option>Júnior</option><option>Pleno</option><option>Sênior</option><option>Especialista</option><option>Liderança</option>
+          </select>
         </div>
-        <div class="form-group"><label class="form-label">Observações</label><textarea class="form-textarea" id="sObs" placeholder="Justificativas, ajustes, decisões específicas para este cargo..."></textarea></div>
+        <div class="form-group">
+          <label class="form-label">Salário Mínimo (R$)</label>
+          <input type="number" class="form-input" id="sMin" placeholder="0,00" oninput="calcMedio()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Salário Máximo (R$)</label>
+          <input type="number" class="form-input" id="sMax" placeholder="0,00" oninput="calcMedio()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ponto Médio (R$)</label>
+          <input type="number" class="form-input" id="sMedio" placeholder="Calculado automaticamente" style="background:var(--beige)" readonly />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Qtd Ocupantes</label>
+          <input type="number" class="form-input" id="sQtd" placeholder="0" min="0" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Custo Atual por Pessoa (R$)</label>
+          <input type="number" class="form-input" id="sCustoAtual" placeholder="Salário médio atual" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Aprovação Diretoria/CEO</label>
+          <select class="form-select" id="sAprovacao">
+            <option value="pendente">Pendente</option>
+            <option value="aprovado">Aprovado</option>
+            <option value="reprovado">Reprovado</option>
+          </select>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -245,30 +253,37 @@ requireAuth((user,perfil)=>{
   currentUser=user;currentPerfil=perfil;
   document.getElementById('userName').textContent=perfil.nome||user.email;
   if(isAdmin(perfil))document.getElementById('sideUsuarios').style.display='flex';
-  carregarAtividades();carregarSalarios();carregarBenchmark();carregarPolitica();carregarNotas();
+  carregarAtividades();carregarSalarios();carregarPolitica();carregarNotas();
 });
 
 function carregarAtividades(){
   db.collection('fases').doc(FASE_ID).collection('atividades').onSnapshot(snap=>{
-    const data={};snap.forEach(d=>data[d.id]=d.data());let done=0;
+    const data={};snap.forEach(d=>data[d.id]=d.data());
+    let done=0;
     document.getElementById('atvsBody').innerHTML=ATIVIDADES_DEF.map(a=>{
-      const s=(data[a.id]||{}).status||'pendente';if(s==='concluido')done++;
-      return `<tr style="${s==='concluido'?'opacity:0.6':''}"><td><input type="checkbox" class="task-check" ${s==='concluido'?'checked':''} onchange="toggleCheck('${a.id}',this.checked)"></td><td>${a.nome}</td><td><span class="resp ${a.respClass}">${a.resp}</span></td><td><span style="font-size:12px;color:var(--gray-500);font-style:italic">${a.entregavel}</span></td><td><select class="status-sel s-${s}" onchange="updateStatus('${a.id}',this)"><option value="pendente" ${s==='pendente'?'selected':''}>Pendente</option><option value="andamento" ${s==='andamento'?'selected':''}>Em andamento</option><option value="concluido" ${s==='concluido'?'selected':''}>Concluído</option></select></td><td><span style="font-size:11px;color:var(--gray-300)">${(data[a.id]||{}).atualizadoPor||'—'}</span></td></tr>`;
+      const s=(data[a.id]||{}).status||'pendente';
+      if(s==='concluido')done++;
+      return `<tr style="${s==='concluido'?'opacity:0.6':''}">
+        <td><input type="checkbox" class="task-check" ${s==='concluido'?'checked':''} onchange="toggleCheck('${a.id}',this.checked)"></td>
+        <td>${a.nome}</td><td><span class="resp ${a.respClass}">${a.resp}</span></td>
+        <td><span style="font-size:12px;color:var(--gray-500);font-style:italic">${a.entregavel}</span></td>
+        <td><select class="status-sel s-${s}" onchange="updateStatus('${a.id}',this)">
+          <option value="pendente" ${s==='pendente'?'selected':''}>Pendente</option>
+          <option value="andamento" ${s==='andamento'?'selected':''}>Em andamento</option>
+          <option value="concluido" ${s==='concluido'?'selected':''}>Concluído</option>
+        </select></td>
+        <td><span style="font-size:11px;color:var(--gray-300)">${(data[a.id]||{}).atualizadoPor||'—'}</span></td>
+      </tr>`;
     }).join('');
     const pct=Math.round((done/ATIVIDADES_DEF.length)*100);
-    document.getElementById('fasePct').textContent=pct+'%';document.getElementById('faseTasks').textContent=done+' de '+ATIVIDADES_DEF.length+' atividades';document.getElementById('faseBar').style.width=pct+'%';
+    document.getElementById('fasePct').textContent=pct+'%';
+    document.getElementById('faseTasks').textContent=done+' de '+ATIVIDADES_DEF.length+' atividades';
+    document.getElementById('faseBar').style.width=pct+'%';
   });
 }
 function toggleCheck(id,v){updateStatusDB(id,v?'concluido':'pendente');}
 function updateStatus(id,sel){sel.className='status-sel s-'+sel.value;updateStatusDB(id,sel.value);}
 function updateStatusDB(id,status){db.collection('fases').doc(FASE_ID).collection('atividades').doc(id).set({status,atualizadoPor:currentPerfil.nome||currentUser.email,atualizadoEm:firebase.firestore.FieldValue.serverTimestamp()},{merge:true}).then(()=>showToast('Atualizado!','ok'));}
-
-const fmt=v=>v?'R$ '+parseFloat(v).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—';
-function calcMedio(){
-  const min=parseFloat(document.getElementById('sMin').value)||0;
-  const max=parseFloat(document.getElementById('sMax').value)||0;
-  if(min&&max)document.getElementById('sMedio').value=((min+max)/2).toFixed(2);
-}
 
 function carregarSalarios(){
   db.collection('fases').doc(FASE_ID).collection('salarios').orderBy('nome').onSnapshot(snap=>{
@@ -277,83 +292,202 @@ function carregarSalarios(){
   });
 }
 
+const fmt=v=>v?'R$ '+parseFloat(v).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—';
+const aBadge={pendente:'badge-gray',aprovado:'badge-green',reprovado:'badge-gray'};
+const aLabel={pendente:'Pendente',aprovado:'✓ Aprovado',reprovado:'Reprovado'};
+
 function renderSalarios(){
   const tbody=document.getElementById('salariosBody');
-  if(!todosSalarios.length){tbody.innerHTML='<tr><td colspan="11"><div class="empty"><div class="empty-icon">💰</div><div class="empty-text">Nenhum cargo cadastrado.</div></div></td></tr>';return;}
-  const aB={pendente:'badge-gray',aprovado:'badge-green',reprovado:'badge-gray'};
-  const aL={pendente:'Pendente',aprovado:'✓ Aprovado',reprovado:'Reprovado'};
-  tbody.innerHTML=todosSalarios.map(s=>{
-    const amp=s.minimo&&s.maximo?Math.round(((s.maximo-s.minimo)/s.minimo)*100)+'%':'—';
-    return `<tr>
-      <td><strong>${s.nome}</strong>${s.obs?`<div style="font-size:10px;color:var(--gray-300)">${s.obs.substring(0,40)}</div>`:''}</td>
-      <td><span class="badge badge-gold">${s.familia}</span></td>
-      <td><span class="badge badge-gray">${s.nivel||'—'}</span></td>
-      <td style="color:var(--green);font-weight:600">${fmt(s.minimo)}</td>
-      <td style="color:var(--gold);font-weight:600">${fmt(s.medio)}</td>
-      <td style="color:var(--amber);font-weight:600">${fmt(s.maximo)}</td>
-      <td style="font-size:12px;text-align:center">${amp}</td>
-      <td style="text-align:center">${s.qtd||0}</td>
-      <td style="font-size:12px">${fmt(s.custoAtual)}</td>
-      <td><span class="badge ${aB[s.aprovacao]||'badge-gray'}">${aL[s.aprovacao]||'Pendente'}</span></td>
-      <td><div style="display:flex;gap:6px">
-        <button class="btn btn-ghost btn-sm" onclick="editarSalario('${s.id}')">Editar</button>
-        <button class="btn btn-danger btn-sm" onclick="remover('${s.id}','${s.nome}')">×</button>
-      </div></td>
-    </tr>`;
-  }).join('');
+  if(!todosSalarios.length){tbody.innerHTML='<tr><td colspan="10"><div class="empty"><div class="empty-icon">💰</div><div class="empty-text">Nenhum cargo cadastrado.</div></div></td></tr>';return;}
+  tbody.innerHTML=todosSalarios.map(s=>`<tr>
+    <td><strong>${s.nome}</strong></td>
+    <td><span class="badge badge-gold">${s.familia}</span></td>
+    <td><span class="badge badge-gray">${s.nivel||'—'}</span></td>
+    <td style="color:var(--green);font-weight:600">${fmt(s.minimo)}</td>
+    <td style="color:var(--gold);font-weight:600">${fmt(s.medio)}</td>
+    <td style="color:var(--amber);font-weight:600">${fmt(s.maximo)}</td>
+    <td style="text-align:center">${s.qtd||0}</td>
+    <td style="font-size:12px">${fmt(s.custoAtual)}</td>
+    <td><span class="badge ${aBadge[s.aprovacao]||'badge-gray'}">${aLabel[s.aprovacao]||'Pendente'}</span></td>
+    <td><div style="display:flex;gap:6px">
+      <button class="btn btn-ghost btn-sm" onclick="editarSalario('${s.id}')">Editar</button>
+      <button class="btn btn-danger btn-sm" onclick="remover('${s.id}','${s.nome}')">×</button>
+    </div></td>
+  </tr>`).join('');
 }
 
 function calcSimulador(){
   let atual=0,medio=0;
-  todosSalarios.forEach(s=>{const q=parseInt(s.qtd)||0;atual+=(parseFloat(s.custoAtual)||0)*q;medio+=(parseFloat(s.medio)||0)*q;});
-  const imp=medio-atual;
-  document.getElementById('simAtual').textContent=fmt(atual);
-  document.getElementById('simMedio').textContent=fmt(medio);
+  todosSalarios.forEach(s=>{
+    const qtd=parseInt(s.qtd)||0;
+    atual+=((parseFloat(s.custoAtual)||0)*qtd);
+    medio+=((parseFloat(s.medio)||0)*qtd);
+  });
+  const impacto=medio-atual;
+  document.getElementById('simAtual').textContent='R$ '+atual.toLocaleString('pt-BR',{minimumFractionDigits:2});
+  document.getElementById('simMedio').textContent='R$ '+medio.toLocaleString('pt-BR',{minimumFractionDigits:2});
   const impEl=document.getElementById('simImpacto');
-  impEl.textContent=(imp>=0?'+ ':'-')+fmt(Math.abs(imp));
-  impEl.style.color=imp>0?'var(--red)':imp<0?'var(--green)':'var(--gray-700)';
-  document.getElementById('simSub').textContent=imp>0?'Aumento na folha':imp<0?'Redução na folha':'Sem impacto';
+  impEl.textContent=(impacto>=0?'+ ':'- ')+'R$ '+Math.abs(impacto).toLocaleString('pt-BR',{minimumFractionDigits:2});
+  impEl.style.color=impacto>0?'var(--red)':impacto<0?'var(--green)':'var(--gray-700)';
+  document.getElementById('simImpactoSub').textContent=impacto>0?'Aumento na folha':impacto<0?'Redução na folha':'Sem impacto';
+}
+
+function calcMedio(){
+  const min=parseFloat(document.getElementById('sMin').value)||0;
+  const max=parseFloat(document.getElementById('sMax').value)||0;
+  document.getElementById('sMedio').value=min&&max?((min+max)/2).toFixed(2):'';
 }
 
 function abrirModal(){
-  editingId=null;document.getElementById('modalTitle').textContent='Cadastrar Cargo na Tabela Salarial';
-  ['sNome','sMin','sMax','sMedio','sQtd','sCustoAtual','sReferencia','sObs'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('sAprovacao').value='pendente';document.getElementById('modalSal').classList.add('show');
+  editingId=null;
+  document.getElementById('modalTit').textContent='Cadastrar Cargo na Tabela Salarial';
+  ['sNome','sMin','sMax','sMedio','sQtd','sCustoAtual'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('sAprovacao').value='pendente';
+  document.getElementById('modalSalario').classList.add('show');
 }
 
 function editarSalario(id){
-  const s=todosSalarios.find(x=>x.id===id);if(!s)return;editingId=id;
-  document.getElementById('modalTitle').textContent='Editar Cargo';
-  document.getElementById('sNome').value=s.nome||'';document.getElementById('sFamilia').value=s.familia||'Operacional / Florestal';
-  document.getElementById('sNivel').value=s.nivel||'Júnior';document.getElementById('sQtd').value=s.qtd||0;
-  document.getElementById('sCustoAtual').value=s.custoAtual||'';document.getElementById('sMin').value=s.minimo||'';
-  document.getElementById('sMax').value=s.maximo||'';document.getElementById('sMedio').value=s.medio||'';
-  document.getElementById('sReferencia').value=s.referencia||'';document.getElementById('sAprovacao').value=s.aprovacao||'pendente';
-  document.getElementById('sObs').value=s.obs||'';document.getElementById('modalSal').classList.add('show');
+  const s=todosSalarios.find(x=>x.id===id);if(!s)return;
+  editingId=id;
+  document.getElementById('modalTit').textContent='Editar Cargo';
+  document.getElementById('sNome').value=s.nome||'';
+  document.getElementById('sFamilia').value=s.familia||'Operacional / Florestal';
+  document.getElementById('sNivel').value=s.nivel||'Júnior';
+  document.getElementById('sMin').value=s.minimo||'';
+  document.getElementById('sMax').value=s.maximo||'';
+  document.getElementById('sMedio').value=s.medio||'';
+  document.getElementById('sQtd').value=s.qtd||0;
+  document.getElementById('sCustoAtual').value=s.custoAtual||'';
+  document.getElementById('sAprovacao').value=s.aprovacao||'pendente';
+  document.getElementById('modalSalario').classList.add('show');
 }
 
-function fecharModal(){document.getElementById('modalSal').classList.remove('show');}
+function fecharModal(){document.getElementById('modalSalario').classList.remove('show');}
 
 function salvarSalario(){
-  const nome=document.getElementById('sNome').value.trim();if(!nome){showToast('Informe o nome.','erro');return;}
-  const data={nome,familia:document.getElementById('sFamilia').value,nivel:document.getElementById('sNivel').value,qtd:parseInt(document.getElementById('sQtd').value)||0,custoAtual:parseFloat(document.getElementById('sCustoAtual').value)||0,minimo:parseFloat(document.getElementById('sMin').value)||0,maximo:parseFloat(document.getElementById('sMax').value)||0,medio:parseFloat(document.getElementById('sMedio').value)||0,referencia:document.getElementById('sReferencia').value.trim(),aprovacao:document.getElementById('sAprovacao').value,obs:document.getElementById('sObs').value.trim(),atualizadoPor:currentPerfil.nome||currentUser.email,atualizadoEm:firebase.firestore.FieldValue.serverTimestamp()};
+  const nome=document.getElementById('sNome').value.trim();
+  if(!nome){showToast('Informe o nome do cargo.','erro');return;}
+  const data={
+    nome,familia:document.getElementById('sFamilia').value,nivel:document.getElementById('sNivel').value,
+    minimo:parseFloat(document.getElementById('sMin').value)||0,
+    maximo:parseFloat(document.getElementById('sMax').value)||0,
+    medio:parseFloat(document.getElementById('sMedio').value)||0,
+    qtd:parseInt(document.getElementById('sQtd').value)||0,
+    custoAtual:parseFloat(document.getElementById('sCustoAtual').value)||0,
+    aprovacao:document.getElementById('sAprovacao').value,
+    atualizadoPor:currentPerfil.nome||currentUser.email,
+    atualizadoEm:firebase.firestore.FieldValue.serverTimestamp()
+  };
   const ref=db.collection('fases').doc(FASE_ID).collection('salarios');
   const op=editingId?ref.doc(editingId).update(data):ref.add(data);
   op.then(()=>{fecharModal();showToast('Salvo!','ok');}).catch(()=>showToast('Erro ao salvar.','erro'));
 }
 
-function remover(id,nome){if(!confirm(`Remover "${nome}"?`))return;db.collection('fases').doc(FASE_ID).collection('salarios').doc(id).delete().then(()=>showToast('Removido.','ok'));}
+function remover(id,nome){
+  if(!confirm(`Remover "${nome}" da tabela salarial?`))return;
+  db.collection('fases').doc(FASE_ID).collection('salarios').doc(id).delete().then(()=>showToast('Removido.','ok'));
+}
 
-function carregarBenchmark(){db.collection('fases').doc(FASE_ID).get().then(d=>{if(!d.exists)return;const data=d.data();if(data.bFonte)document.getElementById('bFonte').value=data.bFonte;if(data.bData)document.getElementById('bData').value=data.bData;if(data.bResponsavel)document.getElementById('bResponsavel').value=data.bResponsavel;if(data.bResultados)document.getElementById('bResultados').value=data.bResultados;});}
-function salvarBenchmark(){db.collection('fases').doc(FASE_ID).set({bFonte:document.getElementById('bFonte').value,bData:document.getElementById('bData').value,bResponsavel:document.getElementById('bResponsavel').value,bResultados:document.getElementById('bResultados').value},{merge:true}).then(()=>showToast('Benchmark salvo!','ok'));}
+function carregarPolitica(){
+  db.collection('fases').doc(FASE_ID).get().then(d=>{
+    if(!d.exists)return;
+    const data=d.data();
+    ['polMerito','polTempo','polPromocao','polRevisao'].forEach(id=>{if(data[id])document.getElementById(id).value=data[id];});
+    if(data.notas)document.getElementById('notasFase').value=data.notas;
+  });
+}
 
-function carregarPolitica(){db.collection('fases').doc(FASE_ID).get().then(d=>{if(!d.exists)return;const data=d.data();['polMerito','polTempo','polPromocao','polRevisao','polJovem'].forEach(id=>{if(data[id])document.getElementById(id).value=data[id];});});}
-function salvarPolitica(){db.collection('fases').doc(FASE_ID).set({polMerito:document.getElementById('polMerito').value,polTempo:document.getElementById('polTempo').value,polPromocao:document.getElementById('polPromocao').value,polRevisao:document.getElementById('polRevisao').value,polJovem:document.getElementById('polJovem').value,polSalvaPor:currentPerfil.nome,polSalvaEm:firebase.firestore.FieldValue.serverTimestamp()},{merge:true}).then(()=>{document.getElementById('polSalvas').textContent='✓ Salvo às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});showToast('Política salva!','ok');});}
+function salvarPolitica(){
+  const data={
+    polMerito:document.getElementById('polMerito').value,
+    polTempo:document.getElementById('polTempo').value,
+    polPromocao:document.getElementById('polPromocao').value,
+    polRevisao:document.getElementById('polRevisao').value,
+    politicaSalvaPor:currentPerfil.nome,
+    politicaSalvaEm:firebase.firestore.FieldValue.serverTimestamp()
+  };
+  db.collection('fases').doc(FASE_ID).set(data,{merge:true}).then(()=>showToast('Política salva!','ok'));
+}
 
-function carregarNotas(){db.collection('fases').doc(FASE_ID).get().then(d=>{if(!d.exists)return;const data=d.data();if(data.notas)document.getElementById('notasFase').value=data.notas;if(data.dataAprovacao)document.getElementById('dataAprovacao').value=data.dataAprovacao;if(data.participantes)document.getElementById('participantes').value=data.participantes;});}
-function salvarNotas(){db.collection('fases').doc(FASE_ID).set({notas:document.getElementById('notasFase').value,dataAprovacao:document.getElementById('dataAprovacao').value,participantes:document.getElementById('participantes').value,notasSalvasPor:currentPerfil.nome,notasSalvasEm:firebase.firestore.FieldValue.serverTimestamp()},{merge:true}).then(()=>{document.getElementById('notasSalvas').textContent='✓ Salvo às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});showToast('Salvo!','ok');});}
+function carregarNotas(){db.collection('fases').doc(FASE_ID).get().then(d=>{if(d.exists&&d.data().notas)document.getElementById('notasFase').value=d.data().notas;});}
+function salvarNotas(){
+  db.collection('fases').doc(FASE_ID).set({notas:document.getElementById('notasFase').value,notasAtualizadoPor:currentPerfil.nome,notasAtualizadoEm:firebase.firestore.FieldValue.serverTimestamp()},{merge:true})
+    .then(()=>{document.getElementById('notasSalvas').textContent='✓ Salvo às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});showToast('Notas salvas!','ok');});
+}
+document.getElementById('modalSalario').addEventListener('click',function(e){if(e.target===this)fecharModal();});
+</script>
 
-document.getElementById('modalSal').addEventListener('click',function(e){if(e.target===this)fecharModal();});
+<!-- MODAL POLÍTICA POR FUNÇÃO -->
+<div class="modal-overlay" id="modalPolitica">
+  <div class="modal" style="width:580px">
+    <div class="modal-header">
+      <span class="modal-title" id="modalPolTitle">Política de Progressão por Função</span>
+      <button class="modal-close" onclick="fecharModalPolitica()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group"><label class="form-label">Cargo ou Família *</label><input type="text" class="form-input" id="ppCargo" placeholder="Ex: Operador de Máquinas, Família Florestal..." /></div>
+        <div class="form-group"><label class="form-label">Critério de Progressão</label>
+          <select class="form-select" id="ppCriterio">
+            <option>Mérito / Desempenho</option><option>Tempo de casa</option>
+            <option>Promoção de cargo</option><option>Certificação / Qualificação</option>
+            <option>Misto (mérito + tempo)</option><option>Outro</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group"><label class="form-label">Percentual ou Valor (R$)</label><input type="text" class="form-input" id="ppPercentual" placeholder="Ex: 5% ou R$ 200,00" /></div>
+        <div class="form-group"><label class="form-label">Periodicidade</label>
+          <select class="form-select" id="ppPeriodicidade">
+            <option>Anual</option><option>Semestral</option><option>A cada 2 anos</option>
+            <option>Por meta atingida</option><option>Outro</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Requisitos para progressão</label><textarea class="form-textarea" id="ppRequisitos" placeholder="Ex: Avaliação ≥ 80%, sem advertências no período, conclusão de treinamento NR-X..."></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group"><label class="form-label">Quem aprova</label><input type="text" class="form-input" id="ppAprovador" placeholder="Ex: Vilson + Michele, Diretoria..." /></div>
+        <div class="form-group"><label class="form-label">Teto máximo</label><input type="text" class="form-input" id="ppTeto" placeholder="Ex: Máximo 30% acima do salário base" /></div>
+      </div>
+      <div class="form-group"><label class="form-label">Observações específicas</label><textarea class="form-textarea" id="ppObs" placeholder="Regras específicas para este cargo ou família..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="fecharModalPolitica()">Cancelar</button>
+      <button class="btn btn-primary btn-sm" onclick="salvarPoliticaFuncao()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Política por função
+let editingPolId = null, todasPoliticas = [];
+function carregarPoliticasFuncao(){
+  db.collection('fases').doc(FASE_ID).collection('politicasFuncao').orderBy('cargo').onSnapshot(snap=>{
+    todasPoliticas = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const tbody = document.getElementById('politicaFuncaoBody');
+    if(!todasPoliticas.length){tbody.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-text">Nenhuma política por função cadastrada.</div></div></td></tr>';return;}
+    tbody.innerHTML = todasPoliticas.map(p=>`<tr>
+      <td><strong>${p.cargo||'—'}</strong></td>
+      <td><span class="badge badge-gold">${p.criterio||'—'}</span></td>
+      <td style="font-size:12px;font-weight:600;color:var(--green)">${p.percentual||'—'}</td>
+      <td style="font-size:12px">${p.periodicidade||'—'}</td>
+      <td style="font-size:11px;color:var(--gray-500);max-width:150px">${p.requisitos||'—'}</td>
+      <td style="font-size:12px">${p.aprovador||'—'}</td>
+      <td><div style="display:flex;gap:4px">
+        <button class="btn btn-ghost btn-sm" onclick="editarPolitica('${p.id}')">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="removerPolitica('${p.id}','${p.cargo}')">×</button>
+      </div></td>
+    </tr>`).join('');
+  });
+}
+function abrirModalPolitica(){editingPolId=null;document.getElementById('modalPolTitle').textContent='Nova Política por Função';['ppCargo','ppPercentual','ppRequisitos','ppAprovador','ppTeto','ppObs'].forEach(id=>document.getElementById(id).value='');document.getElementById('modalPolitica').classList.add('show');}
+function editarPolitica(id){const p=todasPoliticas.find(x=>x.id===id);if(!p)return;editingPolId=id;document.getElementById('modalPolTitle').textContent='Editar Política';document.getElementById('ppCargo').value=p.cargo||'';document.getElementById('ppCriterio').value=p.criterio||'Mérito / Desempenho';document.getElementById('ppPercentual').value=p.percentual||'';document.getElementById('ppPeriodicidade').value=p.periodicidade||'Anual';document.getElementById('ppRequisitos').value=p.requisitos||'';document.getElementById('ppAprovador').value=p.aprovador||'';document.getElementById('ppTeto').value=p.teto||'';document.getElementById('ppObs').value=p.obs||'';document.getElementById('modalPolitica').classList.add('show');}
+function fecharModalPolitica(){document.getElementById('modalPolitica').classList.remove('show');}
+function salvarPoliticaFuncao(){const cargo=document.getElementById('ppCargo').value.trim();if(!cargo){showToast('Informe o cargo.','erro');return;}const data={cargo,criterio:document.getElementById('ppCriterio').value,percentual:document.getElementById('ppPercentual').value.trim(),periodicidade:document.getElementById('ppPeriodicidade').value,requisitos:document.getElementById('ppRequisitos').value.trim(),aprovador:document.getElementById('ppAprovador').value.trim(),teto:document.getElementById('ppTeto').value.trim(),obs:document.getElementById('ppObs').value.trim(),atualizadoPor:currentPerfil.nome||currentUser.email,atualizadoEm:firebase.firestore.FieldValue.serverTimestamp()};const ref=db.collection('fases').doc(FASE_ID).collection('politicasFuncao');const op=editingPolId?ref.doc(editingPolId).update(data):ref.add(data);op.then(()=>{fecharModalPolitica();showToast('Política salva!','ok');});}
+function removerPolitica(id,cargo){if(!confirm(`Remover política de "${cargo}"?`))return;db.collection('fases').doc(FASE_ID).collection('politicasFuncao').doc(id).delete().then(()=>showToast('Removido.','ok'));}
+document.getElementById('modalPolitica').addEventListener('click',function(e){if(e.target===this)fecharModalPolitica();});
+// Call on load
+document.addEventListener('DOMContentLoaded', ()=>{ if(typeof db !== 'undefined') carregarPoliticasFuncao(); });
 </script>
 </body>
 </html>

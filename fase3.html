@@ -3,32 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fase 3 — Avaliação | PCS SM Madeiras</title>
+<title>Fase 3 — Avaliação e Pontuação | PCS SM Madeiras</title>
 <link rel="stylesheet" href="style.css">
-<style>
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
-.sec-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--gray-900);padding-bottom:8px;border-bottom:1px solid var(--beige-dark);margin-bottom:12px}
-.fator-card{background:var(--beige);padding:14px;border-radius:2px;border:1px solid var(--beige-dark)}
-.fator-nome{font-size:12px;font-weight:600;color:var(--gray-700);margin-bottom:4px}
-.fator-desc{font-size:10px;color:var(--gray-300);margin-bottom:10px}
-.rank-num{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700}
-</style>
 </head>
 <body>
+
 <div class="topbar">
   <a href="dashboard.html" class="topbar-logo">Instituto Primazia</a>
   <div class="topbar-sep"></div>
   <span class="topbar-project">PCS · Fase 3 · Avaliação e Pontuação</span>
   <div class="topbar-right">
     <span class="topbar-user">Olá, <strong id="userName">...</strong></span>
+    <button class="topbar-btn" onclick="window.print()">⬇ PDF</button>
     <button class="topbar-btn" onclick="logout()">Sair</button>
   </div>
 </div>
+
 <div class="layout">
   <div class="sidebar">
     <div class="sidebar-label">Navegação</div>
-    <div class="sidebar-section"><a href="dashboard.html" class="sidebar-link"><span class="icon">🏠</span> Dashboard</a></div>
+    <div class="sidebar-section">
+      <a href="dashboard.html" class="sidebar-link"><span class="icon">🏠</span> Dashboard</a>
+    </div>
     <div class="sidebar-label">Fases do PCS</div>
     <div class="sidebar-section">
       <a href="fase1.html" class="sidebar-link"><span class="sidebar-phase-num">01</span> Levantamento</a>
@@ -40,9 +36,11 @@
     <div class="sidebar-divider"></div>
     <div class="sidebar-section">
       <a href="marcos.html" class="sidebar-link"><span class="icon">🏁</span> Marcos Críticos</a>
+      <a href="seguranca.html" class="sidebar-link"><span class="icon">🛡️</span> Segurança do Trabalho</a>
       <a href="usuarios.html" class="sidebar-link" id="sideUsuarios" style="display:none"><span class="icon">👥</span> Usuários</a>
     </div>
   </div>
+
   <div class="content">
     <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between">
       <div>
@@ -61,11 +59,11 @@
     <div class="card" style="margin-bottom:24px">
       <div class="card-header"><span class="card-title">Atividades da Fase</span></div>
       <table class="table">
-        <thead><tr><th></th><th>Atividade</th><th>Responsável</th><th>Entregável</th><th>Status</th><th>Por</th></tr></thead>
+        <thead><tr><th></th><th>Atividade</th><th>Responsável</th><th>Entregável</th><th>Status</th><th>Atualizado por</th></tr></thead>
         <tbody id="atvsBody"></tbody>
       </table>
       <div style="padding:10px 16px;background:var(--beige);border-top:1px solid var(--beige-dark)">
-        <span style="font-size:12px;color:var(--amber);font-weight:500">💡 Condições de trabalho e risco operacional devem ter peso elevado — alinhado com NR-1 e NR-17.</span>
+        <span style="font-size:12px;color:var(--amber);font-weight:500">💡 Para SM Madeiras, os fatores <strong>condições de trabalho</strong> e <strong>risco operacional</strong> devem ter peso elevado — alinhado com NR-1 e NR-17.</span>
       </div>
     </div>
 
@@ -73,27 +71,32 @@
     <div class="card" style="margin-bottom:24px">
       <div class="card-header">
         <span class="card-title">Fatores Compensáveis e Pesos</span>
-        <div style="display:flex;align-items:center;gap:12px">
-          <span style="font-size:12px;color:var(--gray-500)">Total: <strong id="totalPesos" style="color:var(--gold)">0</strong>/100</span>
-          <button class="btn btn-primary btn-sm" onclick="salvarFatores()">Salvar Pesos</button>
-        </div>
+        <button class="btn btn-primary btn-sm" onclick="salvarFatores()">Salvar Pesos</button>
       </div>
       <div class="card-body">
-        <div style="font-size:12px;color:var(--gray-500);margin-bottom:16px">Defina o peso de cada fator. A soma deve ser <strong>exatamente 100 pontos</strong>.</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px" id="fatoresGrid"></div>
+        <div style="font-size:12px;color:var(--gray-500);margin-bottom:16px">Defina o peso de cada fator (0–100). Total deve somar 100 pontos. Os pesos definem a importância relativa de cada fator na pontuação final dos cargos.</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px" id="fatoresGrid">
+          <!-- rendered by JS -->
+        </div>
+        <div style="margin-top:16px;padding:12px;background:var(--beige);border-radius:2px;display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:12px;color:var(--gray-500)">Total dos pesos:</span>
+          <span style="font-size:18px;font-family:'Cormorant Garamond',serif;font-weight:700" id="totalPesos">0</span>
+        </div>
       </div>
     </div>
 
-    <!-- PONTUAÇÃO -->
+    <!-- PONTUAÇÃO POR CARGO -->
     <div class="card" style="margin-bottom:24px">
       <div class="card-header">
         <span class="card-title">Pontuação por Cargo</span>
-        <button class="btn btn-primary btn-sm" onclick="abrirModal()">+ Avaliar Cargo</button>
+        <button class="btn btn-primary btn-sm" onclick="abrirModalPontuacao()">+ Avaliar Cargo</button>
       </div>
       <div style="overflow-x:auto">
         <table class="table" id="pontuacaoTable">
           <thead id="pontuacaoHead"></thead>
-          <tbody id="pontuacaoBody"><tr><td colspan="8"><div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Nenhum cargo avaliado ainda.</div></div></td></tr></tbody>
+          <tbody id="pontuacaoBody">
+            <tr><td colspan="8"><div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Nenhum cargo avaliado ainda.</div></div></td></tr>
+          </tbody>
         </table>
       </div>
     </div>
@@ -102,11 +105,13 @@
     <div class="card" style="margin-bottom:24px">
       <div class="card-header">
         <span class="card-title">🏆 Ranking Oficial de Cargos</span>
-        <span style="font-size:11px;color:var(--gray-300)">Ordenado automaticamente por pontuação total</span>
+        <span style="font-size:11px;color:var(--gray-300)">Ordenado automaticamente por pontuação</span>
       </div>
-      <table class="table">
-        <thead><tr><th style="width:50px">Pos.</th><th>Cargo</th><th>Família</th><th>Pontuação</th><th>% do máximo</th><th>Val. Vilson</th></tr></thead>
-        <tbody id="rankingBody"><tr><td colspan="6"><div class="empty"><div class="empty-text">Ranking gerado automaticamente após avaliação.</div></div></td></tr></tbody>
+      <table class="table" id="rankingTable">
+        <thead><tr><th style="width:40px">#</th><th>Cargo</th><th>Família</th><th>Pontuação Total</th><th>Validação Vilson</th></tr></thead>
+        <tbody id="rankingBody">
+          <tr><td colspan="5"><div class="empty"><div class="empty-text">O ranking será gerado automaticamente após a pontuação dos cargos.</div></div></td></tr>
+        </tbody>
       </table>
     </div>
 
@@ -114,240 +119,267 @@
     <div class="card">
       <div class="card-header"><span class="card-title">📝 Notas e Encaminhamentos da Fase 3</span></div>
       <div class="card-body">
-        <div class="form-group"><label class="form-label">Decisões sobre pesos e critérios de avaliação</label><textarea class="form-textarea" id="notasFase" style="min-height:120px" placeholder="Registre decisões sobre os pesos, validações com Vilson, ajustes no ranking..."></textarea></div>
-        <div style="display:flex;justify-content:flex-end;gap:10px;align-items:center;margin-top:12px">
+        <textarea class="form-textarea" id="notasFase" style="min-height:120px" placeholder="Registre decisões sobre pesos, critérios de avaliação, validações com Vilson..."></textarea>
+        <div style="display:flex;justify-content:flex-end;margin-top:12px;gap:10px;align-items:center">
           <span style="font-size:11px;color:var(--gray-300)" id="notasSalvas"></span>
-          <button class="btn btn-primary btn-sm" onclick="salvarNotas()">Salvar</button>
+          <button class="btn btn-primary btn-sm" onclick="salvarNotas()">Salvar Notas</button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL AVALIAÇÃO -->
-<div class="modal-overlay" id="modalAv">
-  <div class="modal" style="width:580px">
+<!-- MODAL PONTUAÇÃO -->
+<div class="modal-overlay" id="modalPontuacao">
+  <div class="modal" style="width:560px">
     <div class="modal-header">
       <span class="modal-title">Avaliar Cargo</span>
-      <button class="modal-close" onclick="fecharModal()">×</button>
+      <button class="modal-close" onclick="fecharModalPontuacao()">×</button>
     </div>
     <div class="modal-body">
-      <div class="g2" style="margin-bottom:14px">
-        <div class="form-group"><label class="form-label">Nome do Cargo *</label><input type="text" class="form-input" id="pNome" placeholder="Ex: Operador de Máquinas" /></div>
-        <div class="form-group"><label class="form-label">Família</label>
-          <select class="form-select" id="pFamilia">
-            <option>Operacional / Florestal</option><option>Técnico / Manutenção</option>
-            <option>Administrativo</option><option>Comercial / Logística</option><option>Gestão / Liderança</option>
-          </select>
-        </div>
+      <div class="form-group">
+        <label class="form-label">Nome do Cargo</label>
+        <input type="text" class="form-input" id="pNome" placeholder="Ex: Operador de Máquinas" />
       </div>
-      <div style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-500);margin-bottom:12px">Nível por fator (1 = básico · 5 = máximo)</div>
+      <div class="form-group">
+        <label class="form-label">Família</label>
+        <select class="form-select" id="pFamilia">
+          <option>Operacional / Florestal</option>
+          <option>Técnico / Manutenção</option>
+          <option>Administrativo</option>
+          <option>Comercial / Logística</option>
+          <option>Gestão / Liderança</option>
+        </select>
+      </div>
+      <div style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray-500);margin-bottom:12px">Nível por Fator (1 = básico · 5 = máximo)</div>
       <div id="pFatoresInputs" style="display:grid;grid-template-columns:1fr 1fr;gap:12px"></div>
       <div style="margin-top:14px;padding:12px;background:var(--gold-pale);border-radius:2px;display:flex;align-items:center;justify-content:space-between">
         <span style="font-size:12px;font-weight:600;color:var(--amber)">Pontuação estimada:</span>
-        <span style="font-size:24px;font-family:'Cormorant Garamond',serif;font-weight:700;color:var(--gold)" id="pontuacaoEst">0</span>
+        <span style="font-size:22px;font-family:'Cormorant Garamond',serif;font-weight:700;color:var(--gold)" id="pontuacaoEstimada">0</span>
       </div>
-      <div class="form-group" style="margin-top:12px"><label class="form-label">Validação Vilson</label>
-        <select class="form-select" id="pValidacao">
-          <option value="pendente">Pendente</option><option value="aprovado">✓ Aprovado</option><option value="ajuste">Com ajustes</option>
+      <div class="form-group" style="margin-top:12px">
+        <label class="form-label">Validação Vilson</label>
+        <select class="form-select" id="pValidacaoVilson">
+          <option value="pendente">Pendente</option>
+          <option value="aprovado">Aprovado</option>
+          <option value="ajuste">Com ajustes</option>
         </select>
       </div>
-      <div class="form-group"><label class="form-label">Observações</label><textarea class="form-textarea" id="pObs" placeholder="Justificativas para os níveis atribuídos..."></textarea></div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost btn-sm" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-ghost btn-sm" onclick="fecharModalPontuacao()">Cancelar</button>
       <button class="btn btn-primary btn-sm" onclick="salvarPontuacao()">Salvar Avaliação</button>
     </div>
   </div>
 </div>
 
 <div id="toast" class="toast"></div>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script>
-const FASE_ID='fase03';
-const ATIVIDADES_DEF=[
-  {id:'atv1',nome:'Aplicação do Método de Pontos por Fatores',resp:'Primazia',respClass:'primazia',entregavel:'Planilha de avaliação preenchida'},
-  {id:'atv2',nome:'Definição dos fatores compensáveis com pesos validados com Vilson',resp:'Primazia + Vilson',respClass:'primazia',entregavel:'Fatores e pesos validados'},
-  {id:'atv3',nome:'Hierarquização final dos cargos por pontuação',resp:'Primazia',respClass:'primazia',entregavel:'Ranking oficial de cargos'}
+const FASE_ID = 'fase03';
+const ATIVIDADES_DEF = [
+  { id:'atv1', nome:'Aplicação do Método de Pontos por Fatores', resp:'Primazia', respClass:'primazia', entregavel:'Planilha de avaliação preenchida' },
+  { id:'atv2', nome:'Definição dos fatores compensáveis com pesos (escolaridade, responsabilidade, complexidade, condições de trabalho)', resp:'Primazia + Vilson', respClass:'primazia', entregavel:'Fatores e pesos validados' },
+  { id:'atv3', nome:'Hierarquização final dos cargos por pontuação', resp:'Primazia', respClass:'primazia', entregavel:'Ranking oficial de cargos' }
 ];
-const FATORES_DEF=[
-  {id:'escolaridade',nome:'Escolaridade',peso:15,desc:'Nível de formação exigido'},
-  {id:'experiencia',nome:'Experiência',peso:15,desc:'Tempo e complexidade'},
-  {id:'responsabilidade',nome:'Responsabilidade',peso:20,desc:'Por pessoas e recursos'},
-  {id:'complexidade',nome:'Complexidade',peso:20,desc:'Nível das tarefas'},
-  {id:'condicoes',nome:'Condições de Trabalho',peso:20,desc:'Riscos e ambiente (NR-1/17)'},
-  {id:'iniciativa',nome:'Iniciativa',peso:10,desc:'Autonomia e decisão'}
+const FATORES_DEF = [
+  { id:'escolaridade', nome:'Escolaridade', peso:15, descr:'Nível de formação exigido' },
+  { id:'experiencia', nome:'Experiência', peso:15, descr:'Tempo e tipo de experiência' },
+  { id:'responsabilidade', nome:'Responsabilidade', peso:20, descr:'Responsabilidade por pessoas/recursos' },
+  { id:'complexidade', nome:'Complexidade', peso:20, descr:'Nível de complexidade das tarefas' },
+  { id:'condicoes', nome:'Condições de Trabalho', peso:20, descr:'Riscos e condições do ambiente' },
+  { id:'iniciativa', nome:'Iniciativa', peso:10, descr:'Autonomia e tomada de decisão' }
 ];
-let currentUser,currentPerfil,fatoresPesos={},todasPontuacoes=[],editingId=null;
 
-requireAuth((user,perfil)=>{
-  currentUser=user;currentPerfil=perfil;
-  document.getElementById('userName').textContent=perfil.nome||user.email;
-  if(isAdmin(perfil))document.getElementById('sideUsuarios').style.display='flex';
-  carregarAtividades();renderFatores();carregarFatores();carregarPontuacoes();carregarNotas();
+let currentUser, currentPerfil, fatoresPesos = {}, todasPontuacoes = [], editingPId = null;
+
+requireAuth((user, perfil) => {
+  currentUser = user; currentPerfil = perfil;
+  document.getElementById('userName').textContent = perfil.nome || user.email;
+  if(isAdmin(perfil)) document.getElementById('sideUsuarios').style.display='flex';
+  carregarAtividades(); renderFatores(); carregarFatores(); carregarPontuacoes(); carregarNotas();
 });
 
-function carregarAtividades(){
-  db.collection('fases').doc(FASE_ID).collection('atividades').onSnapshot(snap=>{
-    const data={};snap.forEach(d=>data[d.id]=d.data());let done=0;
-    document.getElementById('atvsBody').innerHTML=ATIVIDADES_DEF.map(a=>{
-      const s=(data[a.id]||{}).status||'pendente';if(s==='concluido')done++;
-      return `<tr style="${s==='concluido'?'opacity:0.6':''}"><td><input type="checkbox" class="task-check" ${s==='concluido'?'checked':''} onchange="toggleCheck('${a.id}',this.checked)"></td><td>${a.nome}</td><td><span class="resp ${a.respClass}">${a.resp}</span></td><td><span style="font-size:12px;color:var(--gray-500);font-style:italic">${a.entregavel}</span></td><td><select class="status-sel s-${s}" onchange="updateStatus('${a.id}',this)"><option value="pendente" ${s==='pendente'?'selected':''}>Pendente</option><option value="andamento" ${s==='andamento'?'selected':''}>Em andamento</option><option value="concluido" ${s==='concluido'?'selected':''}>Concluído</option></select></td><td><span style="font-size:11px;color:var(--gray-300)">${(data[a.id]||{}).atualizadoPor||'—'}</span></td></tr>`;
+function carregarAtividades() {
+  db.collection('fases').doc(FASE_ID).collection('atividades').onSnapshot(snap => {
+    const data = {};
+    snap.forEach(d => data[d.id] = d.data());
+    let done = 0;
+    document.getElementById('atvsBody').innerHTML = ATIVIDADES_DEF.map(a => {
+      const s = (data[a.id]||{}).status||'pendente';
+      if(s==='concluido') done++;
+      return `<tr style="${s==='concluido'?'opacity:0.6':''}">
+        <td><input type="checkbox" class="task-check" ${s==='concluido'?'checked':''} onchange="toggleCheck('${a.id}',this.checked)"></td>
+        <td style="font-size:13px">${a.nome}</td>
+        <td><span class="resp ${a.respClass}">${a.resp}</span></td>
+        <td><span style="font-size:12px;color:var(--gray-500);font-style:italic">${a.entregavel}</span></td>
+        <td><select class="status-sel s-${s}" onchange="updateStatus('${a.id}',this)">
+          <option value="pendente" ${s==='pendente'?'selected':''}>Pendente</option>
+          <option value="andamento" ${s==='andamento'?'selected':''}>Em andamento</option>
+          <option value="concluido" ${s==='concluido'?'selected':''}>Concluído</option>
+        </select></td>
+        <td><span style="font-size:11px;color:var(--gray-300)">${(data[a.id]||{}).atualizadoPor||'—'}</span></td>
+      </tr>`;
     }).join('');
-    const pct=Math.round((done/ATIVIDADES_DEF.length)*100);
-    document.getElementById('fasePct').textContent=pct+'%';document.getElementById('faseTasks').textContent=done+' de '+ATIVIDADES_DEF.length+' atividades';document.getElementById('faseBar').style.width=pct+'%';
+    const pct = Math.round((done/ATIVIDADES_DEF.length)*100);
+    document.getElementById('fasePct').textContent = pct+'%';
+    document.getElementById('faseTasks').textContent = done+' de '+ATIVIDADES_DEF.length+' atividades';
+    document.getElementById('faseBar').style.width = pct+'%';
   });
 }
-function toggleCheck(id,v){updateStatusDB(id,v?'concluido':'pendente');}
-function updateStatus(id,sel){sel.className='status-sel s-'+sel.value;updateStatusDB(id,sel.value);}
-function updateStatusDB(id,status){db.collection('fases').doc(FASE_ID).collection('atividades').doc(id).set({status,atualizadoPor:currentPerfil.nome||currentUser.email,atualizadoEm:firebase.firestore.FieldValue.serverTimestamp()},{merge:true}).then(()=>showToast('Atualizado!','ok'));}
+function toggleCheck(id, v) { updateStatusDB(id, v?'concluido':'pendente'); }
+function updateStatus(id, sel) { sel.className='status-sel s-'+sel.value; updateStatusDB(id, sel.value); }
+function updateStatusDB(id, status) {
+  db.collection('fases').doc(FASE_ID).collection('atividades').doc(id).set({ status, atualizadoPor: currentPerfil.nome||currentUser.email, atualizadoEm: firebase.firestore.FieldValue.serverTimestamp() },{merge:true}).then(()=>showToast('Atualizado!','ok'));
+}
 
-function renderFatores(){
-  document.getElementById('fatoresGrid').innerHTML=FATORES_DEF.map(f=>`
-    <div class="fator-card">
-      <div class="fator-nome">${f.nome}</div>
-      <div class="fator-desc">${f.desc}</div>
+function renderFatores() {
+  document.getElementById('fatoresGrid').innerHTML = FATORES_DEF.map(f=>`
+    <div style="background:var(--beige);padding:14px;border-radius:2px;border:1px solid var(--beige-dark)">
+      <div style="font-size:12px;font-weight:600;color:var(--gray-700);margin-bottom:2px">${f.nome}</div>
+      <div style="font-size:10px;color:var(--gray-300);margin-bottom:10px">${f.descr}</div>
       <div style="display:flex;align-items:center;gap:8px">
         <input type="number" id="peso_${f.id}" value="${f.peso}" min="0" max="100"
           style="width:60px;padding:6px;border:1px solid var(--beige-dark);border-radius:2px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;text-align:center"
           oninput="atualizarTotal()" />
         <span style="font-size:11px;color:var(--gray-300)">pontos</span>
       </div>
-    </div>`).join('');
+    </div>
+  `).join('');
   atualizarTotal();
 }
 
-function atualizarTotal(){
-  const total=FATORES_DEF.reduce((s,f)=>s+(parseInt(document.getElementById('peso_'+f.id).value)||0),0);
-  const el=document.getElementById('totalPesos');
-  el.textContent=total;
-  el.style.color=total===100?'var(--green)':total>100?'var(--red)':'var(--gold)';
+function atualizarTotal() {
+  const total = FATORES_DEF.reduce((s,f)=>s+(parseInt(document.getElementById('peso_'+f.id).value)||0),0);
+  const el = document.getElementById('totalPesos');
+  el.textContent = total;
+  el.style.color = total===100 ? 'var(--green)' : total>100 ? 'var(--red)' : 'var(--gold)';
 }
 
-function carregarFatores(){
+function carregarFatores() {
   db.collection('fases').doc(FASE_ID).get().then(d=>{
-    if(d.exists&&d.data().fatoresPesos){
-      fatoresPesos=d.data().fatoresPesos;
-      FATORES_DEF.forEach(f=>{if(fatoresPesos[f.id])document.getElementById('peso_'+f.id).value=fatoresPesos[f.id];});
+    if(d.exists && d.data().fatoresPesos) {
+      fatoresPesos = d.data().fatoresPesos;
+      FATORES_DEF.forEach(f=>{ if(fatoresPesos[f.id]) document.getElementById('peso_'+f.id).value=fatoresPesos[f.id]; });
       atualizarTotal();
     }
   });
 }
 
-function salvarFatores(){
-  const pesos={};let total=0;
-  FATORES_DEF.forEach(f=>{pesos[f.id]=parseInt(document.getElementById('peso_'+f.id).value)||0;total+=pesos[f.id];});
-  if(total!==100){showToast('Os pesos devem somar exatamente 100!','erro');return;}
-  fatoresPesos=pesos;
-  db.collection('fases').doc(FASE_ID).set({fatoresPesos:pesos,fatoresSalvoPor:currentPerfil.nome,fatoresSalvoEm:firebase.firestore.FieldValue.serverTimestamp()},{merge:true}).then(()=>{showToast('Pesos salvos!','ok');carregarPontuacoes();});
+function salvarFatores() {
+  const pesos = {};
+  let total = 0;
+  FATORES_DEF.forEach(f=>{ pesos[f.id]=parseInt(document.getElementById('peso_'+f.id).value)||0; total+=pesos[f.id]; });
+  if(total!==100) { showToast('Os pesos devem somar exatamente 100!','erro'); return; }
+  fatoresPesos = pesos;
+  db.collection('fases').doc(FASE_ID).set({ fatoresPesos: pesos, fatoresSalvoPor: currentPerfil.nome, fatoresSalvoEm: firebase.firestore.FieldValue.serverTimestamp() },{merge:true})
+    .then(()=>{ showToast('Pesos salvos!','ok'); carregarPontuacoes(); });
 }
 
-function calcPontuacao(niveis){return FATORES_DEF.reduce((s,f)=>{const peso=fatoresPesos[f.id]||f.peso;const nivel=niveis[f.id]||1;return s+Math.round((nivel/5)*peso);},0);}
-
-function abrirModal(id){
-  editingId=id||null;
-  if(id){
-    const p=todasPontuacoes.find(x=>x.id===id);if(!p)return;
-    document.getElementById('pNome').value=p.nome||'';
-    document.getElementById('pFamilia').value=p.familia||'Operacional / Florestal';
-    document.getElementById('pValidacao').value=p.validacao||'pendente';
-    document.getElementById('pObs').value=p.obs||'';
-    renderPFatores(p.niveis||{});
-  } else {
-    document.getElementById('pNome').value='';
-    document.getElementById('pValidacao').value='pendente';
-    document.getElementById('pObs').value='';
-    renderPFatores({});
-  }
-  document.getElementById('modalAv').classList.add('show');
+function calcPontuacao(niveis) {
+  return FATORES_DEF.reduce((s,f)=>{
+    const peso = fatoresPesos[f.id] || f.peso;
+    const nivel = niveis[f.id] || 1;
+    return s + Math.round((nivel/5)*peso);
+  }, 0);
 }
 
-function renderPFatores(niveis){
-  document.getElementById('pFatoresInputs').innerHTML=FATORES_DEF.map(f=>`
+function abrirModalPontuacao() {
+  editingPId = null;
+  document.getElementById('pNome').value='';
+  document.getElementById('pValidacaoVilson').value='pendente';
+  renderPFatores({});
+  document.getElementById('modalPontuacao').classList.add('show');
+}
+
+function renderPFatores(niveis) {
+  document.getElementById('pFatoresInputs').innerHTML = FATORES_DEF.map(f=>`
     <div>
-      <label style="font-size:11px;font-weight:600;color:var(--gray-500);display:block;margin-bottom:4px">${f.nome} <span style="font-size:10px;color:var(--gray-300)">(${f.desc})</span></label>
+      <label style="font-size:11px;font-weight:600;color:var(--gray-500);display:block;margin-bottom:4px">${f.nome}</label>
       <input type="range" min="1" max="5" value="${niveis[f.id]||1}" id="pf_${f.id}"
-        style="width:100%;accent-color:var(--gold)" oninput="document.getElementById('pfl_${f.id}').textContent=this.value;calcEst()" />
+        style="width:100%;accent-color:var(--gold)" oninput="document.getElementById('pfl_${f.id}').textContent=this.value;calcEstimada()" />
       <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--gray-300)">
-        <span>1-Básico</span><span id="pfl_${f.id}" style="color:var(--gold);font-weight:700">${niveis[f.id]||1}</span><span>5-Máximo</span>
+        <span>1</span><span id="pfl_${f.id}" style="color:var(--gold);font-weight:700">${niveis[f.id]||1}</span><span>5</span>
       </div>
-    </div>`).join('');
-  calcEst();
+    </div>
+  `).join('');
+  calcEstimada();
 }
 
-function calcEst(){
-  const niveis={};FATORES_DEF.forEach(f=>{niveis[f.id]=parseInt(document.getElementById('pf_'+f.id).value)||1;});
-  document.getElementById('pontuacaoEst').textContent=calcPontuacao(niveis);
+function calcEstimada() {
+  const niveis={};
+  FATORES_DEF.forEach(f=>{ niveis[f.id]=parseInt(document.getElementById('pf_'+f.id).value)||1; });
+  document.getElementById('pontuacaoEstimada').textContent = calcPontuacao(niveis);
 }
 
-function fecharModal(){document.getElementById('modalAv').classList.remove('show');}
+function fecharModalPontuacao() { document.getElementById('modalPontuacao').classList.remove('show'); }
 
-function salvarPontuacao(){
-  const nome=document.getElementById('pNome').value.trim();
-  if(!nome){showToast('Informe o nome do cargo.','erro');return;}
-  const niveis={};FATORES_DEF.forEach(f=>{niveis[f.id]=parseInt(document.getElementById('pf_'+f.id).value)||1;});
-  const pontuacao=calcPontuacao(niveis);
-  const data={nome,familia:document.getElementById('pFamilia').value,niveis,pontuacao,validacao:document.getElementById('pValidacao').value,obs:document.getElementById('pObs').value.trim(),atualizadoPor:currentPerfil.nome||currentUser.email,atualizadoEm:firebase.firestore.FieldValue.serverTimestamp()};
-  const ref=db.collection('fases').doc(FASE_ID).collection('pontuacoes');
-  const op=editingId?ref.doc(editingId).update(data):ref.add(data);
-  op.then(()=>{fecharModal();showToast('Avaliação salva!','ok');}).catch(()=>showToast('Erro ao salvar.','erro'));
+function salvarPontuacao() {
+  const nome = document.getElementById('pNome').value.trim();
+  if(!nome) { showToast('Informe o nome do cargo.','erro'); return; }
+  const niveis={};
+  FATORES_DEF.forEach(f=>{ niveis[f.id]=parseInt(document.getElementById('pf_'+f.id).value)||1; });
+  const pontuacao = calcPontuacao(niveis);
+  const data = { nome, familia: document.getElementById('pFamilia').value, niveis, pontuacao, validacaoVilson: document.getElementById('pValidacaoVilson').value, atualizadoPor: currentPerfil.nome||currentUser.email, atualizadoEm: firebase.firestore.FieldValue.serverTimestamp() };
+  const ref = db.collection('fases').doc(FASE_ID).collection('pontuacoes');
+  const op = editingPId ? ref.doc(editingPId).update(data) : ref.add(data);
+  op.then(()=>{ fecharModalPontuacao(); showToast('Avaliação salva!','ok'); }).catch(()=>showToast('Erro ao salvar.','erro'));
 }
 
-function carregarPontuacoes(){
+function carregarPontuacoes() {
   db.collection('fases').doc(FASE_ID).collection('pontuacoes').onSnapshot(snap=>{
-    todasPontuacoes=snap.docs.map(d=>({id:d.id,...d.data()}));
-    renderPontuacoes();renderRanking();
+    todasPontuacoes = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderPontuacoes(); renderRanking();
   });
 }
 
-function renderPontuacoes(){
-  const head=document.getElementById('pontuacaoHead');
-  const body=document.getElementById('pontuacaoBody');
-  head.innerHTML=`<tr><th>Cargo</th><th>Família</th>${FATORES_DEF.map(f=>`<th>${f.nome}</th>`).join('')}<th>Total</th><th>Val.</th><th></th></tr>`;
-  if(!todasPontuacoes.length){body.innerHTML='<tr><td colspan="10"><div class="empty"><div class="empty-text">Nenhum cargo avaliado.</div></div></td></tr>';return;}
-  const vB={pendente:'badge-gray',aprovado:'badge-green',ajuste:'badge-amber'};
-  const vL={pendente:'Pendente',aprovado:'✓ Aprovado',ajuste:'Ajustes'};
-  body.innerHTML=todasPontuacoes.map(p=>`<tr>
-    <td><strong>${p.nome}</strong>${p.obs?`<div style="font-size:10px;color:var(--gray-300)">${p.obs.substring(0,40)}...</div>`:''}</td>
+function renderPontuacoes() {
+  const head = document.getElementById('pontuacaoHead');
+  const body = document.getElementById('pontuacaoBody');
+  head.innerHTML = `<tr><th>Cargo</th><th>Família</th>${FATORES_DEF.map(f=>`<th>${f.nome}</th>`).join('')}<th>Total</th><th>Val. Vilson</th><th></th></tr>`;
+  if(!todasPontuacoes.length) { body.innerHTML='<tr><td colspan="10"><div class="empty"><div class="empty-text">Nenhum cargo avaliado ainda.</div></div></td></tr>'; return; }
+  const vBadge = { pendente:'badge-gray', aprovado:'badge-green', ajuste:'badge-amber' };
+  const vLabel = { pendente:'Pendente', aprovado:'✓ Aprovado', ajuste:'Com ajustes' };
+  body.innerHTML = todasPontuacoes.map(p=>`<tr>
+    <td><strong>${p.nome}</strong></td>
     <td><span class="badge badge-gold">${p.familia}</span></td>
     ${FATORES_DEF.map(f=>`<td style="text-align:center;font-size:13px;color:var(--gray-500)">${(p.niveis||{})[f.id]||'—'}</td>`).join('')}
-    <td><strong style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:20px">${p.pontuacao||0}</strong></td>
-    <td><span class="badge ${vB[p.validacao]||'badge-gray'}">${vL[p.validacao]||'Pendente'}</span></td>
-    <td><div style="display:flex;gap:6px">
-      <button class="btn btn-ghost btn-sm" onclick="abrirModal('${p.id}')">Editar</button>
-      <button class="btn btn-danger btn-sm" onclick="remover('${p.id}','${p.nome}')">×</button>
-    </div></td>
+    <td><strong style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:18px">${p.pontuacao||0}</strong></td>
+    <td><span class="badge ${vBadge[p.validacaoVilson]||'badge-gray'}">${vLabel[p.validacaoVilson]||'Pendente'}</span></td>
+    <td><button class="btn btn-danger btn-sm" onclick="removerPontuacao('${p.id}','${p.nome}')">×</button></td>
   </tr>`).join('');
 }
 
-function renderRanking(){
-  const sorted=[...todasPontuacoes].sort((a,b)=>(b.pontuacao||0)-(a.pontuacao||0));
-  const maxPts=FATORES_DEF.reduce((s,f)=>s+(fatoresPesos[f.id]||f.peso),0);
-  const vB={pendente:'badge-gray',aprovado:'badge-green',ajuste:'badge-amber'};
-  const vL={pendente:'Pendente',aprovado:'✓ Aprovado',ajuste:'Com ajustes'};
-  document.getElementById('rankingBody').innerHTML=sorted.length?sorted.map((p,i)=>{
-    const pct=maxPts>0?Math.round((p.pontuacao||0)/maxPts*100):0;
-    const cor=i===0?'var(--gold)':i===1?'var(--gray-300)':i===2?'var(--amber)':'var(--gray-500)';
-    return `<tr>
-      <td><strong class="rank-num" style="color:${cor}">${i+1}º</strong></td>
-      <td><strong>${p.nome}</strong></td>
-      <td><span class="badge badge-gold">${p.familia}</span></td>
-      <td><strong style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:22px">${p.pontuacao||0}</strong> pts</td>
-      <td><div style="display:flex;align-items:center;gap:8px"><div class="progress-track" style="width:80px"><div class="progress-fill" style="width:${pct}%"></div></div><span style="font-size:12px;color:var(--gray-500)">${pct}%</span></div></td>
-      <td><span class="badge ${vB[p.validacao]||'badge-gray'}">${vL[p.validacao]||'Pendente'}</span></td>
-    </tr>`;
-  }).join(''):'<tr><td colspan="6"><div class="empty"><div class="empty-text">Nenhum cargo avaliado.</div></div></td></tr>';
+function renderRanking() {
+  const sorted = [...todasPontuacoes].sort((a,b)=>(b.pontuacao||0)-(a.pontuacao||0));
+  const vBadge = { pendente:'badge-gray', aprovado:'badge-green', ajuste:'badge-amber' };
+  const vLabel = { pendente:'Pendente', aprovado:'✓ Aprovado', ajuste:'Com ajustes' };
+  document.getElementById('rankingBody').innerHTML = sorted.length ? sorted.map((p,i)=>`<tr>
+    <td><strong style="font-family:'Cormorant Garamond',serif;font-size:18px;color:${i===0?'var(--gold)':i===1?'var(--gray-300)':i===2?'var(--amber)':'var(--gray-500)'}">${i+1}º</strong></td>
+    <td><strong>${p.nome}</strong></td>
+    <td><span class="badge badge-gold">${p.familia}</span></td>
+    <td><strong style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:20px">${p.pontuacao||0}</strong> pts</td>
+    <td><span class="badge ${vBadge[p.validacaoVilson]||'badge-gray'}">${vLabel[p.validacaoVilson]||'Pendente'}</span></td>
+  </tr>`).join('') : '<tr><td colspan="5"><div class="empty"><div class="empty-text">Nenhum cargo avaliado ainda.</div></div></td></tr>';
 }
 
-function remover(id,nome){if(!confirm(`Remover avaliação de "${nome}"?`))return;db.collection('fases').doc(FASE_ID).collection('pontuacoes').doc(id).delete().then(()=>showToast('Removido.','ok'));}
+function removerPontuacao(id, nome) {
+  if(!confirm(`Remover avaliação de "${nome}"?`)) return;
+  db.collection('fases').doc(FASE_ID).collection('pontuacoes').doc(id).delete().then(()=>showToast('Removido.','ok'));
+}
 
-function carregarNotas(){db.collection('fases').doc(FASE_ID).get().then(d=>{if(d.exists&&d.data().notas)document.getElementById('notasFase').value=d.data().notas;});}
-function salvarNotas(){db.collection('fases').doc(FASE_ID).set({notas:document.getElementById('notasFase').value,notasSalvasPor:currentPerfil.nome,notasSalvasEm:firebase.firestore.FieldValue.serverTimestamp()},{merge:true}).then(()=>{document.getElementById('notasSalvas').textContent='✓ Salvo às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});showToast('Salvo!','ok');});}
-
-document.getElementById('modalAv').addEventListener('click',function(e){if(e.target===this)fecharModal();});
+function carregarNotas() {
+  db.collection('fases').doc(FASE_ID).get().then(d=>{ if(d.exists&&d.data().notas) document.getElementById('notasFase').value=d.data().notas; });
+}
+function salvarNotas() {
+  db.collection('fases').doc(FASE_ID).set({ notas: document.getElementById('notasFase').value, notasAtualizadoPor: currentPerfil.nome, notasAtualizadoEm: firebase.firestore.FieldValue.serverTimestamp() },{merge:true})
+    .then(()=>{ document.getElementById('notasSalvas').textContent='✓ Salvo às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); showToast('Notas salvas!','ok'); });
+}
+document.getElementById('modalPontuacao').addEventListener('click',function(e){if(e.target===this)fecharModalPontuacao();});
 </script>
 </body>
 </html>

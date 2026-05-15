@@ -5,29 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fase 2 — Descrição de Cargos | PCS SM Madeiras</title>
 <link rel="stylesheet" href="style.css">
-<style>
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
-.sec-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--gray-900);padding-bottom:8px;border-bottom:1px solid var(--beige-dark);margin-bottom:12px}
-.cargo-card{background:var(--white);border:1px solid var(--beige-dark);border-radius:2px;overflow:hidden;box-shadow:var(--shadow)}
-.cargo-card-header{background:var(--gray-900);padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
-.cargo-card-body{padding:16px}
-</style>
 </head>
 <body>
+
 <div class="topbar">
   <a href="dashboard.html" class="topbar-logo">Instituto Primazia</a>
   <div class="topbar-sep"></div>
   <span class="topbar-project">PCS · Fase 2 · Descrição de Cargos</span>
   <div class="topbar-right">
     <span class="topbar-user">Olá, <strong id="userName">...</strong></span>
+    <button class="topbar-btn" onclick="window.print()">⬇ PDF</button>
     <button class="topbar-btn" onclick="logout()">Sair</button>
   </div>
 </div>
+
 <div class="layout">
   <div class="sidebar">
     <div class="sidebar-label">Navegação</div>
-    <div class="sidebar-section"><a href="dashboard.html" class="sidebar-link"><span class="icon">🏠</span> Dashboard</a></div>
+    <div class="sidebar-section">
+      <a href="dashboard.html" class="sidebar-link"><span class="icon">🏠</span> Dashboard</a>
+    </div>
     <div class="sidebar-label">Fases do PCS</div>
     <div class="sidebar-section">
       <a href="fase1.html" class="sidebar-link"><span class="sidebar-phase-num">01</span> Levantamento</a>
@@ -39,9 +36,11 @@
     <div class="sidebar-divider"></div>
     <div class="sidebar-section">
       <a href="marcos.html" class="sidebar-link"><span class="icon">🏁</span> Marcos Críticos</a>
+      <a href="seguranca.html" class="sidebar-link"><span class="icon">🛡️</span> Segurança do Trabalho</a>
       <a href="usuarios.html" class="sidebar-link" id="sideUsuarios" style="display:none"><span class="icon">👥</span> Usuários</a>
     </div>
   </div>
+
   <div class="content">
     <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between">
       <div>
@@ -58,38 +57,61 @@
 
     <!-- ATIVIDADES -->
     <div class="card" style="margin-bottom:24px">
-      <div class="card-header"><span class="card-title">Atividades da Fase</span></div>
+      <div class="card-header">
+        <span class="card-title">Atividades da Fase</span>
+      </div>
       <table class="table">
-        <thead><tr><th></th><th>Atividade</th><th>Responsável</th><th>Entregável</th><th>Status</th><th>Por</th></tr></thead>
+        <thead><tr><th></th><th>Atividade</th><th>Responsável</th><th>Entregável</th><th>Status</th><th>Atualizado por</th></tr></thead>
         <tbody id="atvsBody"></tbody>
       </table>
       <div style="padding:10px 16px;background:var(--beige);border-top:1px solid var(--beige-dark)">
-        <span style="font-size:12px;color:var(--amber);font-weight:500">💡 Validação: Vilson e Michele → Diretoria/CEO. Líderes operacionais não entram nessa alçada.</span>
+        <span style="font-size:12px;color:var(--amber);font-weight:500">💡 A validação segue a hierarquia correta: Vilson e Michele → Diretoria/CEO. Líderes operacionais não entram nessa alçada.</span>
       </div>
     </div>
 
-    <!-- FICHAS -->
+    <!-- FICHAS DE CARGO -->
     <div class="card" style="margin-bottom:24px">
       <div class="card-header">
-        <div>
-          <span class="card-title">Fichas de Descrição de Cargo</span>
-          <div style="font-size:11px;color:var(--gray-300);margin-top:2px">Uma ficha por cargo — base do PCS</div>
-        </div>
+        <span class="card-title">Fichas de Descrição de Cargo</span>
         <div style="display:flex;gap:10px;align-items:center">
-          <select class="status-sel" id="filtroFamilia" onchange="filtrar()">
+          <select class="status-sel" id="filtroFamilia" onchange="filtrarFichas()">
             <option value="">Todas as famílias</option>
-            <option>Operacional / Florestal</option><option>Técnico / Manutenção</option>
-            <option>Administrativo</option><option>Comercial / Logística</option><option>Gestão / Liderança</option>
+            <option>Operacional / Florestal</option>
+            <option>Técnico / Manutenção</option>
+            <option>Administrativo</option>
+            <option>Comercial / Logística</option>
+            <option>Gestão / Liderança</option>
           </select>
           <button class="btn btn-primary btn-sm" onclick="abrirModal()">+ Nova Ficha</button>
         </div>
       </div>
+      
+      <!-- FILTRO POR FAMÍLIA -->
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 16px;background:var(--beige);border-bottom:1px solid var(--beige-dark)">
+        <span style="font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.1em">Filtros:</span>
+        <select class="status-sel" id="filtroFamilia" onchange="filtrar()">
+          <option value="">Todas as famílias</option>
+          <option>Administrativo</option><option>Comercial</option><option>Logística</option>
+          <option>Produção / Indústria</option><option>Manejo / Florestal</option>
+          <option>Técnico / Manutenção</option><option>Gestão / Liderança</option>
+        </select>
+        <select class="status-sel" id="filtroValidacao" onchange="filtrar()">
+          <option value="">Todos os status</option>
+          <option value="pendente">Pendente</option><option value="analise">Em análise</option>
+          <option value="aprovado">Aprovado</option><option value="ajuste">Com ajustes</option>
+        </select>
+        <input type="text" id="filtroNomeCargo" class="form-input" style="max-width:160px;padding:4px 10px" placeholder="Buscar cargo..." oninput="filtrar()" />
+        <button class="btn btn-ghost btn-sm" onclick="limparFiltros2()">Limpar</button>
+        <span style="font-size:11px;color:var(--gray-300);margin-left:auto" id="filtroCount2"></span>
+        <button class="btn btn-primary btn-sm" onclick="abrirModalImport()">📥 Importar Descrição</button>
+      </div>
+
       <table class="table">
         <thead>
-          <tr><th>Cargo</th><th>Família</th><th>Escolaridade</th><th>Experiência</th><th>Qtd Ocupantes</th><th>Val. Vilson/Michele</th><th>Aprov. CEO</th><th>Ações</th></tr>
+          <tr><th>Cargo</th><th>Família</th><th>Requisitos</th><th>Validação</th><th>Aprovação CEO</th><th>Ações</th></tr>
         </thead>
         <tbody id="fichasBody">
-          <tr><td colspan="8"><div class="empty"><div class="empty-icon">📝</div><div class="empty-text">Nenhuma ficha criada ainda.</div></div></td></tr>
+          <tr><td colspan="6"><div class="empty"><div class="empty-icon">📝</div><div class="empty-text">Nenhuma ficha criada ainda.</div></div></td></tr>
         </tbody>
       </table>
     </div>
@@ -98,17 +120,10 @@
     <div class="card">
       <div class="card-header"><span class="card-title">📝 Notas e Encaminhamentos da Fase 2</span></div>
       <div class="card-body">
-        <div class="g2" style="margin-bottom:14px">
-          <div class="form-group"><label class="form-label">Data validação Vilson/Michele</label><input type="date" class="form-input" id="dataValidacao" /></div>
-          <div class="form-group"><label class="form-label">Data aprovação Diretoria/CEO</label><input type="date" class="form-input" id="dataAprovacao" /></div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Encaminhamentos e decisões</label>
-          <textarea class="form-textarea" id="notasFase" style="min-height:120px" placeholder="Ajustes solicitados, decisões sobre agrupamentos, prazos..."></textarea>
-        </div>
-        <div style="display:flex;justify-content:flex-end;gap:10px;align-items:center;margin-top:12px">
+        <textarea class="form-textarea" id="notasFase" style="min-height:120px" placeholder="Registre decisões, datas de validação com Vilson/Michele, pautas com diretoria..."></textarea>
+        <div style="display:flex;justify-content:flex-end;margin-top:12px;gap:10px;align-items:center">
           <span style="font-size:11px;color:var(--gray-300)" id="notasSalvas"></span>
-          <button class="btn btn-primary btn-sm" onclick="salvarNotas()">Salvar</button>
+          <button class="btn btn-primary btn-sm" onclick="salvarNotas()">Salvar Notas</button>
         </div>
       </div>
     </div>
@@ -116,100 +131,73 @@
 </div>
 
 <!-- MODAL FICHA -->
-<div class="modal-overlay" id="modalFicha" style="align-items:flex-start;padding:24px 0;overflow-y:auto">
-  <div class="modal" style="width:680px;max-width:96vw">
+<div class="modal-overlay" id="modalFicha" style="align-items:flex-start;padding:40px 0;overflow-y:auto">
+  <div class="modal" style="width:620px;max-width:96vw">
     <div class="modal-header">
-      <span class="modal-title" id="modalTitle">Nova Ficha de Cargo</span>
+      <span class="modal-title" id="modalTitulo">Nova Ficha de Cargo</span>
       <button class="modal-close" onclick="fecharModal()">×</button>
     </div>
-    <div class="modal-body" style="display:flex;flex-direction:column;gap:20px">
-
-      <!-- IDENTIFICAÇÃO -->
-      <div>
-        <div class="sec-title">Identificação do Cargo</div>
-        <div class="g2">
-          <div class="form-group"><label class="form-label">Nome do Cargo *</label><input type="text" class="form-input" id="fNome" placeholder="Ex: Supervisor de Produção" /></div>
-          <div class="form-group"><label class="form-label">Família / Área *</label>
-            <select class="form-select" id="fFamilia">
-              <option>Operacional / Florestal</option><option>Técnico / Manutenção</option>
-              <option>Administrativo</option><option>Comercial / Logística</option><option>Gestão / Liderança</option>
-            </select>
-          </div>
-        </div>
-        <div class="g3">
-          <div class="form-group"><label class="form-label">Reporta a</label><input type="text" class="form-input" id="fReporta" placeholder="Ex: Gerente de Produção" /></div>
-          <div class="form-group"><label class="form-label">Qtd de Ocupantes</label><input type="number" class="form-input" id="fQtd" placeholder="0" min="0" /></div>
-          <div class="form-group"><label class="form-label">CBO (Código Brasileiro)</label><input type="text" class="form-input" id="fCBO" placeholder="Ex: 7171-10" /></div>
-        </div>
+    <div class="modal-body" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="form-group" style="grid-column:1/-1">
+        <label class="form-label">Nome do Cargo</label>
+        <input type="text" class="form-input" id="fNome" placeholder="Ex: Supervisor de Produção" />
       </div>
-
-      <!-- REQUISITOS -->
-      <div>
-        <div class="sec-title">Requisitos do Cargo</div>
-        <div class="g2">
-          <div class="form-group"><label class="form-label">Escolaridade mínima *</label>
-            <select class="form-select" id="fEscolaridade">
-              <option>Ensino Fundamental incompleto</option><option>Ensino Fundamental completo</option>
-              <option>Ensino Médio incompleto</option><option>Ensino Médio completo</option>
-              <option>Técnico</option><option>Graduação</option><option>Pós-graduação</option>
-            </select>
-          </div>
-          <div class="form-group"><label class="form-label">Experiência mínima *</label><input type="text" class="form-input" id="fExperiencia" placeholder="Ex: 2 anos na área florestal" /></div>
-        </div>
-        <div class="form-group"><label class="form-label">Cursos / Certificações exigidos</label><input type="text" class="form-input" id="fCursos" placeholder="Ex: NR-35, CIPA, Habilitação Cat. B..." /></div>
-        <div class="form-group"><label class="form-label">Conhecimentos técnicos necessários</label><textarea class="form-textarea" id="fConhecimentos" placeholder="Ex: Operação de motosserra, leitura de mapas florestais, sistema de gestão..."></textarea></div>
+      <div class="form-group">
+        <label class="form-label">Família / Área</label>
+        <select class="form-select" id="fFamilia">
+          <option>Operacional / Florestal</option>
+          <option>Técnico / Manutenção</option>
+          <option>Administrativo</option>
+          <option>Comercial / Logística</option>
+          <option>Gestão / Liderança</option>
+        </select>
       </div>
-
-      <!-- RESPONSABILIDADES -->
-      <div>
-        <div class="sec-title">Responsabilidades e Atribuições</div>
-        <div class="form-group"><label class="form-label">Principais responsabilidades *</label><textarea class="form-textarea" id="fResponsabilidades" style="min-height:100px" placeholder="Liste as principais responsabilidades do cargo..."></textarea></div>
-        <div class="form-group"><label class="form-label">Atividades rotineiras</label><textarea class="form-textarea" id="fAtividades" placeholder="Atividades do dia a dia..."></textarea></div>
-        <div class="form-group"><label class="form-label">Responsabilidade por pessoas / recursos</label><input type="text" class="form-input" id="fRespRecursos" placeholder="Ex: Equipe de 5 pessoas, veículos da empresa, maquinário..." /></div>
+      <div class="form-group">
+        <label class="form-label">Escolaridade mínima</label>
+        <select class="form-select" id="fEscolaridade">
+          <option>Ensino Fundamental</option>
+          <option>Ensino Médio</option>
+          <option>Técnico</option>
+          <option>Graduação</option>
+          <option>Pós-graduação</option>
+        </select>
       </div>
-
-      <!-- COMPETÊNCIAS -->
-      <div>
-        <div class="sec-title">Competências e Habilidades</div>
-        <div class="g2">
-          <div class="form-group"><label class="form-label">Competências técnicas</label><textarea class="form-textarea" id="fCompTecnicas" placeholder="Habilidades técnicas específicas do cargo..."></textarea></div>
-          <div class="form-group"><label class="form-label">Competências comportamentais</label><textarea class="form-textarea" id="fCompComp" placeholder="Ex: Liderança, comunicação, proatividade..."></textarea></div>
-        </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label class="form-label">Principais Responsabilidades</label>
+        <textarea class="form-textarea" id="fResponsabilidades" placeholder="Descreva as principais responsabilidades do cargo..."></textarea>
       </div>
-
-      <!-- CONDIÇÕES -->
-      <div>
-        <div class="sec-title">Condições de Trabalho e Riscos</div>
-        <div class="g2">
-          <div class="form-group"><label class="form-label">Ambiente de trabalho</label>
-            <select class="form-select" id="fAmbiente">
-              <option>Externo — campo / floresta</option><option>Interno — escritório</option>
-              <option>Interno — galpão / fábrica</option><option>Misto</option>
-            </select>
-          </div>
-          <div class="form-group"><label class="form-label">Horário de trabalho</label><input type="text" class="form-input" id="fHorario" placeholder="Ex: 07h às 17h, seg a sex" /></div>
-        </div>
-        <div class="form-group"><label class="form-label">Riscos ocupacionais (NR-1 / NR-17)</label><input type="text" class="form-input" id="fRiscos" placeholder="Ex: Risco ergonômico, físico, químico, biológico..." /></div>
-        <div class="form-group"><label class="form-label">EPIs obrigatórios</label><input type="text" class="form-input" id="fEPIs" placeholder="Ex: Capacete, luvas, botas, protetor auricular..." /></div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label class="form-label">Competências Necessárias</label>
+        <textarea class="form-textarea" id="fCompetencias" placeholder="Conhecimentos técnicos, habilidades comportamentais..."></textarea>
       </div>
-
-      <!-- VALIDAÇÃO -->
-      <div>
-        <div class="sec-title">Status de Validação</div>
-        <div class="g2">
-          <div class="form-group"><label class="form-label">Validação Vilson/Michele</label>
-            <select class="form-select" id="fValidacao">
-              <option value="pendente">Pendente</option><option value="analise">Em análise</option>
-              <option value="aprovado">✓ Aprovado</option><option value="ajuste">Necessita ajustes</option>
-            </select>
-          </div>
-          <div class="form-group"><label class="form-label">Aprovação Diretoria/CEO</label>
-            <select class="form-select" id="fAprovacao">
-              <option value="pendente">Pendente</option><option value="aprovado">✓ Aprovado</option><option value="reprovado">Reprovado</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group"><label class="form-label">Observações</label><textarea class="form-textarea" id="fObs" placeholder="Ajustes pendentes, observações da diretoria..."></textarea></div>
+      <div class="form-group">
+        <label class="form-label">Experiência mínima</label>
+        <input type="text" class="form-input" id="fExperiencia" placeholder="Ex: 2 anos na área" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Reporta a</label>
+        <input type="text" class="form-input" id="fReporta" placeholder="Ex: Gerente de Produção" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Validação Vilson/Michele</label>
+        <select class="form-select" id="fValidacao">
+          <option value="pendente">Pendente</option>
+          <option value="andamento">Em análise</option>
+          <option value="aprovado">Aprovado</option>
+          <option value="ajuste">Com ajustes</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Aprovação Diretoria/CEO</label>
+        <select class="form-select" id="fAprovacao">
+          <option value="pendente">Pendente</option>
+          <option value="aprovado">Aprovado</option>
+          <option value="reprovado">Reprovado</option>
+        </select>
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label class="form-label">Observações</label>
+        <textarea class="form-textarea" id="fObs" placeholder="Observações adicionais, ajustes pendentes..."></textarea>
       </div>
     </div>
     <div class="modal-footer">
@@ -220,37 +208,41 @@
 </div>
 
 <div id="toast" class="toast"></div>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script>
-const FASE_ID='fase02';
-const ATIVIDADES_DEF=[
-  {id:'atv1',nome:'Elaboração das Descrições de Cargo (competências, requisitos, responsabilidades)',resp:'Primazia',respClass:'primazia',entregavel:'Manual de Descrição de Cargos'},
-  {id:'atv2',nome:'Agrupamento por famílias: Operacional / Técnico / Administrativo / Gestão',resp:'Primazia',respClass:'primazia',entregavel:'Organograma funcional atualizado'},
-  {id:'atv3',nome:'Validação técnica com Vilson e Michele',resp:'Primazia + Vilson + Michele',respClass:'primazia',entregavel:'Descrições aprovadas na gestão'},
-  {id:'atv4',nome:'Aprovação final com Diretoria / CEO',resp:'Primazia + Diretoria',respClass:'',entregavel:'Descrições com aval executivo'}
+const FASE_ID = 'fase02';
+const ATIVIDADES_DEF = [
+  { id:'atv1', nome:'Elaboração das Descrições de Cargo (competências, requisitos, responsabilidades)', resp:'Primazia', respClass:'primazia', entregavel:'Manual de Descrição de Cargos' },
+  { id:'atv2', nome:'Agrupamento por famílias: Operacional / Técnico / Administrativo / Gestão', resp:'Primazia', respClass:'primazia', entregavel:'Organograma funcional atualizado' },
+  { id:'atv3', nome:'Validação técnica com Vilson e Michele', resp:'Primazia + Vilson + Michele', respClass:'primazia', entregavel:'Descrições aprovadas na gestão' },
+  { id:'atv4', nome:'Aprovação final com Diretoria / CEO', resp:'Primazia + Diretoria', respClass:'', entregavel:'Descrições com aval executivo' }
 ];
-let currentUser,currentPerfil,editingId=null,todasFichas=[];
 
-requireAuth((user,perfil)=>{
-  currentUser=user;currentPerfil=perfil;
-  document.getElementById('userName').textContent=perfil.nome||user.email;
-  if(isAdmin(perfil))document.getElementById('sideUsuarios').style.display='flex';
-  carregarAtividades();carregarFichas();carregarNotas();
+let currentUser, currentPerfil, editingId = null, todasFichas = [];
+
+requireAuth((user, perfil) => {
+  currentUser = user; currentPerfil = perfil;
+  document.getElementById('userName').textContent = perfil.nome || user.email;
+  if(isAdmin(perfil)) document.getElementById('sideUsuarios').style.display='flex';
+  carregarAtividades(); carregarFichas(); carregarNotas();
 });
 
-function carregarAtividades(){
-  db.collection('fases').doc(FASE_ID).collection('atividades').onSnapshot(snap=>{
-    const data={};snap.forEach(d=>data[d.id]=d.data());
-    let done=0;
-    document.getElementById('atvsBody').innerHTML=ATIVIDADES_DEF.map(a=>{
-      const s=(data[a.id]||{}).status||'pendente';
-      if(s==='concluido')done++;
+function carregarAtividades() {
+  db.collection('fases').doc(FASE_ID).collection('atividades').onSnapshot(snap => {
+    const data = {};
+    snap.forEach(d => data[d.id] = d.data());
+    let done = 0;
+    document.getElementById('atvsBody').innerHTML = ATIVIDADES_DEF.map(a => {
+      const s = (data[a.id]||{}).status||'pendente';
+      if(s==='concluido') done++;
       return `<tr style="${s==='concluido'?'opacity:0.6':''}">
         <td><input type="checkbox" class="task-check" ${s==='concluido'?'checked':''} onchange="toggleCheck('${a.id}',this.checked)"></td>
-        <td>${a.nome}</td><td><span class="resp ${a.respClass}">${a.resp}</span></td>
+        <td>${a.nome}</td>
+        <td><span class="resp ${a.respClass}">${a.resp}</span></td>
         <td><span style="font-size:12px;color:var(--gray-500);font-style:italic">${a.entregavel}</span></td>
         <td><select class="status-sel s-${s}" onchange="updateStatus('${a.id}',this)">
           <option value="pendente" ${s==='pendente'?'selected':''}>Pendente</option>
@@ -260,46 +252,45 @@ function carregarAtividades(){
         <td><span style="font-size:11px;color:var(--gray-300)">${(data[a.id]||{}).atualizadoPor||'—'}</span></td>
       </tr>`;
     }).join('');
-    const pct=Math.round((done/ATIVIDADES_DEF.length)*100);
-    document.getElementById('fasePct').textContent=pct+'%';
-    document.getElementById('faseTasks').textContent=done+' de '+ATIVIDADES_DEF.length+' atividades';
-    document.getElementById('faseBar').style.width=pct+'%';
-  });
-}
-function toggleCheck(id,v){updateStatusDB(id,v?'concluido':'pendente');}
-function updateStatus(id,sel){sel.className='status-sel s-'+sel.value;updateStatusDB(id,sel.value);}
-function updateStatusDB(id,status){db.collection('fases').doc(FASE_ID).collection('atividades').doc(id).set({status,atualizadoPor:currentPerfil.nome||currentUser.email,atualizadoEm:firebase.firestore.FieldValue.serverTimestamp()},{merge:true}).then(()=>showToast('Atualizado!','ok'));}
-
-function carregarFichas(){
-  db.collection('fases').doc(FASE_ID).collection('fichas').orderBy('nome').onSnapshot(snap=>{
-    todasFichas=snap.docs.map(d=>({id:d.id,...d.data()}));
-    filtrar();
+    const pct = Math.round((done/ATIVIDADES_DEF.length)*100);
+    document.getElementById('fasePct').textContent = pct+'%';
+    document.getElementById('faseTasks').textContent = done+' de '+ATIVIDADES_DEF.length+' atividades';
+    document.getElementById('faseBar').style.width = pct+'%';
   });
 }
 
-function filtrar(){
-  const f=document.getElementById('filtroFamilia').value;
-  renderFichas(f?todasFichas.filter(x=>x.familia===f):todasFichas);
+function toggleCheck(id, checked) { updateStatusDB(id, checked?'concluido':'pendente'); }
+function updateStatus(id, sel) { sel.className='status-sel s-'+sel.value; updateStatusDB(id, sel.value); }
+function updateStatusDB(id, status) {
+  db.collection('fases').doc(FASE_ID).collection('atividades').doc(id).set({ status, atualizadoPor: currentPerfil.nome||currentUser.email, atualizadoEm: firebase.firestore.FieldValue.serverTimestamp() },{merge:true})
+    .then(()=>showToast('Atualizado!','ok'));
 }
 
-function renderFichas(fichas){
-  const vB={pendente:'badge-gray',analise:'badge-amber',aprovado:'badge-green',ajuste:'badge-amber'};
-  const vL={pendente:'Pendente',analise:'Em análise',aprovado:'✓ Aprovado',ajuste:'Com ajustes'};
-  const aB={pendente:'badge-gray',aprovado:'badge-green',reprovado:'badge-gray'};
-  const aL={pendente:'Pendente',aprovado:'✓ Aprovado CEO',reprovado:'Reprovado'};
-  const tbody=document.getElementById('fichasBody');
-  if(!fichas.length){tbody.innerHTML='<tr><td colspan="8"><div class="empty"><div class="empty-icon">📝</div><div class="empty-text">Nenhuma ficha encontrada.</div></div></td></tr>';return;}
-  tbody.innerHTML=fichas.map(f=>`<tr>
-    <td>
-      <strong>${f.nome}</strong>
-      <div style="font-size:10px;color:var(--gray-300);margin-top:2px">Reporta: ${f.reporta||'—'} · CBO: ${f.cbo||'—'}</div>
-    </td>
+function carregarFichas() {
+  db.collection('fases').doc(FASE_ID).collection('fichas').orderBy('nome').onSnapshot(snap => {
+    todasFichas = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderFichas(todasFichas);
+  });
+}
+
+function filtrarFichas() {
+  const f = document.getElementById('filtroFamilia').value;
+  renderFichas(f ? todasFichas.filter(x=>x.familia===f) : todasFichas);
+}
+
+function renderFichas(fichas) {
+  const vBadge = { pendente:'badge-gray', andamento:'badge-amber', aprovado:'badge-green', ajuste:'badge-amber' };
+  const vLabel = { pendente:'Pendente', andamento:'Em análise', aprovado:'✓ Aprovado', ajuste:'Com ajustes' };
+  const aBadge = { pendente:'badge-gray', aprovado:'badge-green', reprovado:'badge-gray' };
+  const aLabel = { pendente:'Pendente', aprovado:'✓ Aprovado CEO', reprovado:'Reprovado' };
+  const tbody = document.getElementById('fichasBody');
+  if(!fichas.length) { tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon">📝</div><div class="empty-text">Nenhuma ficha encontrada.</div></div></td></tr>'; return; }
+  tbody.innerHTML = fichas.map(f=>`<tr>
+    <td><strong>${f.nome}</strong><div style="font-size:11px;color:var(--gray-300);margin-top:2px">${f.escolaridade||''} · ${f.experiencia||''}</div></td>
     <td><span class="badge badge-gold">${f.familia}</span></td>
-    <td style="font-size:12px">${f.escolaridade||'—'}</td>
-    <td style="font-size:12px">${f.experiencia||'—'}</td>
-    <td style="text-align:center;font-size:13px">${f.qtd||0}</td>
-    <td><span class="badge ${vB[f.validacao]||'badge-gray'}">${vL[f.validacao]||'Pendente'}</span></td>
-    <td><span class="badge ${aB[f.aprovacao]||'badge-gray'}">${aL[f.aprovacao]||'Pendente'}</span></td>
+    <td style="font-size:12px;max-width:180px;color:var(--gray-500)">${(f.competencias||'').substring(0,80)}${f.competencias&&f.competencias.length>80?'...':''}</td>
+    <td><span class="badge ${vBadge[f.validacao]||'badge-gray'}">${vLabel[f.validacao]||'Pendente'}</span></td>
+    <td><span class="badge ${aBadge[f.aprovacao]||'badge-gray'}">${aLabel[f.aprovacao]||'Pendente'}</span></td>
     <td><div style="display:flex;gap:6px">
       <button class="btn btn-ghost btn-sm" onclick="editarFicha('${f.id}')">Editar</button>
       <button class="btn btn-danger btn-sm" onclick="removerFicha('${f.id}','${f.nome}')">×</button>
@@ -307,73 +298,201 @@ function renderFichas(fichas){
   </tr>`).join('');
 }
 
-function abrirModal(){
-  editingId=null;
-  document.getElementById('modalTitle').textContent='Nova Ficha de Cargo';
-  ['fNome','fReporta','fCBO','fExperiencia','fCursos','fConhecimentos','fResponsabilidades','fAtividades','fRespRecursos','fCompTecnicas','fCompComp','fRiscos','fEPIs','fObs'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('fQtd').value='';
+function abrirModal(id) {
+  editingId = null;
+  document.getElementById('modalTitulo').textContent = 'Nova Ficha de Cargo';
+  ['fNome','fExperiencia','fReporta','fResponsabilidades','fCompetencias','fObs'].forEach(i=>document.getElementById(i).value='');
   document.getElementById('fValidacao').value='pendente';
   document.getElementById('fAprovacao').value='pendente';
   document.getElementById('modalFicha').classList.add('show');
 }
 
-function editarFicha(id){
-  const f=todasFichas.find(x=>x.id===id);if(!f)return;
-  editingId=id;
-  document.getElementById('modalTitle').textContent='Editar Ficha';
-  document.getElementById('fNome').value=f.nome||'';
-  document.getElementById('fFamilia').value=f.familia||'Operacional / Florestal';
-  document.getElementById('fReporta').value=f.reporta||'';
-  document.getElementById('fQtd').value=f.qtd||'';
-  document.getElementById('fCBO').value=f.cbo||'';
-  document.getElementById('fEscolaridade').value=f.escolaridade||'Ensino Médio completo';
-  document.getElementById('fExperiencia').value=f.experiencia||'';
-  document.getElementById('fCursos').value=f.cursos||'';
-  document.getElementById('fConhecimentos').value=f.conhecimentos||'';
-  document.getElementById('fResponsabilidades').value=f.responsabilidades||'';
-  document.getElementById('fAtividades').value=f.atividades||'';
-  document.getElementById('fRespRecursos').value=f.respRecursos||'';
-  document.getElementById('fCompTecnicas').value=f.compTecnicas||'';
-  document.getElementById('fCompComp').value=f.compComp||'';
-  document.getElementById('fAmbiente').value=f.ambiente||'Externo — campo / floresta';
-  document.getElementById('fHorario').value=f.horario||'';
-  document.getElementById('fRiscos').value=f.riscos||'';
-  document.getElementById('fEPIs').value=f.epis||'';
-  document.getElementById('fValidacao').value=f.validacao||'pendente';
-  document.getElementById('fAprovacao').value=f.aprovacao||'pendente';
-  document.getElementById('fObs').value=f.obs||'';
+function editarFicha(id) {
+  const f = todasFichas.find(x=>x.id===id);
+  if(!f) return;
+  editingId = id;
+  document.getElementById('modalTitulo').textContent = 'Editar Ficha';
+  document.getElementById('fNome').value = f.nome||'';
+  document.getElementById('fFamilia').value = f.familia||'Operacional / Florestal';
+  document.getElementById('fEscolaridade').value = f.escolaridade||'Ensino Médio';
+  document.getElementById('fExperiencia').value = f.experiencia||'';
+  document.getElementById('fReporta').value = f.reporta||'';
+  document.getElementById('fResponsabilidades').value = f.responsabilidades||'';
+  document.getElementById('fCompetencias').value = f.competencias||'';
+  document.getElementById('fValidacao').value = f.validacao||'pendente';
+  document.getElementById('fAprovacao').value = f.aprovacao||'pendente';
+  document.getElementById('fObs').value = f.obs||'';
   document.getElementById('modalFicha').classList.add('show');
 }
 
-function fecharModal(){document.getElementById('modalFicha').classList.remove('show');}
+function fecharModal() { document.getElementById('modalFicha').classList.remove('show'); }
 
-function salvarFicha(){
-  const nome=document.getElementById('fNome').value.trim();
-  if(!nome){showToast('Informe o nome do cargo.','erro');return;}
-  const data={nome,familia:document.getElementById('fFamilia').value,reporta:document.getElementById('fReporta').value.trim(),qtd:parseInt(document.getElementById('fQtd').value)||0,cbo:document.getElementById('fCBO').value.trim(),escolaridade:document.getElementById('fEscolaridade').value,experiencia:document.getElementById('fExperiencia').value.trim(),cursos:document.getElementById('fCursos').value.trim(),conhecimentos:document.getElementById('fConhecimentos').value.trim(),responsabilidades:document.getElementById('fResponsabilidades').value.trim(),atividades:document.getElementById('fAtividades').value.trim(),respRecursos:document.getElementById('fRespRecursos').value.trim(),compTecnicas:document.getElementById('fCompTecnicas').value.trim(),compComp:document.getElementById('fCompComp').value.trim(),ambiente:document.getElementById('fAmbiente').value,horario:document.getElementById('fHorario').value.trim(),riscos:document.getElementById('fRiscos').value.trim(),epis:document.getElementById('fEPIs').value.trim(),validacao:document.getElementById('fValidacao').value,aprovacao:document.getElementById('fAprovacao').value,obs:document.getElementById('fObs').value.trim(),atualizadoPor:currentPerfil.nome||currentUser.email,atualizadoEm:firebase.firestore.FieldValue.serverTimestamp()};
-  const ref=db.collection('fases').doc(FASE_ID).collection('fichas');
-  const op=editingId?ref.doc(editingId).update(data):ref.add(data);
-  op.then(()=>{fecharModal();showToast('Ficha salva!','ok');}).catch(()=>showToast('Erro ao salvar.','erro'));
+function salvarFicha() {
+  const nome = document.getElementById('fNome').value.trim();
+  if(!nome) { showToast('Informe o nome do cargo.','erro'); return; }
+  const data = {
+    nome, familia: document.getElementById('fFamilia').value,
+    escolaridade: document.getElementById('fEscolaridade').value,
+    experiencia: document.getElementById('fExperiencia').value.trim(),
+    reporta: document.getElementById('fReporta').value.trim(),
+    responsabilidades: document.getElementById('fResponsabilidades').value.trim(),
+    competencias: document.getElementById('fCompetencias').value.trim(),
+    validacao: document.getElementById('fValidacao').value,
+    aprovacao: document.getElementById('fAprovacao').value,
+    obs: document.getElementById('fObs').value.trim(),
+    atualizadoPor: currentPerfil.nome||currentUser.email,
+    atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  const ref = db.collection('fases').doc(FASE_ID).collection('fichas');
+  const op = editingId ? ref.doc(editingId).update(data) : ref.add(data);
+  op.then(()=>{ fecharModal(); showToast('Ficha salva!','ok'); }).catch(()=>showToast('Erro ao salvar.','erro'));
 }
 
-function removerFicha(id,nome){
-  if(!confirm(`Remover ficha de "${nome}"?`))return;
-  db.collection('fases').doc(FASE_ID).collection('fichas').doc(id).delete().then(()=>showToast('Removido.','ok'));
+function removerFicha(id, nome) {
+  if(!confirm(`Remover ficha do cargo "${nome}"?`)) return;
+  db.collection('fases').doc(FASE_ID).collection('fichas').doc(id).delete().then(()=>showToast('Ficha removida.','ok'));
 }
 
-function carregarNotas(){
-  db.collection('fases').doc(FASE_ID).get().then(d=>{
-    if(!d.exists)return;const data=d.data();
-    if(data.notas)document.getElementById('notasFase').value=data.notas;
-    if(data.dataValidacao)document.getElementById('dataValidacao').value=data.dataValidacao;
-    if(data.dataAprovacao)document.getElementById('dataAprovacao').value=data.dataAprovacao;
-  });
+function carregarNotas() {
+  db.collection('fases').doc(FASE_ID).get().then(d=>{ if(d.exists&&d.data().notas) document.getElementById('notasFase').value=d.data().notas; });
 }
-function salvarNotas(){
-  db.collection('fases').doc(FASE_ID).set({notas:document.getElementById('notasFase').value,dataValidacao:document.getElementById('dataValidacao').value,dataAprovacao:document.getElementById('dataAprovacao').value,notasSalvasPor:currentPerfil.nome,notasSalvasEm:firebase.firestore.FieldValue.serverTimestamp()},{merge:true}).then(()=>{document.getElementById('notasSalvas').textContent='✓ Salvo às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});showToast('Salvo!','ok');});
+function salvarNotas() {
+  db.collection('fases').doc(FASE_ID).set({ notas: document.getElementById('notasFase').value, notasAtualizadoPor: currentPerfil.nome, notasAtualizadoEm: firebase.firestore.FieldValue.serverTimestamp() },{merge:true})
+    .then(()=>{ document.getElementById('notasSalvas').textContent='✓ Salvo às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); showToast('Notas salvas!','ok'); });
 }
-
 document.getElementById('modalFicha').addEventListener('click',function(e){if(e.target===this)fecharModal();});
+</script>
+
+<!-- MODAL IMPORTAR DESCRIÇÃO -->
+<div class="modal-overlay" id="modalImport">
+  <div class="modal" style="width:640px">
+    <div class="modal-header">
+      <span class="modal-title">📥 Importar Descrição de Cargo</span>
+      <button class="modal-close" onclick="fecharModalImport()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="padding:12px;background:var(--beige);border-radius:2px;border-left:3px solid var(--gold);margin-bottom:16px;font-size:12px;color:var(--gray-500)">
+        💡 Copie o conteúdo do seu documento Word ou PDF e cole no campo abaixo. O sistema vai preencher automaticamente os campos disponíveis.
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <div class="form-group"><label class="form-label">Nome do Cargo *</label><input type="text" class="form-input" id="impNome" placeholder="Nome do cargo que está importando" /></div>
+        <div class="form-group"><label class="form-label">Família</label>
+          <select class="form-select" id="impFamilia">
+            <option>Administrativo</option><option>Comercial</option><option>Logística</option>
+            <option>Produção / Indústria</option><option>Manejo / Florestal</option>
+            <option>Técnico / Manutenção</option><option>Gestão / Liderança</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cole aqui o conteúdo do documento Word / PDF *</label>
+        <textarea class="form-textarea" id="impTexto" style="min-height:200px;font-family:monospace;font-size:12px" placeholder="Cole aqui todo o conteúdo do documento de descrição de cargo...&#10;&#10;O sistema vai identificar as seções de: responsabilidades, requisitos, competências, escolaridade, experiência, etc."></textarea>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+        <button class="btn btn-ghost btn-sm" onclick="processarImport()">🔍 Processar e Pré-visualizar</button>
+      </div>
+      <div id="impPreview" style="display:none;background:var(--beige);padding:14px;border-radius:2px;border:1px solid var(--beige-dark);font-size:12px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="fecharModalImport()">Cancelar</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmarImport()">✓ Criar Ficha com este conteúdo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Filtros fase2
+let todasFichas2 = [];
+function filtrar(){
+  const f = document.getElementById('filtroFamilia').value;
+  const v = document.getElementById('filtroValidacao').value;
+  const n = (document.getElementById('filtroNomeCargo').value||'').toLowerCase();
+  let lista = (typeof todasFichas !== 'undefined' ? todasFichas : todasFichas2).filter(x=>{
+    if(f && x.familia !== f) return false;
+    if(v && x.validacao !== v) return false;
+    if(n && !(x.nome||'').toLowerCase().includes(n)) return false;
+    return true;
+  });
+  const countEl = document.getElementById('filtroCount2');
+  if(countEl) countEl.textContent = lista.length + ' fichas';
+  if(typeof renderFichas === 'function') renderFichas(lista);
+}
+function limparFiltros2(){
+  ['filtroFamilia','filtroValidacao'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const el=document.getElementById('filtroNomeCargo');if(el)el.value='';
+  filtrar();
+}
+
+// Import modal
+function abrirModalImport(){document.getElementById('modalImport').classList.add('show');}
+function fecharModalImport(){document.getElementById('modalImport').classList.remove('show');document.getElementById('impPreview').style.display='none';}
+
+function processarImport(){
+  const texto = document.getElementById('impTexto').value.trim();
+  if(!texto){showToast('Cole o conteúdo do documento.','erro');return;}
+  
+  // Extract sections from text
+  const extractSection = (text, keywords) => {
+    for(const kw of keywords){
+      const re = new RegExp(kw + '[:\s]*([^\n]{10,}(?:\n(?![A-Z]{3,})[^\n]+)*)', 'i');
+      const m = text.match(re);
+      if(m) return m[1].trim().substring(0, 500);
+    }
+    return '';
+  };
+  
+  const responsabilidades = extractSection(texto, ['Responsabilidades','Atribuições','Funções','Atividades principais']);
+  const escolaridade = extractSection(texto, ['Escolaridade','Formação','Grau de instrução']);
+  const experiencia = extractSection(texto, ['Experiência','Experiência profissional']);
+  const competencias = extractSection(texto, ['Competências','Habilidades','CHA']);
+  const reporta = extractSection(texto, ['Reporta','Subordina','Superior imediato']);
+  
+  const preview = document.getElementById('impPreview');
+  preview.style.display = 'block';
+  preview.innerHTML = `
+    <strong style="color:var(--gold)">Conteúdo identificado:</strong><br><br>
+    <strong>Responsabilidades:</strong> ${responsabilidades||'<em style="color:var(--gray-300)">Não identificado</em>'}<br><br>
+    <strong>Escolaridade:</strong> ${escolaridade||'<em style="color:var(--gray-300)">Não identificado</em>'}<br><br>
+    <strong>Experiência:</strong> ${experiencia||'<em style="color:var(--gray-300)">Não identificado</em>'}<br><br>
+    <strong>Competências:</strong> ${competencias||'<em style="color:var(--gray-300)">Não identificado</em>'}<br><br>
+    <strong>Reporta a:</strong> ${reporta||'<em style="color:var(--gray-300)">Não identificado</em>'}
+    <br><br><span style="color:var(--green)">✓ Clique em "Criar Ficha" para salvar esta descrição no sistema.</span>
+  `;
+  
+  // Store for confirm
+  window._importData = {responsabilidades, escolaridade, experiencia, competencias, reporta, textoCompleto: texto};
+}
+
+function confirmarImport(){
+  const nome = document.getElementById('impNome').value.trim();
+  if(!nome){showToast('Informe o nome do cargo.','erro');return;}
+  if(!window._importData){showToast('Processe o documento primeiro.','erro');return;}
+  
+  const currentUser = firebase.auth().currentUser;
+  const data = {
+    nome,
+    familia: document.getElementById('impFamilia').value,
+    responsabilidades: window._importData.responsabilidades,
+    escolaridade: window._importData.escolaridade || 'Ensino Médio completo',
+    experiencia: window._importData.experiencia,
+    compTecnicas: window._importData.competencias,
+    reporta: window._importData.reporta,
+    descricaoCompleta: window._importData.textoCompleto,
+    validacao: 'pendente',
+    aprovacao: 'pendente',
+    importada: true,
+    atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  
+  db.collection('fases').doc('fase02').collection('fichas').add(data).then(()=>{
+    fecharModalImport();
+    showToast('Ficha importada com sucesso!','ok');
+    window._importData = null;
+    ['impNome','impTexto'].forEach(id=>document.getElementById(id).value='');
+  }).catch(()=>showToast('Erro ao importar.','erro'));
+}
+
+document.getElementById('modalImport').addEventListener('click',function(e){if(e.target===this)fecharModalImport();});
 </script>
 </body>
 </html>

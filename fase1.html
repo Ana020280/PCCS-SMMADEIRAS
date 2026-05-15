@@ -6,22 +6,25 @@
 <title>Fase 1 — Levantamento | PCS SM Madeiras</title>
 <link rel="stylesheet" href="style.css">
 <style>
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--gray-900);padding-bottom:8px;border-bottom:1px solid var(--beige-dark);margin-bottom:12px}
 .tempo-badge{display:inline-block;padding:2px 8px;border-radius:2px;font-size:11px;font-weight:600;background:var(--gold-pale);color:var(--amber);border:1px solid var(--gold-light)}
 .stat-mini{background:var(--beige);border:1px solid var(--beige-dark);border-radius:2px;padding:14px;text-align:center}
 .stat-mini .val{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--gold)}
 .stat-mini .lbl{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-300);margin-top:4px}
-.sec-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--gray-900);margin-bottom:4px;padding-bottom:8px;border-bottom:1px solid var(--beige-dark);margin-bottom:12px}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.filter-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 16px;background:var(--beige);border-bottom:1px solid var(--beige-dark)}
+@media print{.topbar,.sidebar,.filter-bar .btn,.topbar-btn,button{display:none!important}.layout{display:block}.content{padding:16px}body{font-size:12px}}
 </style>
 </head>
 <body>
 <div class="topbar">
   <a href="dashboard.html" class="topbar-logo">Instituto Primazia</a>
   <div class="topbar-sep"></div>
-  <span class="topbar-project">PCS · Fase 1 · Levantamento e Diagnóstico</span>
+  <span class="topbar-project">PCS · Fase 1 · Levantamento</span>
   <div class="topbar-right">
     <span class="topbar-user">Olá, <strong id="userName">...</strong></span>
+    <button class="topbar-btn" onclick="window.print()">⬇ PDF</button>
     <button class="topbar-btn" onclick="logout()">Sair</button>
   </div>
 </div>
@@ -40,6 +43,7 @@
     <div class="sidebar-divider"></div>
     <div class="sidebar-section">
       <a href="marcos.html" class="sidebar-link"><span class="icon">🏁</span> Marcos Críticos</a>
+      <a href="seguranca.html" class="sidebar-link"><span class="icon">🛡️</span> Segurança do Trabalho</a>
       <a href="usuarios.html" class="sidebar-link" id="sideUsuarios" style="display:none"><span class="icon">👥</span> Usuários</a>
     </div>
   </div>
@@ -48,7 +52,7 @@
       <div>
         <div class="page-eyebrow">Fase 01 · Maio · Semanas 1 e 2</div>
         <div class="page-title">Levantamento e Diagnóstico</div>
-        <div class="page-sub">Coleta de colaboradores e cargos · Inconsistências salariais · Alinhamento Vilson e Michele</div>
+        <div class="page-sub">Coleta de colaboradores · Inconsistências salariais · Alinhamento com Vilson e Michele</div>
       </div>
       <div style="text-align:right">
         <div style="font-size:32px;font-family:'Cormorant Garamond',serif;font-weight:700;color:var(--gold)" id="fasePct">0%</div>
@@ -56,93 +60,62 @@
         <div class="progress-track" style="width:120px;margin-top:6px;margin-left:auto"><div class="progress-fill" id="faseBar" style="width:0%"></div></div>
       </div>
     </div>
-
-    <!-- STATS -->
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">
       <div class="stat-mini"><div class="val" id="stTotal">0</div><div class="lbl">Colaboradores</div></div>
       <div class="stat-mini"><div class="val" id="stCargos">0</div><div class="lbl">Cargos distintos</div></div>
       <div class="stat-mini"><div class="val" id="stIncons">0</div><div class="lbl">Inconsistências</div></div>
-      <div class="stat-mini"><div class="val" id="stFolha">R$ 0</div><div class="lbl">Folha total atual</div></div>
+      <div class="stat-mini"><div class="val" id="stFolha">R$ 0</div><div class="lbl">Folha total</div></div>
     </div>
-
-    <!-- ATIVIDADES -->
     <div class="card" style="margin-bottom:24px">
       <div class="card-header"><span class="card-title">Atividades da Fase</span></div>
-      <table class="table">
-        <thead><tr><th></th><th>Atividade</th><th>Responsável</th><th>Entregável</th><th>Status</th><th>Por</th></tr></thead>
-        <tbody id="atvsBody"></tbody>
-      </table>
-      <div style="padding:10px 16px;background:var(--beige);border-top:1px solid var(--beige-dark)">
-        <span style="font-size:12px;color:var(--amber);font-weight:500">⚠️ O alinhamento com Vilson e Michele na largada evita retrabalho nas fases seguintes.</span>
-      </div>
+      <table class="table"><thead><tr><th></th><th>Atividade</th><th>Responsável</th><th>Entregável</th><th>Status</th><th>Por</th></tr></thead><tbody id="atvsBody"></tbody></table>
+      <div style="padding:10px 16px;background:var(--beige);border-top:1px solid var(--beige-dark)"><span style="font-size:12px;color:var(--amber);font-weight:500">⚠️ Alinhamento com Vilson e Michele evita retrabalho nas fases seguintes.</span></div>
     </div>
-
-    <!-- COLABORADORES -->
     <div class="card" style="margin-bottom:24px">
       <div class="card-header">
-        <div>
-          <span class="card-title">Cadastro de Colaboradores e Cargos</span>
-          <div style="font-size:11px;color:var(--gray-300);margin-top:2px">Registre todos — formais e informais</div>
-        </div>
-        <div style="display:flex;gap:10px;align-items:center">
-          <select class="status-sel" id="filtroDepto" onchange="filtrarColabs()">
-            <option value="">Todos os departamentos</option>
-            <option>Operacional / Florestal</option>
-            <option>Técnico / Manutenção</option>
-            <option>Administrativo</option>
-            <option>Comercial / Logística</option>
-            <option>Gestão / Liderança</option>
-          </select>
-          <button class="btn btn-primary btn-sm" onclick="abrirModal()">+ Adicionar Colaborador</button>
-        </div>
+        <div><span class="card-title">Cadastro de Colaboradores</span><div style="font-size:11px;color:var(--gray-300);margin-top:2px">Formais e informais</div></div>
+        <button class="btn btn-primary btn-sm" onclick="abrirModal()">+ Adicionar</button>
+      </div>
+      <div class="filter-bar">
+        <span style="font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.1em">Filtros:</span>
+        <select class="status-sel" id="filtroDepto" onchange="aplicarFiltros()">
+          <option value="">Todos os departamentos</option>
+          <option>Administrativo</option><option>Comercial</option><option>Logística</option>
+          <option>Produção / Indústria</option><option>Manejo / Florestal</option>
+          <option>Técnico / Manutenção</option><option>Gestão / Liderança</option>
+        </select>
+        <select class="status-sel" id="filtroSituacao" onchange="aplicarFiltros()">
+          <option value="">Todas as situações</option><option value="ativo">Ativo</option>
+          <option value="ferias">Férias</option><option value="afastado">Afastado</option><option value="extinguir">A extinguir</option>
+        </select>
+        <select class="status-sel" id="filtroVinculo" onchange="aplicarFiltros()">
+          <option value="">Todos os vínculos</option><option value="clt">CLT</option>
+          <option value="jovem">Jovem Aprendiz</option><option value="estagio">Estágio</option>
+          <option value="terceiro">Terceirizado</option><option value="pj">PJ</option>
+        </select>
+        <select class="status-sel" id="filtroIncons" onchange="aplicarFiltros()">
+          <option value="">Com e sem inconsistências</option><option value="sim">Com inconsistência</option><option value="nao">Sem inconsistência</option>
+        </select>
+        <input type="text" id="filtroNome" class="form-input" style="max-width:160px;padding:4px 10px" placeholder="Buscar nome..." oninput="aplicarFiltros()" />
+        <button class="btn btn-ghost btn-sm" onclick="limparFiltros()">Limpar</button>
+        <span style="font-size:11px;color:var(--gray-300);margin-left:auto" id="filtroCount"></span>
       </div>
       <div style="overflow-x:auto">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Colaborador</th><th>Cargo CTPS</th><th>Função Real</th><th>Departamento</th>
-              <th>Admissão</th><th>Tempo</th><th>Salário</th><th>Inconsistência</th><th>Situação</th><th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="colabsBody">
-            <tr><td colspan="10"><div class="empty"><div class="empty-icon">👥</div><div class="empty-text">Nenhum colaborador cadastrado. Clique em "+ Adicionar Colaborador"</div></div></td></tr>
-          </tbody>
-        </table>
+        <table class="table"><thead><tr><th>Colaborador</th><th>Cargo CTPS</th><th>Função Real</th><th>Departamento</th><th>Vínculo</th><th>Admissão</th><th>Tempo</th><th>Salário</th><th>Inconsistência</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="colabsBody"><tr><td colspan="11"><div class="empty"><div class="empty-icon">👥</div><div class="empty-text">Nenhum colaborador cadastrado.</div></div></td></tr></tbody></table>
       </div>
     </div>
-
-    <!-- INCONSISTÊNCIAS -->
     <div class="card" style="margin-bottom:24px">
-      <div class="card-header">
-        <span class="card-title">Inconsistências Salariais Identificadas</span>
-        <button class="btn btn-primary btn-sm" onclick="abrirModalIncons()">+ Registrar Inconsistência</button>
-      </div>
-      <table class="table">
-        <thead><tr><th>Colaborador / Cargo</th><th>Tipo</th><th>Descrição</th><th>Impacto (R$)</th><th>Prioridade</th><th>Ações</th></tr></thead>
-        <tbody id="inconsBody">
-          <tr><td colspan="6"><div class="empty"><div class="empty-text">Nenhuma inconsistência registrada.</div></div></td></tr>
-        </tbody>
-      </table>
+      <div class="card-header"><span class="card-title">Inconsistências Salariais</span><button class="btn btn-primary btn-sm" onclick="abrirModalIncons()">+ Registrar</button></div>
+      <table class="table"><thead><tr><th>Colaborador / Cargo</th><th>Tipo</th><th>Descrição</th><th>Impacto (R$)</th><th>Prioridade</th><th>Ações</th></tr></thead><tbody id="inconsBody"><tr><td colspan="6"><div class="empty"><div class="empty-text">Nenhuma inconsistência registrada.</div></div></td></tr></tbody></table>
     </div>
-
-    <!-- ALINHAMENTO / NOTAS -->
     <div class="card">
-      <div class="card-header"><span class="card-title">📝 Alinhamento com Vilson e Michele — Encaminhamentos</span></div>
+      <div class="card-header"><span class="card-title">📝 Alinhamento com Vilson e Michele</span></div>
       <div class="card-body">
         <div class="g2" style="margin-bottom:14px">
-          <div class="form-group">
-            <label class="form-label">Data do Alinhamento</label>
-            <input type="date" class="form-input" id="dataAlinhamento" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Participantes</label>
-            <input type="text" class="form-input" id="participantes" placeholder="Ex: Ana Kátia, Karine, Vilson, Michele..." />
-          </div>
+          <div class="form-group"><label class="form-label">Data do Alinhamento</label><input type="date" class="form-input" id="dataAlinhamento" /></div>
+          <div class="form-group"><label class="form-label">Participantes</label><input type="text" class="form-input" id="participantes" placeholder="Ana Kátia, Karine, Vilson, Michele..." /></div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Encaminhamentos e Decisões</label>
-          <textarea class="form-textarea" id="notasFase" style="min-height:120px" placeholder="Critérios definidos, prazos acordados, responsabilidades..."></textarea>
-        </div>
+        <div class="form-group"><label class="form-label">Encaminhamentos e Decisões</label><textarea class="form-textarea" id="notasFase" style="min-height:100px" placeholder="Critérios, prazos, responsabilidades..."></textarea></div>
         <div style="display:flex;justify-content:flex-end;gap:10px;align-items:center;margin-top:12px">
           <span style="font-size:11px;color:var(--gray-300)" id="notasSalvas"></span>
           <button class="btn btn-primary btn-sm" onclick="salvarNotas()">Salvar</button>
@@ -153,135 +126,74 @@
 </div>
 
 <!-- MODAL COLABORADOR -->
-<div class="modal-overlay" id="modalColab" style="align-items:flex-start;padding:24px 0;overflow-y:auto">
-  <div class="modal" style="width:660px;max-width:96vw">
-    <div class="modal-header">
-      <span class="modal-title" id="modalTitle">Cadastrar Colaborador</span>
-      <button class="modal-close" onclick="fecharModal()">×</button>
-    </div>
-    <div class="modal-body" style="display:flex;flex-direction:column;gap:20px">
-
-      <!-- PESSOAL -->
+<div class="modal-overlay" id="modalColab" style="align-items:flex-start;padding:20px 0;overflow-y:auto">
+  <div class="modal" style="width:640px;max-width:96vw">
+    <div class="modal-header"><span class="modal-title" id="modalTitle">Cadastrar Colaborador</span><button class="modal-close" onclick="fecharModal()">×</button></div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:16px">
       <div>
         <div class="sec-title">Dados Pessoais</div>
-        <div class="g2">
-          <div class="form-group"><label class="form-label">Nome Completo *</label><input type="text" class="form-input" id="cNome" placeholder="Nome completo" /></div>
-          <div class="form-group"><label class="form-label">CPF</label><input type="text" class="form-input" id="cCPF" placeholder="000.000.000-00" /></div>
-        </div>
+        <div class="g2"><div class="form-group"><label class="form-label">Nome *</label><input type="text" class="form-input" id="cNome" /></div><div class="form-group"><label class="form-label">CPF</label><input type="text" class="form-input" id="cCPF" placeholder="000.000.000-00" /></div></div>
         <div class="g3">
           <div class="form-group"><label class="form-label">Data de Admissão *</label><input type="date" class="form-input" id="cAdmissao" onchange="calcTempo()" /></div>
-          <div class="form-group"><label class="form-label">Tempo de Serviço</label><input type="text" class="form-input" id="cTempo" readonly style="background:var(--beige)" placeholder="Auto" /></div>
-          <div class="form-group"><label class="form-label">Situação *</label>
-            <select class="form-select" id="cSituacao">
-              <option value="ativo">Ativo</option><option value="ferias">Em férias</option>
-              <option value="afastado">Afastado</option><option value="extinguir">A extinguir</option>
-            </select>
-          </div>
+          <div class="form-group"><label class="form-label">Tempo de Serviço</label><input type="text" class="form-input" id="cTempo" readonly style="background:var(--beige)" /></div>
+          <div class="form-group"><label class="form-label">Situação *</label><select class="form-select" id="cSituacao"><option value="ativo">Ativo</option><option value="ferias">Em férias</option><option value="afastado">Afastado</option><option value="extinguir">A extinguir</option></select></div>
         </div>
       </div>
-
-      <!-- CARGO -->
       <div>
-        <div class="sec-title">Informações do Cargo</div>
-        <div class="g2">
-          <div class="form-group"><label class="form-label">Cargo Registrado na CTPS *</label><input type="text" class="form-input" id="cCargoRegistrado" placeholder="Conforme carteira de trabalho" /></div>
-          <div class="form-group"><label class="form-label">Função Real Exercida</label><input type="text" class="form-input" id="cFuncaoReal" placeholder="O que realmente faz" /></div>
-        </div>
+        <div class="sec-title">Cargo e Departamento</div>
+        <div class="g2"><div class="form-group"><label class="form-label">Cargo Registrado na CTPS *</label><input type="text" class="form-input" id="cCargoRegistrado" /></div><div class="form-group"><label class="form-label">Função Real Exercida</label><input type="text" class="form-input" id="cFuncaoReal" /></div></div>
         <div class="g3">
           <div class="form-group"><label class="form-label">Departamento *</label>
             <select class="form-select" id="cDepto">
-              <option>Operacional / Florestal</option><option>Técnico / Manutenção</option>
-              <option>Administrativo</option><option>Comercial / Logística</option><option>Gestão / Liderança</option>
+              <option>Administrativo</option><option>Comercial</option><option>Logística</option>
+              <option>Produção / Indústria</option><option>Manejo / Florestal</option>
+              <option>Técnico / Manutenção</option><option>Gestão / Liderança</option>
             </select>
           </div>
-          <div class="form-group"><label class="form-label">Vínculo</label>
-            <select class="form-select" id="cVinculo">
-              <option value="clt">CLT</option><option value="jovem">Jovem Aprendiz</option>
-              <option value="estagio">Estágio</option><option value="terceiro">Terceirizado</option><option value="pj">PJ</option>
-            </select>
-          </div>
-          <div class="form-group"><label class="form-label">Qtd com mesmo cargo</label><input type="number" class="form-input" id="cQtd" value="1" min="1" /></div>
+          <div class="form-group"><label class="form-label">Vínculo *</label><select class="form-select" id="cVinculo"><option value="clt">CLT</option><option value="jovem">Jovem Aprendiz</option><option value="estagio">Estágio</option><option value="terceiro">Terceirizado</option><option value="pj">PJ</option></select></div>
+          <div class="form-group"><label class="form-label">Qtd mesmo cargo</label><input type="number" class="form-input" id="cQtd" value="1" min="1" /></div>
         </div>
       </div>
-
-      <!-- SALÁRIO -->
       <div>
         <div class="sec-title">Dados Salariais</div>
         <div class="g3">
-          <div class="form-group"><label class="form-label">Salário Base (R$)</label><input type="number" class="form-input" id="cSalario" placeholder="0,00" step="0.01" oninput="calcCusto()" /></div>
-          <div class="form-group"><label class="form-label">Benefícios (R$)</label><input type="number" class="form-input" id="cBeneficios" placeholder="0,00" step="0.01" oninput="calcCusto()" /></div>
-          <div class="form-group"><label class="form-label">Custo Total (R$)</label><input type="number" class="form-input" id="cCustoTotal" readonly style="background:var(--beige)" placeholder="Auto" /></div>
+          <div class="form-group"><label class="form-label">Salário Base (R$)</label><input type="number" class="form-input" id="cSalario" step="0.01" oninput="calcCusto()" /></div>
+          <div class="form-group"><label class="form-label">Benefícios (R$)</label><input type="number" class="form-input" id="cBeneficios" step="0.01" oninput="calcCusto()" /></div>
+          <div class="form-group"><label class="form-label">Custo Total (R$)</label><input type="number" class="form-input" id="cCustoTotal" readonly style="background:var(--beige)" /></div>
         </div>
         <div class="g2">
-          <div class="form-group"><label class="form-label">Salários de mesma função na empresa</label><input type="text" class="form-input" id="cSalariosFuncao" placeholder="Ex: R$ 1.800 / R$ 2.100 / R$ 2.400" /></div>
-          <div class="form-group"><label class="form-label">Referência de mercado regional</label><input type="text" class="form-input" id="cMercado" placeholder="Faixa salarial do mercado" /></div>
+          <div class="form-group"><label class="form-label">Salários mesma função na empresa</label><input type="text" class="form-input" id="cSalariosFuncao" placeholder="Ex: R$ 1.800 / R$ 2.100" /></div>
+          <div class="form-group"><label class="form-label">Referência de mercado regional</label><input type="text" class="form-input" id="cMercado" /></div>
         </div>
       </div>
-
-      <!-- INCONSISTÊNCIA -->
       <div>
         <div class="sec-title">Inconsistência Salarial</div>
         <div class="g2">
-          <div class="form-group"><label class="form-label">Há inconsistência?</label>
-            <select class="form-select" id="cInconsistencia" onchange="toggleIncons()">
-              <option value="nao">Não</option><option value="sim">Sim</option>
-            </select>
-          </div>
-          <div class="form-group"><label class="form-label">Tipo</label>
-            <select class="form-select" id="cTipoIncons" disabled>
-              <option>Cargo diferente da função</option><option>Salário abaixo do piso</option>
-              <option>Salário abaixo do mercado</option><option>Diferença entre mesmas funções</option>
-              <option>Horas extras habituais (art.59 CLT)</option><option>Outro</option>
-            </select>
-          </div>
+          <div class="form-group"><label class="form-label">Há inconsistência?</label><select class="form-select" id="cInconsistencia" onchange="toggleIncons()"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
+          <div class="form-group"><label class="form-label">Tipo</label><select class="form-select" id="cTipoIncons" disabled><option>Cargo diferente da função</option><option>Salário abaixo do piso</option><option>Salário abaixo do mercado</option><option>Diferença entre mesmas funções</option><option>Horas extras habituais (art.59 CLT)</option><option>Outro</option></select></div>
         </div>
-        <div class="form-group" id="inconsDesc" style="display:none">
-          <label class="form-label">Descrição da inconsistência</label>
-          <textarea class="form-textarea" id="cDescIncons" placeholder="Descreva detalhadamente..."></textarea>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Observações gerais</label>
-          <textarea class="form-textarea" id="cObs" placeholder="Informações adicionais..."></textarea>
-        </div>
+        <div class="form-group" id="inconsDesc" style="display:none"><label class="form-label">Descrição da inconsistência</label><textarea class="form-textarea" id="cDescIncons"></textarea></div>
+        <div class="form-group"><label class="form-label">Observações gerais</label><textarea class="form-textarea" id="cObs"></textarea></div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost btn-sm" onclick="fecharModal()">Cancelar</button>
-      <button class="btn btn-primary btn-sm" onclick="salvarColab()">Salvar Colaborador</button>
-    </div>
+    <div class="modal-footer"><button class="btn btn-ghost btn-sm" onclick="fecharModal()">Cancelar</button><button class="btn btn-primary btn-sm" onclick="salvarColab()">Salvar Colaborador</button></div>
   </div>
 </div>
 
 <!-- MODAL INCONSISTÊNCIA -->
 <div class="modal-overlay" id="modalIncons">
-  <div class="modal" style="width:520px">
-    <div class="modal-header">
-      <span class="modal-title">Registrar Inconsistência</span>
-      <button class="modal-close" onclick="fecharModalIncons()">×</button>
-    </div>
+  <div class="modal" style="width:500px">
+    <div class="modal-header"><span class="modal-title">Registrar Inconsistência</span><button class="modal-close" onclick="fecharModalIncons()">×</button></div>
     <div class="modal-body">
-      <div class="form-group"><label class="form-label">Colaborador / Cargo *</label><input type="text" class="form-input" id="iColab" placeholder="Nome do colaborador ou cargo" /></div>
+      <div class="form-group"><label class="form-label">Colaborador / Cargo *</label><input type="text" class="form-input" id="iColab" /></div>
       <div class="g2">
-        <div class="form-group"><label class="form-label">Tipo</label>
-          <select class="form-select" id="iTipo">
-            <option>Cargo diferente da função</option><option>Salário abaixo do piso</option>
-            <option>Salário abaixo do mercado</option><option>Diferença entre mesmas funções</option>
-            <option>Horas extras habituais (art.59 CLT)</option><option>Outro</option>
-          </select>
-        </div>
-        <div class="form-group"><label class="form-label">Prioridade</label>
-          <select class="form-select" id="iPrioridade">
-            <option value="alta">🔴 Alta</option><option value="media">🟡 Média</option><option value="baixa">🟢 Baixa</option>
-          </select>
-        </div>
+        <div class="form-group"><label class="form-label">Tipo</label><select class="form-select" id="iTipo"><option>Cargo diferente da função</option><option>Salário abaixo do piso</option><option>Salário abaixo do mercado</option><option>Diferença entre mesmas funções</option><option>Horas extras habituais (art.59 CLT)</option><option>Outro</option></select></div>
+        <div class="form-group"><label class="form-label">Prioridade</label><select class="form-select" id="iPrioridade"><option value="alta">🔴 Alta</option><option value="media">🟡 Média</option><option value="baixa">🟢 Baixa</option></select></div>
       </div>
-      <div class="form-group"><label class="form-label">Descrição detalhada</label><textarea class="form-textarea" id="iDesc" placeholder="Valores envolvidos, impacto, contexto..."></textarea></div>
-      <div class="form-group"><label class="form-label">Impacto financeiro estimado (R$)</label><input type="number" class="form-input" id="iImpacto" placeholder="0,00" /></div>
+      <div class="form-group"><label class="form-label">Descrição</label><textarea class="form-textarea" id="iDesc"></textarea></div>
+      <div class="form-group"><label class="form-label">Impacto estimado (R$)</label><input type="number" class="form-input" id="iImpacto" /></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost btn-sm" onclick="fecharModalIncons()">Cancelar</button>
-      <button class="btn btn-primary btn-sm" onclick="salvarIncons()">Registrar</button>
-    </div>
+    <div class="modal-footer"><button class="btn btn-ghost btn-sm" onclick="fecharModalIncons()">Cancelar</button><button class="btn btn-primary btn-sm" onclick="salvarIncons()">Registrar</button></div>
   </div>
 </div>
 
@@ -293,209 +205,36 @@
 <script>
 const FASE_ID='fase01';
 const ATIVIDADES_DEF=[
-  {id:'atv1',nome:'Coleta de todos os colaboradores e cargos (formais e informais)',resp:'Primazia + RH SM',respClass:'primazia',entregavel:'Lista consolidada de colaboradores'},
+  {id:'atv1',nome:'Coleta de todos os colaboradores e cargos (formais e informais)',resp:'Primazia + RH SM',respClass:'primazia',entregavel:'Lista consolidada'},
   {id:'atv2',nome:'Levantamento de inconsistências salariais internas',resp:'RH SM (Michele)',respClass:'',entregavel:'Relatório de inconsistências'},
-  {id:'atv3',nome:'Alinhamento inicial com Vilson e Michele sobre escopo e critérios',resp:'Primazia + Vilson + Michele',respClass:'primazia',entregavel:'Diretrizes validadas para início'}
+  {id:'atv3',nome:'Alinhamento inicial com Vilson e Michele sobre escopo e critérios',resp:'Primazia + Vilson + Michele',respClass:'primazia',entregavel:'Diretrizes validadas'}
 ];
-let currentUser,currentPerfil,editingId=null,todosColabs=[],todasIncons=[];
-
-requireAuth((user,perfil)=>{
-  currentUser=user;currentPerfil=perfil;
-  document.getElementById('userName').textContent=perfil.nome||user.email;
-  if(isAdmin(perfil))document.getElementById('sideUsuarios').style.display='flex';
-  carregarAtividades();carregarColabs();carregarIncons();carregarNotas();
-});
-
-function carregarAtividades(){
-  db.collection('fases').doc(FASE_ID).collection('atividades').onSnapshot(snap=>{
-    const data={};snap.forEach(d=>data[d.id]=d.data());
-    let done=0;
-    document.getElementById('atvsBody').innerHTML=ATIVIDADES_DEF.map(a=>{
-      const s=(data[a.id]||{}).status||'pendente';
-      if(s==='concluido')done++;
-      return `<tr style="${s==='concluido'?'opacity:0.6':''}">
-        <td><input type="checkbox" class="task-check" ${s==='concluido'?'checked':''} onchange="toggleCheck('${a.id}',this.checked)"></td>
-        <td>${a.nome}</td><td><span class="resp ${a.respClass}">${a.resp}</span></td>
-        <td><span style="font-size:12px;color:var(--gray-500);font-style:italic">${a.entregavel}</span></td>
-        <td><select class="status-sel s-${s}" onchange="updateStatus('${a.id}',this)">
-          <option value="pendente" ${s==='pendente'?'selected':''}>Pendente</option>
-          <option value="andamento" ${s==='andamento'?'selected':''}>Em andamento</option>
-          <option value="concluido" ${s==='concluido'?'selected':''}>Concluído</option>
-        </select></td>
-        <td><span style="font-size:11px;color:var(--gray-300)">${(data[a.id]||{}).atualizadoPor||'—'}</span></td>
-      </tr>`;
-    }).join('');
-    const pct=Math.round((done/ATIVIDADES_DEF.length)*100);
-    document.getElementById('fasePct').textContent=pct+'%';
-    document.getElementById('faseTasks').textContent=done+' de '+ATIVIDADES_DEF.length+' atividades';
-    document.getElementById('faseBar').style.width=pct+'%';
-  });
-}
+let currentUser,currentPerfil,editingId=null,todosColabs=[];
+requireAuth((user,perfil)=>{currentUser=user;currentPerfil=perfil;document.getElementById('userName').textContent=perfil.nome||user.email;if(isAdmin(perfil))document.getElementById('sideUsuarios').style.display='flex';carregarAtividades();carregarColabs();carregarIncons();carregarNotas();});
+function carregarAtividades(){db.collection('fases').doc(FASE_ID).collection('atividades').onSnapshot(snap=>{const data={};snap.forEach(d=>data[d.id]=d.data());let done=0;document.getElementById('atvsBody').innerHTML=ATIVIDADES_DEF.map(a=>{const s=(data[a.id]||{}).status||'pendente';if(s==='concluido')done++;return `<tr style="${s==='concluido'?'opacity:0.6':''}"><td><input type="checkbox" class="task-check" ${s==='concluido'?'checked':''} onchange="toggleCheck('${a.id}',this.checked)"></td><td>${a.nome}</td><td><span class="resp ${a.respClass}">${a.resp}</span></td><td><span style="font-size:12px;color:var(--gray-500);font-style:italic">${a.entregavel}</span></td><td><select class="status-sel s-${s}" onchange="updateStatus('${a.id}',this)"><option value="pendente" ${s==='pendente'?'selected':''}>Pendente</option><option value="andamento" ${s==='andamento'?'selected':''}>Em andamento</option><option value="concluido" ${s==='concluido'?'selected':''}>Concluído</option></select></td><td><span style="font-size:11px;color:var(--gray-300)">${(data[a.id]||{}).atualizadoPor||'—'}</span></td></tr>`;}).join('');const pct=Math.round((done/ATIVIDADES_DEF.length)*100);document.getElementById('fasePct').textContent=pct+'%';document.getElementById('faseTasks').textContent=done+' de '+ATIVIDADES_DEF.length+' atividades';document.getElementById('faseBar').style.width=pct+'%';});}
 function toggleCheck(id,v){updateStatusDB(id,v?'concluido':'pendente');}
 function updateStatus(id,sel){sel.className='status-sel s-'+sel.value;updateStatusDB(id,sel.value);}
 function updateStatusDB(id,status){db.collection('fases').doc(FASE_ID).collection('atividades').doc(id).set({status,atualizadoPor:currentPerfil.nome||currentUser.email,atualizadoEm:firebase.firestore.FieldValue.serverTimestamp()},{merge:true}).then(()=>showToast('Atualizado!','ok'));}
-
-function calcTempo(){
-  const v=document.getElementById('cAdmissao').value;
-  if(!v)return;
-  const diff=new Date()-new Date(v);
-  const anos=Math.floor(diff/(1000*60*60*24*365.25));
-  const meses=Math.floor((diff%(1000*60*60*24*365.25))/(1000*60*60*24*30.44));
-  document.getElementById('cTempo').value=anos>0?`${anos} ano${anos>1?'s':''} e ${meses} mês${meses!==1?'es':''}`:`${meses} mês${meses!==1?'es':''}`;
-}
-
-function calcCusto(){
-  const s=parseFloat(document.getElementById('cSalario').value)||0;
-  const b=parseFloat(document.getElementById('cBeneficios').value)||0;
-  document.getElementById('cCustoTotal').value=(s+b).toFixed(2);
-}
-
-function toggleIncons(){
-  const v=document.getElementById('cInconsistencia').value;
-  document.getElementById('cTipoIncons').disabled=v==='nao';
-  document.getElementById('inconsDesc').style.display=v==='sim'?'block':'none';
-}
-
-function carregarColabs(){
-  db.collection('fases').doc(FASE_ID).collection('colaboradores').orderBy('nome').onSnapshot(snap=>{
-    todosColabs=snap.docs.map(d=>({id:d.id,...d.data()}));
-    renderColabs(todosColabs);atualizarStats();
-  });
-}
-
-function filtrarColabs(){
-  const f=document.getElementById('filtroDepto').value;
-  renderColabs(f?todosColabs.filter(c=>c.depto===f):todosColabs);
-}
-
-function renderColabs(lista){
-  const tbody=document.getElementById('colabsBody');
-  if(!lista.length){tbody.innerHTML='<tr><td colspan="10"><div class="empty"><div class="empty-icon">👥</div><div class="empty-text">Nenhum colaborador cadastrado.</div></div></td></tr>';return;}
-  const sits={ativo:'<span class="badge badge-green">Ativo</span>',ferias:'<span class="badge badge-amber">Férias</span>',afastado:'<span class="badge badge-amber">Afastado</span>',extinguir:'<span class="badge badge-gray">A extinguir</span>'};
-  tbody.innerHTML=lista.map(c=>`<tr>
-    <td><strong>${c.nome}</strong><div style="font-size:10px;color:var(--gray-300);margin-top:2px">${c.vinculo||'CLT'}${c.cpf?' · '+c.cpf:''}</div></td>
-    <td style="font-size:12px">${c.cargoRegistrado||'—'}</td>
-    <td style="font-size:12px;color:var(--amber)">${c.funcaoReal||'—'}</td>
-    <td><span class="badge badge-gold" style="font-size:10px">${c.depto||'—'}</span></td>
-    <td style="font-size:12px">${c.admissao?new Date(c.admissao+'T00:00:00').toLocaleDateString('pt-BR'):'—'}</td>
-    <td><span class="tempo-badge">${c.tempo||'—'}</span></td>
-    <td style="font-size:12px;color:var(--green);font-weight:600">${c.salario?'R$ '+parseFloat(c.salario).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—'}</td>
-    <td>${c.inconsistencia==='sim'?`<span style="color:var(--red);font-weight:600;font-size:12px">⚠️ ${c.tipoIncons||'Sim'}</span>`:'<span style="color:var(--green);font-size:12px">✓ Não</span>'}</td>
-    <td>${sits[c.situacao]||'—'}</td>
-    <td><div style="display:flex;gap:6px">
-      <button class="btn btn-ghost btn-sm" onclick="editarColab('${c.id}')">Editar</button>
-      <button class="btn btn-danger btn-sm" onclick="removerColab('${c.id}','${c.nome}')">×</button>
-    </div></td>
-  </tr>`).join('');
-}
-
-function atualizarStats(){
-  document.getElementById('stTotal').textContent=todosColabs.length;
-  document.getElementById('stCargos').textContent=new Set(todosColabs.map(c=>c.cargoRegistrado).filter(Boolean)).size;
-  document.getElementById('stIncons').textContent=todosColabs.filter(c=>c.inconsistencia==='sim').length;
-  const folha=todosColabs.reduce((s,c)=>s+(parseFloat(c.custoTotal)||parseFloat(c.salario)||0),0);
-  document.getElementById('stFolha').textContent='R$ '+folha.toLocaleString('pt-BR',{minimumFractionDigits:2});
-}
-
-function abrirModal(){
-  editingId=null;
-  document.getElementById('modalTitle').textContent='Cadastrar Colaborador';
-  ['cNome','cCPF','cTempo','cCargoRegistrado','cFuncaoReal','cSalario','cBeneficios','cCustoTotal','cSalariosFuncao','cMercado','cDescIncons','cObs'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('cAdmissao').value='';
-  document.getElementById('cSituacao').value='ativo';
-  document.getElementById('cVinculo').value='clt';
-  document.getElementById('cQtd').value='1';
-  document.getElementById('cInconsistencia').value='nao';
-  document.getElementById('cTipoIncons').disabled=true;
-  document.getElementById('inconsDesc').style.display='none';
-  document.getElementById('modalColab').classList.add('show');
-}
-
-function editarColab(id){
-  const c=todosColabs.find(x=>x.id===id);if(!c)return;
-  editingId=id;
-  document.getElementById('modalTitle').textContent='Editar Colaborador';
-  document.getElementById('cNome').value=c.nome||'';
-  document.getElementById('cCPF').value=c.cpf||'';
-  document.getElementById('cAdmissao').value=c.admissao||'';
-  document.getElementById('cTempo').value=c.tempo||'';
-  document.getElementById('cSituacao').value=c.situacao||'ativo';
-  document.getElementById('cCargoRegistrado').value=c.cargoRegistrado||'';
-  document.getElementById('cFuncaoReal').value=c.funcaoReal||'';
-  document.getElementById('cDepto').value=c.depto||'Administrativo';
-  document.getElementById('cVinculo').value=c.vinculo||'clt';
-  document.getElementById('cQtd').value=c.qtd||1;
-  document.getElementById('cSalario').value=c.salario||'';
-  document.getElementById('cBeneficios').value=c.beneficios||'';
-  document.getElementById('cCustoTotal').value=c.custoTotal||'';
-  document.getElementById('cSalariosFuncao').value=c.salariosFuncao||'';
-  document.getElementById('cMercado').value=c.mercado||'';
-  document.getElementById('cInconsistencia').value=c.inconsistencia||'nao';
-  document.getElementById('cTipoIncons').value=c.tipoIncons||'';
-  document.getElementById('cTipoIncons').disabled=c.inconsistencia!=='sim';
-  document.getElementById('cDescIncons').value=c.descIncons||'';
-  document.getElementById('inconsDesc').style.display=c.inconsistencia==='sim'?'block':'none';
-  document.getElementById('cObs').value=c.obs||'';
-  document.getElementById('modalColab').classList.add('show');
-}
-
+function calcTempo(){const v=document.getElementById('cAdmissao').value;if(!v)return;const diff=new Date()-new Date(v+'T00:00:00');const anos=Math.floor(diff/(1000*60*60*24*365.25));const meses=Math.floor((diff%(1000*60*60*24*365.25))/(1000*60*60*24*30.44));document.getElementById('cTempo').value=anos>0?`${anos} ano${anos>1?'s':''} e ${meses} mês${meses!==1?'es':''}`:`${meses} mês${meses!==1?'es':''}`;}
+function calcCusto(){const s=parseFloat(document.getElementById('cSalario').value)||0;const b=parseFloat(document.getElementById('cBeneficios').value)||0;document.getElementById('cCustoTotal').value=(s+b).toFixed(2);}
+function toggleIncons(){const v=document.getElementById('cInconsistencia').value;document.getElementById('cTipoIncons').disabled=v==='nao';document.getElementById('inconsDesc').style.display=v==='sim'?'block':'none';}
+function carregarColabs(){db.collection('fases').doc(FASE_ID).collection('colaboradores').orderBy('nome').onSnapshot(snap=>{todosColabs=snap.docs.map(d=>({id:d.id,...d.data()}));aplicarFiltros();atualizarStats();});}
+function aplicarFiltros(){const depto=document.getElementById('filtroDepto').value;const sit=document.getElementById('filtroSituacao').value;const vinc=document.getElementById('filtroVinculo').value;const incons=document.getElementById('filtroIncons').value;const nome=(document.getElementById('filtroNome').value||'').toLowerCase();let lista=todosColabs.filter(c=>{if(depto&&c.depto!==depto)return false;if(sit&&c.situacao!==sit)return false;if(vinc&&c.vinculo!==vinc)return false;if(incons&&c.inconsistencia!==incons)return false;if(nome&&!(c.nome||'').toLowerCase().includes(nome))return false;return true;});document.getElementById('filtroCount').textContent=`${lista.length} de ${todosColabs.length} colaboradores`;renderColabs(lista);}
+function limparFiltros(){['filtroDepto','filtroSituacao','filtroVinculo','filtroIncons'].forEach(id=>document.getElementById(id).value='');document.getElementById('filtroNome').value='';aplicarFiltros();}
+function renderColabs(lista){const tbody=document.getElementById('colabsBody');if(!lista.length){tbody.innerHTML='<tr><td colspan="11"><div class="empty"><div class="empty-icon">👥</div><div class="empty-text">Nenhum colaborador encontrado.</div></div></td></tr>';return;}const sits={ativo:'<span class="badge badge-green">Ativo</span>',ferias:'<span class="badge badge-amber">Férias</span>',afastado:'<span class="badge badge-amber">Afastado</span>',extinguir:'<span class="badge badge-gray">A extinguir</span>'};const vincs={clt:'CLT',jovem:'Jovem Aprendiz',estagio:'Estágio',terceiro:'Terceirizado',pj:'PJ'};tbody.innerHTML=lista.map(c=>`<tr><td><strong>${c.nome}</strong><div style="font-size:10px;color:var(--gray-300)">${c.cpf||''}</div></td><td style="font-size:12px">${c.cargoRegistrado||'—'}</td><td style="font-size:12px;color:var(--amber)">${c.funcaoReal||'—'}</td><td><span class="badge badge-gold" style="font-size:10px">${c.depto||'—'}</span></td><td style="font-size:11px">${vincs[c.vinculo]||c.vinculo||'—'}</td><td style="font-size:12px">${c.admissao?new Date(c.admissao+'T00:00:00').toLocaleDateString('pt-BR'):'—'}</td><td><span style="display:inline-block;padding:2px 8px;border-radius:2px;font-size:11px;font-weight:600;background:var(--gold-pale);color:var(--amber);border:1px solid var(--gold-light)">${c.tempo||'—'}</span></td><td style="font-size:12px;color:var(--green);font-weight:600">${c.salario?'R$ '+parseFloat(c.salario).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—'}</td><td>${c.inconsistencia==='sim'?'<span style="color:var(--red);font-weight:600;font-size:11px">⚠️ Sim</span>':'<span style="color:var(--green);font-size:11px">✓ Não</span>'}</td><td>${sits[c.situacao]||'—'}</td><td><div style="display:flex;gap:4px"><button class="btn btn-ghost btn-sm" onclick="editarColab(\'${c.id}\')">✏️</button><button class="btn btn-danger btn-sm" onclick="removerColab(\'${c.id}\',\'${c.nome.replace(/'/g,"\\'")}}\')">×</button></div></td></tr>`).join('');}
+function atualizarStats(){document.getElementById('stTotal').textContent=todosColabs.length;document.getElementById('stCargos').textContent=new Set(todosColabs.map(c=>c.cargoRegistrado).filter(Boolean)).size;document.getElementById('stIncons').textContent=todosColabs.filter(c=>c.inconsistencia==='sim').length;const folha=todosColabs.reduce((s,c)=>s+(parseFloat(c.custoTotal)||parseFloat(c.salario)||0),0);document.getElementById('stFolha').textContent='R$ '+folha.toLocaleString('pt-BR',{minimumFractionDigits:2});}
+function abrirModal(){editingId=null;document.getElementById('modalTitle').textContent='Cadastrar Colaborador';['cNome','cCPF','cTempo','cCargoRegistrado','cFuncaoReal','cSalario','cBeneficios','cCustoTotal','cSalariosFuncao','cMercado','cDescIncons','cObs'].forEach(id=>document.getElementById(id).value='');document.getElementById('cAdmissao').value='';document.getElementById('cSituacao').value='ativo';document.getElementById('cVinculo').value='clt';document.getElementById('cQtd').value='1';document.getElementById('cInconsistencia').value='nao';document.getElementById('cTipoIncons').disabled=true;document.getElementById('inconsDesc').style.display='none';document.getElementById('modalColab').classList.add('show');}
+function editarColab(id){const c=todosColabs.find(x=>x.id===id);if(!c)return;editingId=id;document.getElementById('modalTitle').textContent='Editar Colaborador';document.getElementById('cNome').value=c.nome||'';document.getElementById('cCPF').value=c.cpf||'';document.getElementById('cAdmissao').value=c.admissao||'';document.getElementById('cTempo').value=c.tempo||'';document.getElementById('cSituacao').value=c.situacao||'ativo';document.getElementById('cCargoRegistrado').value=c.cargoRegistrado||'';document.getElementById('cFuncaoReal').value=c.funcaoReal||'';document.getElementById('cDepto').value=c.depto||'Administrativo';document.getElementById('cVinculo').value=c.vinculo||'clt';document.getElementById('cQtd').value=c.qtd||1;document.getElementById('cSalario').value=c.salario||'';document.getElementById('cBeneficios').value=c.beneficios||'';document.getElementById('cCustoTotal').value=c.custoTotal||'';document.getElementById('cSalariosFuncao').value=c.salariosFuncao||'';document.getElementById('cMercado').value=c.mercado||'';document.getElementById('cInconsistencia').value=c.inconsistencia||'nao';document.getElementById('cTipoIncons').value=c.tipoIncons||'';document.getElementById('cTipoIncons').disabled=c.inconsistencia!=='sim';document.getElementById('cDescIncons').value=c.descIncons||'';document.getElementById('inconsDesc').style.display=c.inconsistencia==='sim'?'block':'none';document.getElementById('cObs').value=c.obs||'';document.getElementById('modalColab').classList.add('show');}
 function fecharModal(){document.getElementById('modalColab').classList.remove('show');}
-
-function salvarColab(){
-  const nome=document.getElementById('cNome').value.trim();
-  if(!nome){showToast('Informe o nome.','erro');return;}
-  const sal=parseFloat(document.getElementById('cSalario').value)||0;
-  const ben=parseFloat(document.getElementById('cBeneficios').value)||0;
-  const data={nome,cpf:document.getElementById('cCPF').value.trim(),admissao:document.getElementById('cAdmissao').value,tempo:document.getElementById('cTempo').value,situacao:document.getElementById('cSituacao').value,cargoRegistrado:document.getElementById('cCargoRegistrado').value.trim(),funcaoReal:document.getElementById('cFuncaoReal').value.trim(),depto:document.getElementById('cDepto').value,vinculo:document.getElementById('cVinculo').value,qtd:parseInt(document.getElementById('cQtd').value)||1,salario:sal,beneficios:ben,custoTotal:sal+ben,salariosFuncao:document.getElementById('cSalariosFuncao').value.trim(),mercado:document.getElementById('cMercado').value.trim(),inconsistencia:document.getElementById('cInconsistencia').value,tipoIncons:document.getElementById('cTipoIncons').value,descIncons:document.getElementById('cDescIncons').value.trim(),obs:document.getElementById('cObs').value.trim(),atualizadoPor:currentPerfil.nome||currentUser.email,atualizadoEm:firebase.firestore.FieldValue.serverTimestamp()};
-  const ref=db.collection('fases').doc(FASE_ID).collection('colaboradores');
-  const op=editingId?ref.doc(editingId).update(data):ref.add(data);
-  op.then(()=>{fecharModal();showToast('Colaborador salvo!','ok');}).catch(()=>showToast('Erro ao salvar.','erro'));
-}
-
-function removerColab(id,nome){
-  if(!confirm(`Remover ${nome}?`))return;
-  db.collection('fases').doc(FASE_ID).collection('colaboradores').doc(id).delete().then(()=>showToast('Removido.','ok'));
-}
-
-function carregarIncons(){
-  db.collection('fases').doc(FASE_ID).collection('inconsistencias').onSnapshot(snap=>{
-    todasIncons=snap.docs.map(d=>({id:d.id,...d.data()}));
-    const tbody=document.getElementById('inconsBody');
-    if(!todasIncons.length){tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-text">Nenhuma inconsistência registrada.</div></div></td></tr>';return;}
-    const pBadge={alta:'<span class="badge" style="background:#FEE;color:var(--red)">🔴 Alta</span>',media:'<span class="badge badge-amber">🟡 Média</span>',baixa:'<span class="badge badge-green">🟢 Baixa</span>'};
-    tbody.innerHTML=todasIncons.map(i=>`<tr>
-      <td><strong>${i.colab||'—'}</strong></td>
-      <td style="font-size:12px">${i.tipo||'—'}</td>
-      <td style="font-size:12px;color:var(--gray-500)">${i.desc||'—'}</td>
-      <td style="color:var(--red);font-weight:600;font-size:12px">${i.impacto?'R$ '+parseFloat(i.impacto).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—'}</td>
-      <td>${pBadge[i.prioridade]||'—'}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="removerIncons('${i.id}')">×</button></td>
-    </tr>`).join('');
-  });
-}
-
+function salvarColab(){const nome=document.getElementById('cNome').value.trim();if(!nome){showToast('Informe o nome.','erro');return;}const sal=parseFloat(document.getElementById('cSalario').value)||0;const ben=parseFloat(document.getElementById('cBeneficios').value)||0;const data={nome,cpf:document.getElementById('cCPF').value.trim(),admissao:document.getElementById('cAdmissao').value,tempo:document.getElementById('cTempo').value,situacao:document.getElementById('cSituacao').value,cargoRegistrado:document.getElementById('cCargoRegistrado').value.trim(),funcaoReal:document.getElementById('cFuncaoReal').value.trim(),depto:document.getElementById('cDepto').value,vinculo:document.getElementById('cVinculo').value,qtd:parseInt(document.getElementById('cQtd').value)||1,salario:sal,beneficios:ben,custoTotal:sal+ben,salariosFuncao:document.getElementById('cSalariosFuncao').value.trim(),mercado:document.getElementById('cMercado').value.trim(),inconsistencia:document.getElementById('cInconsistencia').value,tipoIncons:document.getElementById('cTipoIncons').value,descIncons:document.getElementById('cDescIncons').value.trim(),obs:document.getElementById('cObs').value.trim(),atualizadoPor:currentPerfil.nome||currentUser.email,atualizadoEm:firebase.firestore.FieldValue.serverTimestamp()};const ref=db.collection('fases').doc(FASE_ID).collection('colaboradores');const op=editingId?ref.doc(editingId).update(data):ref.add(data);op.then(()=>{fecharModal();showToast('Colaborador salvo!','ok');}).catch(()=>showToast('Erro.','erro'));}
+function removerColab(id,nome){if(!confirm(`Remover ${nome}?`))return;db.collection('fases').doc(FASE_ID).collection('colaboradores').doc(id).delete().then(()=>showToast('Removido.','ok'));}
+function carregarIncons(){db.collection('fases').doc(FASE_ID).collection('inconsistencias').onSnapshot(snap=>{const tbody=document.getElementById('inconsBody');if(snap.empty){tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-text">Nenhuma inconsistência registrada.</div></div></td></tr>';return;}const pB={alta:'<span class="badge" style="background:#FEE;color:var(--red)">🔴 Alta</span>',media:'<span class="badge badge-amber">🟡 Média</span>',baixa:'<span class="badge badge-green">🟢 Baixa</span>'};tbody.innerHTML=snap.docs.map(d=>{const i=d.data();return `<tr><td><strong>${i.colab||'—'}</strong></td><td style="font-size:12px">${i.tipo||'—'}</td><td style="font-size:12px;color:var(--gray-500)">${i.desc||'—'}</td><td style="color:var(--red);font-weight:600;font-size:12px">${i.impacto?'R$ '+parseFloat(i.impacto).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—'}</td><td>${pB[i.prioridade]||'—'}</td><td><button class="btn btn-danger btn-sm" onclick="removerIncons('${d.id}')">×</button></td></tr>`;}).join('');}); }
 function abrirModalIncons(){document.getElementById('modalIncons').classList.add('show');}
 function fecharModalIncons(){document.getElementById('modalIncons').classList.remove('show');}
-function salvarIncons(){
-  const colab=document.getElementById('iColab').value.trim();
-  if(!colab){showToast('Informe o colaborador.','erro');return;}
-  db.collection('fases').doc(FASE_ID).collection('inconsistencias').add({colab,tipo:document.getElementById('iTipo').value,desc:document.getElementById('iDesc').value.trim(),impacto:parseFloat(document.getElementById('iImpacto').value)||0,prioridade:document.getElementById('iPrioridade').value,criadoPor:currentPerfil.nome||currentUser.email,criadoEm:firebase.firestore.FieldValue.serverTimestamp()}).then(()=>{fecharModalIncons();showToast('Inconsistência registrada!','ok');});
-}
+function salvarIncons(){const colab=document.getElementById('iColab').value.trim();if(!colab){showToast('Informe o colaborador.','erro');return;}db.collection('fases').doc(FASE_ID).collection('inconsistencias').add({colab,tipo:document.getElementById('iTipo').value,desc:document.getElementById('iDesc').value.trim(),impacto:parseFloat(document.getElementById('iImpacto').value)||0,prioridade:document.getElementById('iPrioridade').value,criadoPor:currentPerfil.nome||currentUser.email,criadoEm:firebase.firestore.FieldValue.serverTimestamp()}).then(()=>{fecharModalIncons();showToast('Registrado!','ok');});}
 function removerIncons(id){if(!confirm('Remover?'))return;db.collection('fases').doc(FASE_ID).collection('inconsistencias').doc(id).delete().then(()=>showToast('Removido.','ok'));}
-
-function carregarNotas(){
-  db.collection('fases').doc(FASE_ID).get().then(d=>{
-    if(!d.exists)return;
-    const data=d.data();
-    if(data.notas)document.getElementById('notasFase').value=data.notas;
-    if(data.dataAlinhamento)document.getElementById('dataAlinhamento').value=data.dataAlinhamento;
-    if(data.participantes)document.getElementById('participantes').value=data.participantes;
-  });
-}
-function salvarNotas(){
-  db.collection('fases').doc(FASE_ID).set({notas:document.getElementById('notasFase').value,dataAlinhamento:document.getElementById('dataAlinhamento').value,participantes:document.getElementById('participantes').value,notasSalvasPor:currentPerfil.nome,notasSalvasEm:firebase.firestore.FieldValue.serverTimestamp()},{merge:true}).then(()=>{document.getElementById('notasSalvas').textContent='✓ Salvo às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});showToast('Salvo!','ok');});
-}
-
+function carregarNotas(){db.collection('fases').doc(FASE_ID).get().then(d=>{if(!d.exists)return;const data=d.data();if(data.notas)document.getElementById('notasFase').value=data.notas;if(data.dataAlinhamento)document.getElementById('dataAlinhamento').value=data.dataAlinhamento;if(data.participantes)document.getElementById('participantes').value=data.participantes;});}
+function salvarNotas(){db.collection('fases').doc(FASE_ID).set({notas:document.getElementById('notasFase').value,dataAlinhamento:document.getElementById('dataAlinhamento').value,participantes:document.getElementById('participantes').value,notasSalvasPor:currentPerfil.nome,notasSalvasEm:firebase.firestore.FieldValue.serverTimestamp()},{merge:true}).then(()=>{document.getElementById('notasSalvas').textContent='✓ Salvo às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});showToast('Salvo!','ok');});}
 document.getElementById('modalColab').addEventListener('click',function(e){if(e.target===this)fecharModal();});
 document.getElementById('modalIncons').addEventListener('click',function(e){if(e.target===this)fecharModalIncons();});
 </script>
