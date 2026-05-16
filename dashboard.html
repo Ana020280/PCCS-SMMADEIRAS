@@ -3,276 +3,165 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard — PCS SM Madeiras</title>
-<link rel="stylesheet" href="style.css">
+<title>Dashboard | PCCS SM Madeiras</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f5f4ef;display:flex;min-height:100vh}
+.sidebar{width:220px;background:#0d0d0d;color:#fff;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto;display:flex;flex-direction:column}
+.sb-logo{padding:20px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-logo a{color:#B8860B;font-size:15px;font-weight:700;text-decoration:none;display:block}
+.sb-logo small{color:rgba(255,255,255,.3);font-size:10px;display:block;margin-top:3px}
+.sb-sec{padding:16px 16px 4px;font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px}
+.sidebar a{display:block;padding:9px 16px;font-size:13px;color:rgba(255,255,255,.6);text-decoration:none;transition:.15s;border-left:3px solid transparent}
+.sidebar a:hover{color:#fff;background:rgba(255,255,255,.05)}
+.sidebar a.active{color:#B8860B;border-left-color:#B8860B;background:rgba(184,134,11,.08)}
+.fn{font-size:10px;color:rgba(255,255,255,.28);margin-right:6px}
+.topbar{position:fixed;top:0;left:220px;right:0;height:52px;background:#0d0d0d;display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:99}
+.tb-title{font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px}
+.tb-right{display:flex;align-items:center;gap:12px}
+.tb-user{font-size:12px;color:rgba(255,255,255,.6)}
+.tb-user span{color:#B8860B;font-weight:600}
+.btn-sair{background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.45);padding:6px 12px;border-radius:4px;font-size:11px;cursor:pointer}
+.main{margin-left:220px;margin-top:52px;padding:32px;flex:1}
+.page-title{font-size:28px;font-weight:300;margin-bottom:4px}
+.page-sub{font-size:13px;color:#999;margin-bottom:28px}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+.kpi{background:#fff;border-radius:10px;padding:22px 24px;border:1px solid #e8e6e0;text-align:center;cursor:pointer;transition:.2s}
+.kpi:hover{border-color:#B8860B;transform:translateY(-2px)}
+.kpi-val{font-size:32px;font-weight:300;color:#B8860B}
+.kpi-lbl{font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-top:6px}
+.fases-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:32px}
+.fase-card{background:#fff;border-radius:10px;padding:20px;border:1px solid #e8e6e0;cursor:pointer;transition:.2s;text-decoration:none;display:block}
+.fase-card:hover{border-color:#B8860B;transform:translateY(-2px)}
+.fase-num-badge{background:#0d0d0d;color:#B8860B;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;display:inline-block;margin-bottom:10px}
+.fase-title{font-size:14px;font-weight:600;color:#0d0d0d;margin-bottom:6px}
+.fase-sub{font-size:11px;color:#aaa;line-height:1.4}
+.fase-prog{margin-top:12px;background:#f0ede6;border-radius:3px;height:4px}
+.fase-prog-bar{height:100%;background:#B8860B;border-radius:3px}
+.card{background:#fff;border-radius:10px;border:1px solid #e8e6e0;margin-bottom:20px;overflow:hidden}
+.card-hdr{padding:16px 20px;border-bottom:1px solid #f0ede6;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:space-between}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.info-item{padding:16px 20px;border-bottom:1px solid #f8f7f4}
+.info-label{font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.info-value{font-size:14px;font-weight:500;color:#0d0d0d}
+.badge{display:inline-block;padding:3px 9px;border-radius:4px;font-size:11px;font-weight:600}
+.b-gold{background:#fef3c7;color:#92400e}
+.b-green{background:#d1fae5;color:#065f46}
+</style>
 </head>
 <body>
-
-<!-- TOPBAR -->
-<div class="topbar">
-  <a href="dashboard.html" class="topbar-logo">Instituto Primazia</a>
-  <div class="topbar-sep"></div>
-  <span class="topbar-project">PCS · SM Madeiras 2026</span>
-  <div class="topbar-right">
-    <span class="topbar-user">Olá, <strong id="userName">...</strong></span>
-    <a href="usuarios.html" class="topbar-btn" id="btnUsuarios" style="display:none">👥 Usuários</a>
-    <button class="topbar-btn" onclick="logout()">Sair</button>
+<aside class="sidebar">
+  <div class="sb-logo"><a href="dashboard.html">Instituto Primazia</a><small>Sistema PCCS</small></div>
+  <div class="sb-sec">Navegação</div>
+  <a href="dashboard.html" class="active">🏠 Dashboard</a>
+  <div class="sb-sec">Fases do PCCS</div>
+  <a href="fase1.html"><span class="fn">01</span> Levantamento</a>
+  <a href="fase2.html"><span class="fn">02</span> Descrição</a>
+  <a href="fase3.html"><span class="fn">03</span> Avaliação</a>
+  <a href="fase4.html"><span class="fn">04</span> Estrutura Salarial</a>
+  <a href="fase5.html"><span class="fn">05</span> Implantação</a>
+  <div class="sb-sec" style="margin-top:4px"></div>
+  <a href="marcos.html">🏁 Marcos Críticos</a>
+  <a href="seguranca.html">🛡️ Segurança do Trabalho</a>
+</aside>
+<header class="topbar">
+  <span class="tb-title">PCCS · Dashboard</span>
+  <div class="tb-right">
+    <span class="tb-user">Olá, <span id="user-nome">...</span></span>
+    <button class="btn-sair" onclick="sair()">Sair</button>
   </div>
-</div>
+</header>
+<main class="main">
+  <h1 class="page-title">Dashboard</h1>
+  <p class="page-sub">SM Madeiras e Laminados Ltda · Aripuanã · Projeto PCCS 2026</p>
 
-<div class="layout">
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="sidebar-label">Navegação</div>
-    <div class="sidebar-section">
-      <a href="dashboard.html" class="sidebar-link active">
-        <span class="icon">🏠</span> Dashboard
-      </a>
+  <div class="kpi-grid">
+    <div class="kpi" onclick="location.href='fase1.html'">
+      <div class="kpi-val" id="k-col">0</div><div class="kpi-lbl">Colaboradores</div>
     </div>
-    <div class="sidebar-label">Fases do PCS</div>
-    <div class="sidebar-section">
-      <a href="fase1.html" class="sidebar-link">
-        <span class="sidebar-phase-num">01</span> Levantamento
-      </a>
-      <a href="fase2.html" class="sidebar-link">
-        <span class="sidebar-phase-num">02</span> Descrição
-      </a>
-      <a href="fase3.html" class="sidebar-link">
-        <span class="sidebar-phase-num">03</span> Avaliação
-      </a>
-      <a href="fase4.html" class="sidebar-link">
-        <span class="sidebar-phase-num">04</span> Estrutura Salarial
-      </a>
-      <a href="fase5.html" class="sidebar-link">
-        <span class="sidebar-phase-num">05</span> Implantação
-      </a>
+    <div class="kpi" onclick="location.href='fase1.html'">
+      <div class="kpi-val" id="k-car">0</div><div class="kpi-lbl">Cargos distintos</div>
     </div>
-    <div class="sidebar-divider"></div>
-    <div class="sidebar-section">
-      <a href="marcos.html" class="sidebar-link">
-        <span class="icon">🏁</span> Marcos Críticos
-      </a>
-      <a href="usuarios.html" class="sidebar-link" id="sideUsuarios" style="display:none">
-        <span class="icon">👥</span> Usuários
-      </a>
+    <div class="kpi" onclick="location.href='fase1.html'">
+      <div class="kpi-val" id="k-inc">0</div><div class="kpi-lbl">⚠️ Inconsistências</div>
+    </div>
+    <div class="kpi" onclick="location.href='fase1.html'">
+      <div class="kpi-val" id="k-fol">R$0</div><div class="kpi-lbl">Folha total</div>
     </div>
   </div>
 
-  <!-- CONTENT -->
-  <div class="content">
-    <div class="page-header">
-      <div class="page-eyebrow">Visão Geral</div>
-      <div class="page-title">Dashboard do Projeto</div>
-      <div class="page-sub">Plano de Cargo e Salário · SM Madeiras · Maio → Setembro 2026</div>
-    </div>
-
-    <!-- STATS -->
-    <div class="grid-5" style="margin-bottom:24px" id="statsGrid">
-      <div class="stat-card">
-        <div class="stat-label">Progresso Geral</div>
-        <div class="stat-value" id="statPct">0%</div>
-        <div class="stat-sub" id="statTasks">0 de 18 atividades</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Fase Atual</div>
-        <div class="stat-value" style="font-size:22px;margin-top:6px" id="statFase">Fase 1</div>
-        <div class="stat-sub">Levantamento</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Marcos Concluídos</div>
-        <div class="stat-value" id="statMarcos">0/5</div>
-        <div class="stat-sub">Pontos críticos</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Prazo Final</div>
-        <div class="stat-value" style="font-size:20px;margin-top:6px">Set/26</div>
-        <div class="stat-sub">30/09/2026</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Equipe</div>
-        <div class="stat-value" id="statUsuarios">—</div>
-        <div class="stat-sub">usuários ativos</div>
-      </div>
-    </div>
-
-    <!-- PROGRESS BAR -->
-    <div class="card" style="margin-bottom:24px">
-      <div class="card-body" style="padding:16px 20px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <span style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--gray-500)">Progresso Global do Projeto</span>
-          <span style="font-size:13px;font-weight:600;color:var(--gold)" id="pctLabel">0%</span>
-        </div>
-        <div class="progress-track" style="height:6px">
-          <div class="progress-fill" id="globalBar" style="width:0%"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PHASE CARDS -->
-    <div style="margin-bottom:8px;font-size:10px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold)">Fases do Projeto</div>
-    <div class="grid-5" style="margin-bottom:28px" id="faseCards">
-      <!-- Generated by JS -->
-    </div>
-
-    <!-- MARCOS + ATIVIDADE RECENTE -->
-    <div class="grid-2">
-      <!-- MARCOS -->
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Marcos Críticos</span>
-          <a href="marcos.html" style="font-size:11px;color:var(--gold);text-decoration:none">Ver todos →</a>
-        </div>
-        <table class="table" id="marcosTable">
-          <thead><tr><th>Marco</th><th>Mês</th><th>Status</th></tr></thead>
-          <tbody id="marcosBody">
-            <tr><td colspan="3" class="empty"><div class="empty-text">Carregando...</div></td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- ÚLTIMAS ATUALIZAÇÕES -->
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Atividades Recentes</span>
-        </div>
-        <div id="recentList" style="padding:8px 0">
-          <div class="empty"><div class="empty-text">Carregando atividades...</div></div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<div id="toast" class="toast"></div>
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script>
-const FASES = [
-  { num:'01', mes:'Maio', nome:'Levantamento', href:'fase1.html', total:3 },
-  { num:'02', mes:'Junho', nome:'Descrição', href:'fase2.html', total:4 },
-  { num:'03', mes:'Julho', nome:'Avaliação', href:'fase3.html', total:3 },
-  { num:'04', mes:'Agosto', nome:'Estrutura Salarial', href:'fase4.html', total:5 },
-  { num:'05', mes:'Setembro', nome:'Implantação', href:'fase5.html', total:5 }
-];
-
-const MARCOS_DEF = [
-  { id:'m1', nome:'Cargos levantados e alinhados', mes:'Maio' },
-  { id:'m2', nome:'Descrições aprovadas', mes:'Junho' },
-  { id:'m3', nome:'Ranking de cargos definido', mes:'Julho' },
-  { id:'m4', nome:'Tabela salarial aprovada', mes:'Agosto' },
-  { id:'m5', nome:'PCS implantado e comunicado', mes:'Setembro' }
-];
-
-requireAuth((user, perfil) => {
-  document.getElementById('userName').textContent = perfil.nome || user.email;
-  if (isAdmin(perfil)) {
-    document.getElementById('btnUsuarios').style.display = 'inline-flex';
-    document.getElementById('sideUsuarios').style.display = 'flex';
-  }
-  renderFaseCards();
-  loadMarcos();
-  loadRecent();
-  loadUserCount();
-});
-
-function renderFaseCards() {
-  const grid = document.getElementById('faseCards');
-  grid.innerHTML = FASES.map(f => `
-    <a href="${f.href}" class="phase-card">
-      <div class="phase-card-top">
-        <div class="phase-card-num">${f.num}</div>
-        <div class="phase-card-info">
-          <div class="phase-card-mes">${f.mes}</div>
-          <div class="phase-card-nome">${f.nome}</div>
-        </div>
-      </div>
-      <div class="phase-card-body">
-        <div class="phase-card-pct" id="pct-f${f.num}">Carregando...</div>
-        <div class="progress-track"><div class="progress-fill" id="bar-f${f.num}" style="width:0%"></div></div>
-        <div class="phase-card-tasks" id="tasks-f${f.num}">— de ${f.total} atividades</div>
-      </div>
+  <div class="fases-grid">
+    <a class="fase-card" href="fase1.html">
+      <span class="fase-num-badge">FASE 01</span>
+      <div class="fase-title">Levantamento e Diagnóstico</div>
+      <div class="fase-sub">Coleta de colaboradores e inconsistências</div>
+      <div class="fase-prog"><div class="fase-prog-bar" id="p1" style="width:0%"></div></div>
     </a>
-  `).join('');
+    <a class="fase-card" href="fase2.html">
+      <span class="fase-num-badge">FASE 02</span>
+      <div class="fase-title">Descrição de Cargos</div>
+      <div class="fase-sub">Fichas e requisitos por cargo</div>
+      <div class="fase-prog"><div class="fase-prog-bar" style="width:0%"></div></div>
+    </a>
+    <a class="fase-card" href="fase3.html">
+      <span class="fase-num-badge">FASE 03</span>
+      <div class="fase-title">Avaliação e Pontuação</div>
+      <div class="fase-sub">Critérios e pesos por fator</div>
+      <div class="fase-prog"><div class="fase-prog-bar" style="width:0%"></div></div>
+    </a>
+    <a class="fase-card" href="fase4.html">
+      <span class="fase-num-badge">FASE 04</span>
+      <div class="fase-title">Estrutura Salarial</div>
+      <div class="fase-sub">Faixas, graus e progressão</div>
+      <div class="fase-prog"><div class="fase-prog-bar" style="width:0%"></div></div>
+    </a>
+    <a class="fase-card" href="fase5.html">
+      <span class="fase-num-badge">FASE 05</span>
+      <div class="fase-title">Implantação</div>
+      <div class="fase-sub">Comunicação e ativação do plano</div>
+      <div class="fase-prog"><div class="fase-prog-bar" style="width:0%"></div></div>
+    </a>
+  </div>
 
-  // Load progress for each phase
-  let totalDone = 0, totalAll = 0;
-  let loaded = 0;
-  FASES.forEach(f => {
-    db.collection('fases').doc('fase'+f.num).collection('atividades').get().then(snap => {
-      const done = snap.docs.filter(d => d.data().status === 'concluido').length;
-      const all = snap.empty ? f.total : snap.size;
-      const pct = all > 0 ? Math.round((done/all)*100) : 0;
-      totalDone += done; totalAll += all;
-      loaded++;
-      const el = document.getElementById('pct-f'+f.num);
-      const bar = document.getElementById('bar-f'+f.num);
-      const tasks = document.getElementById('tasks-f'+f.num);
-      if(el) el.textContent = pct + '% concluído';
-      if(bar) bar.style.width = pct + '%';
-      if(tasks) tasks.textContent = done + ' de ' + all + ' atividades';
-      if(loaded === FASES.length) updateGlobalProgress(totalDone, totalAll);
-    });
-  });
+  <div class="card">
+    <div class="card-hdr">Informações do Projeto</div>
+    <div class="info-grid">
+      <div class="info-item"><div class="info-label">Cliente</div><div class="info-value">SM Madeiras e Laminados Ltda</div></div>
+      <div class="info-item"><div class="info-label">CNPJ</div><div class="info-value">02.525.555/0001-82</div></div>
+      <div class="info-item"><div class="info-label">Localização</div><div class="info-value">Aripuanã · Mato Grosso</div></div>
+      <div class="info-item"><div class="info-label">Consultoras</div><div class="info-value">Ana Kátia · Karine Beatriz</div></div>
+      <div class="info-item"><div class="info-label">Início do Projeto</div><div class="info-value">Maio 2026</div></div>
+      <div class="info-item"><div class="info-label">Status</div><div class="info-value"><span class="badge b-gold">Em andamento</span></div></div>
+      <div class="info-item"><div class="info-label">Líderes em Desenvolvimento</div><div class="info-value">Marlon · Vanderlei · Fabiano</div></div>
+      <div class="info-item"><div class="info-label">Frentes NR</div><div class="info-value">NR-1 · NR-17 · CLT art.59 · SIPAT · Weex</div></div>
+    </div>
+  </div>
+</main>
+<script>
+function checkSessao(){
+  try{const s=JSON.parse(localStorage.getItem('pccs_sessao')||'{}');
+    if(s.email&&s.expira>Date.now()){document.getElementById('user-nome').textContent=s.nome||s.email;return;}
+  }catch(e){}
+  window.location.href='index.html';
 }
-
-function updateGlobalProgress(done, total) {
-  const pct = total > 0 ? Math.round((done/total)*100) : 0;
-  document.getElementById('statPct').textContent = pct + '%';
-  document.getElementById('statTasks').textContent = done + ' de ' + total + ' atividades';
-  document.getElementById('globalBar').style.width = pct + '%';
-  document.getElementById('pctLabel').textContent = pct + '%';
+function sair(){localStorage.removeItem('pccs_sessao');try{auth.signOut();}catch(e){}window.location.href='index.html';}
+function updKPIs(){
+  try{
+    const cols=JSON.parse(localStorage.getItem('pccs_col_f1')||'[]');
+    const cargos=[...new Set(cols.map(c=>c.funcaoReal||c.cargoCtps))];
+    const incs=cols.filter(c=>c.temI).length;
+    const folha=cols.reduce((s,c)=>s+(parseFloat(c.salario)||0),0);
+    document.getElementById('k-col').textContent=cols.length;
+    document.getElementById('k-car').textContent=cargos.length;
+    document.getElementById('k-inc').textContent=incs;
+    document.getElementById('k-fol').textContent='R$ '+folha.toLocaleString('pt-BR',{minimumFractionDigits:2});
+  }catch(e){}
 }
-
-function loadMarcos() {
-  db.collection('marcos').get().then(snap => {
-    const data = {};
-    snap.forEach(d => data[d.id] = d.data());
-    let concluidos = 0;
-    const tbody = document.getElementById('marcosBody');
-    tbody.innerHTML = MARCOS_DEF.map(m => {
-      const s = data[m.id] ? data[m.id].status : 'pendente';
-      if(s === 'concluido') concluidos++;
-      const badge = s === 'concluido' ? 'badge-green' : s === 'andamento' ? 'badge-amber' : 'badge-gray';
-      const label = s === 'concluido' ? '✓ Concluído' : s === 'andamento' ? '● Em andamento' : '● Pendente';
-      return `<tr>
-        <td style="font-size:12px">${m.nome}</td>
-        <td><span class="badge badge-gray">${m.mes}</span></td>
-        <td><span class="badge ${badge}">${label}</span></td>
-      </tr>`;
-    }).join('');
-    document.getElementById('statMarcos').textContent = concluidos + '/5';
-  });
-}
-
-function loadRecent() {
-  db.collection('atividades_log').orderBy('ts', 'desc').limit(8).get().then(snap => {
-    const el = document.getElementById('recentList');
-    if(snap.empty) { el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Nenhuma atividade registrada ainda.</div></div>'; return; }
-    el.innerHTML = snap.docs.map(d => {
-      const data = d.data();
-      return `<div style="padding:10px 20px;border-bottom:1px solid var(--gray-100);display:flex;gap:12px;align-items:flex-start">
-        <span style="font-size:18px;margin-top:1px">${data.icon||'📝'}</span>
-        <div>
-          <div style="font-size:13px;color:var(--gray-700)">${data.texto||''}</div>
-          <div style="font-size:11px;color:var(--gray-300);margin-top:2px">${data.usuario||''} · ${data.tsStr||''}</div>
-        </div>
-      </div>`;
-    }).join('');
-  }).catch(() => {
-    document.getElementById('recentList').innerHTML = '<div class="empty"><div class="empty-text">Sem atividades ainda.</div></div>';
-  });
-}
-
-function loadUserCount() {
-  db.collection('users').get().then(snap => {
-    document.getElementById('statUsuarios').textContent = snap.size;
-  });
-}
+window.addEventListener('load',()=>{checkSessao();updKPIs();});
 </script>
 </body>
 </html>

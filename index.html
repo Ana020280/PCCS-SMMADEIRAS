@@ -3,169 +3,182 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login | PCS SM Madeiras</title>
-<link rel="stylesheet" href="style.css">
+<title>Login | PCCS SM Madeiras</title>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{min-height:100vh;display:flex;align-items:center;justify-content:center;
-    background:#0d0d0d;font-family:'Segoe UI',Arial,sans-serif}
-  .login-box{background:#fff;border-radius:12px;padding:48px 40px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
-  .logo{text-align:center;margin-bottom:32px}
-  .logo-badge{background:#0d0d0d;color:#B8860B;font-size:10px;font-weight:700;
-    letter-spacing:2px;padding:4px 12px;border-radius:20px;display:inline-block;margin-bottom:12px}
-  .logo h1{font-size:28px;color:#0d0d0d;font-weight:300}
-  .logo h1 span{color:#B8860B;font-weight:700}
-  .logo p{font-size:12px;color:#888;margin-top:6px}
-  .form-group{margin-bottom:20px}
-  label{display:block;font-size:11px;font-weight:600;letter-spacing:1px;
-    color:#666;text-transform:uppercase;margin-bottom:6px}
-  input{width:100%;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:8px;
-    font-size:14px;color:#0d0d0d;transition:.2s;outline:none}
-  input:focus{border-color:#B8860B}
-  .btn-login{width:100%;padding:14px;background:#B8860B;color:#fff;border:none;
-    border-radius:8px;font-size:13px;font-weight:700;letter-spacing:1.5px;
-    text-transform:uppercase;cursor:pointer;transition:.2s;margin-top:8px}
-  .btn-login:hover{background:#9a7009}
-  .erro{background:#fff0f0;border:1px solid #ffcccc;color:#c0392b;
-    font-size:13px;padding:10px 14px;border-radius:6px;margin-bottom:16px;display:none}
-  .esqueci{text-align:center;margin-top:16px;font-size:12px;color:#999}
-  .esqueci a{color:#B8860B;text-decoration:none;cursor:pointer}
-  .rodape{text-align:center;margin-top:32px;font-size:11px;color:#bbb}
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:#0d0d0d;font-family:'Segoe UI',Arial,sans-serif}
+.login-box{background:#fff;border-radius:14px;padding:48px 40px;width:100%;
+  max-width:420px;box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.logo{text-align:center;margin-bottom:36px}
+.logo-badge{background:#0d0d0d;color:#B8860B;font-size:10px;font-weight:700;
+  letter-spacing:2px;padding:5px 14px;border-radius:20px;display:inline-block;margin-bottom:14px}
+.logo h1{font-size:30px;color:#0d0d0d;font-weight:300;letter-spacing:-0.5px}
+.logo h1 span{color:#B8860B;font-weight:700}
+.logo p{font-size:12px;color:#999;margin-top:8px;line-height:1.5}
+.form-group{margin-bottom:20px}
+label{display:block;font-size:11px;font-weight:600;letter-spacing:1px;
+  color:#777;text-transform:uppercase;margin-bottom:7px}
+.input-wrap{position:relative}
+input[type=email],input[type=password],input[type=text]{
+  width:100%;padding:13px 14px;border:1.5px solid #e0e0e0;border-radius:8px;
+  font-size:14px;color:#0d0d0d;transition:.2s;outline:none;font-family:inherit}
+input:focus{border-color:#B8860B;box-shadow:0 0 0 3px rgba(184,134,11,.08)}
+.eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;color:#aaa;font-size:18px;
+  padding:4px;line-height:1;transition:.15s}
+.eye-btn:hover{color:#B8860B}
+.btn-login{width:100%;padding:14px;background:#B8860B;color:#fff;border:none;
+  border-radius:8px;font-size:13px;font-weight:700;letter-spacing:1.5px;
+  text-transform:uppercase;cursor:pointer;transition:.2s;margin-top:4px}
+.btn-login:hover{background:#9a7009}
+.btn-login:active{transform:scale(.99)}
+.erro{background:#fff0f0;border:1px solid #ffcccc;color:#c0392b;font-size:13px;
+  padding:10px 14px;border-radius:6px;margin-bottom:18px;display:none;
+  animation:shake .3s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.esqueci{text-align:center;margin-top:18px;font-size:12px;color:#bbb}
+.esqueci a{color:#B8860B;text-decoration:none;cursor:pointer}
+.esqueci a:hover{text-decoration:underline}
+.rodape{text-align:center;margin-top:36px;font-size:11px;color:#ccc;
+  padding-top:20px;border-top:1px solid #f0f0f0}
+.senha-hint{font-size:11px;color:#bbb;margin-top:5px}
 </style>
 </head>
 <body>
 <div class="login-box">
   <div class="logo">
     <div class="logo-badge">INSTITUTO PRIMAZIA</div>
-    <h1>Sistema <span>PCS</span></h1>
-    <p>SM Madeiras e Laminados Ltda · Aripuanã · 2026</p>
+    <h1>Sistema <span>PCCS</span></h1>
+    <p>Plano de Cargos, Carreiras e Salários<br>
+    SM Madeiras e Laminados Ltda · Aripuanã · 2026</p>
   </div>
 
-  <div class="erro" id="msg-erro">Erro ao fazer login. Verifique seus dados.</div>
+  <div class="erro" id="msg-erro">E-mail ou senha incorretos.</div>
 
   <div class="form-group">
     <label>E-mail</label>
-    <input type="email" id="inp-email" placeholder="seu@email.com"
-           value="anakatia@institutoprimazia.com.br" autocomplete="email">
+    <input type="email" id="inp-email"
+           placeholder="seu@email.com"
+           value="anakatia@institutoprimazia.com.br"
+           autocomplete="email">
   </div>
+
   <div class="form-group">
     <label>Senha</label>
-    <input type="password" id="inp-senha" placeholder="••••••••" autocomplete="current-password">
+    <div class="input-wrap">
+      <input type="password" id="inp-senha"
+             placeholder="••••••••"
+             autocomplete="current-password">
+      <button class="eye-btn" type="button"
+              onclick="toggleSenha()" id="eye-btn"
+              title="Mostrar/ocultar senha">👁</button>
+    </div>
+    <div class="senha-hint">Clique no 👁 para ver a senha digitada</div>
   </div>
 
   <button class="btn-login" onclick="fazerLogin()">Entrar no Sistema</button>
 
   <div class="esqueci"><a onclick="esqueceuSenha()">Esqueci minha senha</a></div>
+
   <div class="rodape">Sistema exclusivo · Instituto Primazia © 2026</div>
 </div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
-
 <script>
-// ── USUÁRIOS LOCAIS (fallback quando Firebase estiver offline) ──
-const USUARIOS_LOCAIS = {
-  "anakatia@institutoprimazia.com.br": { senha: "Primazia@2026", nome: "Ana Kátia", role: "admin" },
-  "consultoria@institutoprimazia.com.br": { senha: "Primazia@2026", nome: "Karine",   role: "user"  },
-  "karine@institutoprimazia.com.br":      { senha: "Primazia@2026", nome: "Karine",   role: "user"  },
+// ── USUÁRIOS LOCAIS (fallback offline) ────────────────────
+const USUARIOS = {
+  "anakatia@institutoprimazia.com.br":    { senha:"Primazia@2026", nome:"Ana Kátia", role:"admin" },
+  "consultoria@institutoprimazia.com.br": { senha:"Primazia@2026", nome:"Karine",    role:"user"  },
+  "karine@institutoprimazia.com.br":      { senha:"Primazia@2026", nome:"Karine",    role:"user"  },
 };
 
-// Verificar se já está logado
+// Verificar sessão já ativa
 window.addEventListener('load', () => {
-  const sessao = localStorage.getItem('pcs_sessao');
-  if (sessao) {
-    try {
-      const dados = JSON.parse(sessao);
-      if (dados.email && dados.expira > Date.now()) {
-        window.location.href = 'fase1.html';
-        return;
-      }
-    } catch(e) {}
-  }
-  // Tentar via Firebase silenciosamente
   try {
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        _criarSessaoLocal(user.email, user.email.split('@')[0]);
-        window.location.href = 'fase1.html';
-      }
+    const s = JSON.parse(localStorage.getItem('pccs_sessao')||'{}');
+    if (s.email && s.expira > Date.now()) {
+      window.location.href = 'fase1.html'; return;
+    }
+  } catch(e) {}
+  // Tentativa silenciosa Firebase
+  try {
+    auth.onAuthStateChanged(u => {
+      if (u) { _criarSessao(u.email, u.displayName||u.email.split('@')[0]); window.location.href='fase1.html'; }
     });
   } catch(e) {}
 });
 
+// ── TOGGLE OLHO ───────────────────────────────────────────
+let senhaVisivel = false;
+function toggleSenha() {
+  senhaVisivel = !senhaVisivel;
+  const inp = document.getElementById('inp-senha');
+  const btn = document.getElementById('eye-btn');
+  inp.type   = senhaVisivel ? 'text' : 'password';
+  btn.textContent = senhaVisivel ? '🙈' : '👁';
+  inp.focus();
+}
+
+// ── LOGIN ─────────────────────────────────────────────────
 function fazerLogin() {
-  const email = document.getElementById('inp-email').value.trim();
+  const email = document.getElementById('inp-email').value.trim().toLowerCase();
   const senha  = document.getElementById('inp-senha').value;
   const erro   = document.getElementById('msg-erro');
   erro.style.display = 'none';
 
   if (!email || !senha) {
-    erro.textContent = 'Preencha e-mail e senha.';
-    erro.style.display = 'block';
+    mostrarErro('Preencha e-mail e senha.');
     return;
   }
 
-  // 1. Tentar Firebase primeiro
+  // 1. Tenta Firebase
   try {
     auth.signInWithEmailAndPassword(email, senha)
-      .then(cred => {
-        _criarSessaoLocal(email, cred.user.displayName || email.split('@')[0]);
-        window.location.href = 'fase1.html';
-      })
-      .catch(e => {
-        // 2. Firebase falhou — tentar login local
-        _loginLocal(email, senha, erro);
-      });
-  } catch(e) {
-    _loginLocal(email, senha, erro);
-  }
+      .then(c => { _criarSessao(email, c.user.displayName||email.split('@')[0]); window.location.href='fase1.html'; })
+      .catch(() => _loginLocal(email, senha));
+  } catch(e) { _loginLocal(email, senha); }
 }
 
-function _loginLocal(email, senha, erro) {
-  const usuario = USUARIOS_LOCAIS[email.toLowerCase()];
-  if (usuario && usuario.senha === senha) {
-    _criarSessaoLocal(email, usuario.nome);
+function _loginLocal(email, senha) {
+  const u = USUARIOS[email];
+  if (u && u.senha === senha) {
+    _criarSessao(email, u.nome);
     window.location.href = 'fase1.html';
   } else {
-    erro.textContent = 'E-mail ou senha incorretos.';
-    erro.style.display = 'block';
+    mostrarErro('E-mail ou senha incorretos.');
   }
 }
 
-function _criarSessaoLocal(email, nome) {
-  const sessao = {
-    email: email,
-    nome: nome || email.split('@')[0],
+function _criarSessao(email, nome) {
+  localStorage.setItem('pccs_sessao', JSON.stringify({
+    email, nome,
     role: email.includes('anakatia') ? 'admin' : 'user',
-    expira: Date.now() + (8 * 60 * 60 * 1000) // 8 horas
-  };
-  localStorage.setItem('pcs_sessao', JSON.stringify(sessao));
-  localStorage.setItem('pcs_email_ultimo', email);
+    expira: Date.now() + 8*60*60*1000
+  }));
+  localStorage.setItem('pccs_email_ultimo', email);
+}
+
+function mostrarErro(msg) {
+  const el = document.getElementById('msg-erro');
+  el.textContent = msg;
+  el.style.display = 'block';
 }
 
 function esqueceuSenha() {
   const email = document.getElementById('inp-email').value.trim();
-  if (!email) {
-    alert('Digite seu e-mail primeiro.');
-    return;
-  }
+  if (!email) { mostrarErro('Digite seu e-mail antes.'); return; }
   try {
     auth.sendPasswordResetEmail(email)
-      .then(() => alert('E-mail de redefinição enviado! Verifique sua caixa de entrada.'))
-      .catch(() => alert('Não foi possível enviar. Contate anakatia@institutoprimazia.com.br'));
-  } catch(e) {
-    alert('Serviço indisponível. Contate anakatia@institutoprimazia.com.br');
-  }
+      .then(()  => alert('Link enviado! Verifique sua caixa de entrada.'))
+      .catch(()  => alert('Não foi possível enviar. Contate anakatia@institutoprimazia.com.br'));
+  } catch(e) { alert('Serviço indisponível. Contate anakatia@institutoprimazia.com.br'); }
 }
 
-// Enter para logar
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter') fazerLogin();
-});
+document.addEventListener('keydown', e => { if(e.key==='Enter') fazerLogin(); });
 </script>
 </body>
 </html>
-

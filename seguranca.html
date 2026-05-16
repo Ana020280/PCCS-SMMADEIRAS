@@ -3,507 +3,157 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Segurança do Trabalho | PCS SM Madeiras</title>
-<link rel="stylesheet" href="style.css">
+<title>Segurança do Trabalho | PCCS SM Madeiras</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
 <style>
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
-.sec-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--gray-900);padding-bottom:8px;border-bottom:1px solid var(--beige-dark);margin-bottom:12px}
-.grau-1{background:#E8F4EC;color:#4A7C59;border:1px solid #A9D4B8}
-.grau-2{background:#FEF3CD;color:#C17A2A;border:1px solid #F0D080}
-.grau-3{background:#FDEBD0;color:#C0392B;border:1px solid #F0A080}
-.grau-4{background:#FADBD8;color:#C0392B;border:1px solid #E07060;font-weight:700}
-.doc-card{background:var(--white);border:1px solid var(--beige-dark);border-radius:2px;padding:20px;margin-bottom:16px}
-.doc-card-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--gold);margin-bottom:4px}
-.doc-card-sub{font-size:12px;color:var(--gray-300);margin-bottom:14px}
-.filter-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 16px;background:var(--beige);border-bottom:1px solid var(--beige-dark)}
-@media print{.topbar,.sidebar,.filter-bar .btn,.topbar-btn,button{display:none!important}.layout{display:block}.content{padding:16px}}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f5f4ef;display:flex;min-height:100vh}
+.sidebar{width:220px;background:#0d0d0d;color:#fff;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
+.sb-logo{padding:20px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-logo a{color:#B8860B;font-size:15px;font-weight:700;text-decoration:none;display:block}
+.sb-logo small{color:rgba(255,255,255,.3);font-size:10px;display:block;margin-top:3px}
+.sb-sec{padding:16px 16px 4px;font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px}
+.sidebar a{display:block;padding:9px 16px;font-size:13px;color:rgba(255,255,255,.6);text-decoration:none;border-left:3px solid transparent;transition:.15s}
+.sidebar a:hover{color:#fff;background:rgba(255,255,255,.05)}
+.sidebar a.active{color:#B8860B;border-left-color:#B8860B;background:rgba(184,134,11,.08)}
+.fn{font-size:10px;color:rgba(255,255,255,.28);margin-right:6px}
+.topbar{position:fixed;top:0;left:220px;right:0;height:52px;background:#0d0d0d;display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:99}
+.tb-title{font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px}
+.tb-right{display:flex;align-items:center;gap:12px}
+.tb-user{font-size:12px;color:rgba(255,255,255,.6)}
+.tb-user span{color:#B8860B;font-weight:600}
+.btn-sair{background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.45);padding:6px 12px;border-radius:4px;font-size:11px;cursor:pointer}
+.main{margin-left:220px;margin-top:52px;padding:32px;flex:1}
+.page-title{font-size:28px;font-weight:300;color:#0d0d0d;margin-bottom:4px}
+.page-sub{font-size:13px;color:#999;margin-bottom:28px}
+.nr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+.nr-card{background:#fff;border-radius:10px;border:1px solid #e8e6e0;padding:20px}
+.nr-badge{background:#0d0d0d;color:#B8860B;font-size:10px;font-weight:700;padding:4px 10px;border-radius:4px;display:inline-block;margin-bottom:10px}
+.nr-title{font-size:14px;font-weight:600;color:#0d0d0d;margin-bottom:6px}
+.nr-desc{font-size:12px;color:#888;line-height:1.5;margin-bottom:12px}
+.nr-status{font-size:11px;font-weight:600}
+.s-ok{color:#059669}
+.s-pend{color:#d97706}
+.s-alert{color:#dc2626}
+.card{background:#fff;border-radius:10px;border:1px solid #e8e6e0;margin-bottom:20px;overflow:hidden}
+.card-hdr{padding:16px 20px;border-bottom:1px solid #f0ede6;font-size:14px;font-weight:600}
+table.t{width:100%;border-collapse:collapse;font-size:12px}
+table.t th{padding:10px 12px;background:#faf9f6;border-bottom:1px solid #f0ede6;font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.3px;font-weight:600;text-align:left}
+table.t td{padding:11px 12px;border-bottom:1px solid #f8f7f4}
+.badge{display:inline-block;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:600}
+.b-red{background:#fee2e2;color:#991b1b}
+.b-gold{background:#fef3c7;color:#92400e}
+.b-green{background:#d1fae5;color:#065f46}
+.b-gray{background:#f3f4f6;color:#6b7280}
 </style>
 </head>
 <body>
-<div class="topbar">
-  <a href="dashboard.html" class="topbar-logo">Instituto Primazia</a>
-  <div class="topbar-sep"></div>
-  <span class="topbar-project">PCS · Segurança do Trabalho · SM Madeiras</span>
-  <div class="topbar-right">
-    <span class="topbar-user">Olá, <strong id="userName">...</strong></span>
-    <button class="topbar-btn" onclick="window.print()">⬇ PDF</button>
-    <button class="topbar-btn" onclick="logout()">Sair</button>
+<aside class="sidebar">
+  <div class="sb-logo"><a href="dashboard.html">Instituto Primazia</a><small>Sistema PCCS</small></div>
+  <div class="sb-sec">Navegação</div>
+  <a href="dashboard.html">🏠 Dashboard</a>
+  <div class="sb-sec">Fases do PCCS</div>
+  <a href="fase1.html"><span class="fn">01</span> Levantamento</a>
+  <a href="fase2.html"><span class="fn">02</span> Descrição</a>
+  <a href="fase3.html"><span class="fn">03</span> Avaliação</a>
+  <a href="fase4.html"><span class="fn">04</span> Estrutura Salarial</a>
+  <a href="fase5.html"><span class="fn">05</span> Implantação</a>
+  <div class="sb-sec" style="margin-top:4px"></div>
+  <a href="marcos.html">🏁 Marcos Críticos</a>
+  <a href="seguranca.html" class="active">🛡️ Segurança do Trabalho</a>
+</aside>
+<header class="topbar">
+  <span class="tb-title">PCCS · Segurança do Trabalho</span>
+  <div class="tb-right">
+    <span class="tb-user">Olá, <span id="user-nome">...</span></span>
+    <button class="btn-sair" onclick="sair()">Sair</button>
   </div>
-</div>
-<div class="layout">
-  <div class="sidebar">
-    <div class="sidebar-label">Navegação</div>
-    <div class="sidebar-section"><a href="dashboard.html" class="sidebar-link"><span class="icon">🏠</span> Dashboard</a></div>
-    <div class="sidebar-label">Fases do PCS</div>
-    <div class="sidebar-section">
-      <a href="fase1.html" class="sidebar-link"><span class="sidebar-phase-num">01</span> Levantamento</a>
-      <a href="fase2.html" class="sidebar-link"><span class="sidebar-phase-num">02</span> Descrição</a>
-      <a href="fase3.html" class="sidebar-link"><span class="sidebar-phase-num">03</span> Avaliação</a>
-      <a href="fase4.html" class="sidebar-link"><span class="sidebar-phase-num">04</span> Estrutura Salarial</a>
-      <a href="fase5.html" class="sidebar-link"><span class="sidebar-phase-num">05</span> Implantação</a>
+</header>
+<main class="main">
+  <h1 class="page-title">Segurança do Trabalho</h1>
+  <p class="page-sub">NRs aplicáveis · Treinamentos obrigatórios · SIPAT · CLT art. 59</p>
+
+  <div class="nr-grid">
+    <div class="nr-card">
+      <span class="nr-badge">NR-1</span>
+      <div class="nr-title">Disposições Gerais</div>
+      <div class="nr-desc">Obrigações de empregadores e trabalhadores. PGR — Programa de Gerenciamento de Riscos.</div>
+      <div class="nr-status s-pend">⏳ Implementação em andamento</div>
     </div>
-    <div class="sidebar-divider"></div>
-    <div class="sidebar-section">
-      <a href="marcos.html" class="sidebar-link"><span class="icon">🏁</span> Marcos Críticos</a>
-      <a href="seguranca.html" class="sidebar-link active"><span class="icon">🛡️</span> Segurança do Trabalho</a>
-      <a href="usuarios.html" class="sidebar-link" id="sideUsuarios" style="display:none"><span class="icon">👥</span> Usuários</a>
+    <div class="nr-card">
+      <span class="nr-badge">NR-17</span>
+      <div class="nr-title">Ergonomia</div>
+      <div class="nr-desc">Condições de trabalho adequadas. AET — Análise Ergonômica do Trabalho obrigatória para setores de produção.</div>
+      <div class="nr-status s-pend">⏳ Laudo pendente</div>
     </div>
-  </div>
-  <div class="content">
-    <div class="page-header">
-      <div class="page-eyebrow">Módulo de Segurança do Trabalho</div>
-      <div class="page-title">Documentos e Riscos Ocupacionais</div>
-      <div class="page-sub">PGR · PCMSO · NR-1 · Riscos por Cargo · Grau de Exposição</div>
+    <div class="nr-card">
+      <span class="nr-badge">NR-12</span>
+      <div class="nr-title">Segurança em Máquinas</div>
+      <div class="nr-desc">Proteções e dispositivos de segurança em serraria, faqueado, beneficiamento e caldeira.</div>
+      <div class="nr-status s-alert">🔴 Verificar adequações</div>
     </div>
-
-    <!-- DOCUMENTOS DE SEGURANÇA -->
-    <div style="margin-bottom:8px;font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)">Documentos de Segurança</div>
-
-    <!-- PGR -->
-    <div class="doc-card">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px">
-        <div>
-          <div class="doc-card-title">📋 PGR — Programa de Gerenciamento de Riscos</div>
-          <div class="doc-card-sub">NR-1 · Obrigatório desde 2022 · Substitui o PPRA</div>
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="salvarDoc('pgr')">Salvar</button>
-      </div>
-      <div class="g3">
-        <div class="form-group"><label class="form-label">Empresa responsável / SESMT</label><input type="text" class="form-input" id="pgr_empresa" placeholder="Nome da empresa ou profissional" /></div>
-        <div class="form-group"><label class="form-label">Data de elaboração</label><input type="date" class="form-input" id="pgr_data" /></div>
-        <div class="form-group"><label class="form-label">Validade / Próxima revisão</label><input type="date" class="form-input" id="pgr_validade" /></div>
-      </div>
-      <div class="g2">
-        <div class="form-group"><label class="form-label">Número do documento / Protocolo</label><input type="text" class="form-input" id="pgr_numero" /></div>
-        <div class="form-group"><label class="form-label">Status</label>
-          <select class="form-select" id="pgr_status">
-            <option value="pendente">Pendente</option><option value="vigente">✓ Vigente</option>
-            <option value="vencido">⚠️ Vencido</option><option value="revisao">Em revisão</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group"><label class="form-label">Riscos identificados no PGR</label><textarea class="form-textarea" id="pgr_riscos" style="min-height:80px" placeholder="Descreva os principais riscos identificados: físicos, químicos, biológicos, ergonômicos, acidentes..."></textarea></div>
-      <div class="form-group"><label class="form-label">Medidas de controle estabelecidas</label><textarea class="form-textarea" id="pgr_controles" placeholder="EPIs exigidos, controles coletivos, treinamentos obrigatórios..."></textarea></div>
-      <div class="form-group"><label class="form-label">Link / Localização do documento</label><input type="text" class="form-input" id="pgr_link" placeholder="Caminho na rede ou link de acesso" /></div>
+    <div class="nr-card">
+      <span class="nr-badge">NR-13</span>
+      <div class="nr-title">Caldeiras e Vasos</div>
+      <div class="nr-desc">Operadores de caldeira com habilitação obrigatória. 4 operadores identificados — certificações a verificar.</div>
+      <div class="nr-status s-pend">⏳ Verificar certificações</div>
     </div>
-
-    <!-- PCMSO -->
-    <div class="doc-card">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px">
-        <div>
-          <div class="doc-card-title">🩺 PCMSO — Programa de Controle Médico de Saúde Ocupacional</div>
-          <div class="doc-card-sub">NR-7 · Médico coordenador obrigatório</div>
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="salvarDoc('pcmso')">Salvar</button>
-      </div>
-      <div class="g3">
-        <div class="form-group"><label class="form-label">Médico coordenador / CRM</label><input type="text" class="form-input" id="pcmso_medico" placeholder="Nome e CRM" /></div>
-        <div class="form-group"><label class="form-label">Data de elaboração</label><input type="date" class="form-input" id="pcmso_data" /></div>
-        <div class="form-group"><label class="form-label">Próxima revisão</label><input type="date" class="form-input" id="pcmso_validade" /></div>
-      </div>
-      <div class="g2">
-        <div class="form-group"><label class="form-label">Empresa de Medicina do Trabalho</label><input type="text" class="form-input" id="pcmso_empresa" placeholder="Ex: SEGMED, SESI..." /></div>
-        <div class="form-group"><label class="form-label">Status</label>
-          <select class="form-select" id="pcmso_status">
-            <option value="pendente">Pendente</option><option value="vigente">✓ Vigente</option>
-            <option value="vencido">⚠️ Vencido</option><option value="revisao">Em revisão</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group"><label class="form-label">Exames periódicos exigidos por cargo</label><textarea class="form-textarea" id="pcmso_exames" placeholder="Liste os exames por cargo/função: audiometria, espirometria, acuidade visual, hemograma..."></textarea></div>
-      <div class="form-group"><label class="form-label">Periodicidade dos exames</label><textarea class="form-textarea" id="pcmso_periodicidade" placeholder="Ex: Anual para todos, semestral para operadores de máquinas..."></textarea></div>
-      <div class="form-group"><label class="form-label">Link / Localização do documento</label><input type="text" class="form-input" id="pcmso_link" /></div>
+    <div class="nr-card">
+      <span class="nr-badge">NR-31</span>
+      <div class="nr-title">Agricultura e Florestal</div>
+      <div class="nr-desc">Aplicável às equipes de extração florestal nas Fazendas. EPI obrigatório para motosserras e derrubamento.</div>
+      <div class="nr-status s-pend">⏳ Mapear fazendas</div>
     </div>
-
-    <!-- NR-1 -->
-    <div class="doc-card">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px">
-        <div>
-          <div class="doc-card-title">📜 NR-1 — Gerenciamento de Riscos Ocupacionais (GRO)</div>
-          <div class="doc-card-sub">Disposições gerais · Inventário de riscos · Plano de ação</div>
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="salvarDoc('nr1')">Salvar</button>
-      </div>
-      <div class="g3">
-        <div class="form-group"><label class="form-label">Responsável técnico</label><input type="text" class="form-input" id="nr1_responsavel" /></div>
-        <div class="form-group"><label class="form-label">Data do inventário de riscos</label><input type="date" class="form-input" id="nr1_data" /></div>
-        <div class="form-group"><label class="form-label">Próxima atualização</label><input type="date" class="form-input" id="nr1_validade" /></div>
-      </div>
-      <div class="form-group"><label class="form-label">Inventário de riscos — resumo</label><textarea class="form-textarea" id="nr1_inventario" style="min-height:80px" placeholder="Síntese do inventário de riscos ocupacionais da empresa..."></textarea></div>
-      <div class="form-group"><label class="form-label">Plano de ação — principais medidas</label><textarea class="form-textarea" id="nr1_plano" placeholder="Ações prioritárias, responsáveis, prazos..."></textarea></div>
-    </div>
-
-    <!-- OUTROS DOCUMENTOS -->
-    <div class="doc-card">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px">
-        <div>
-          <div class="doc-card-title">📁 Outros Documentos de Segurança</div>
-          <div class="doc-card-sub">LTCAT, Laudos, CIPA, treinamentos NR, etc.</div>
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="abrirModalDoc()">+ Adicionar Documento</button>
-      </div>
-      <table class="table" id="outrosDocsTable">
-        <thead><tr><th>Documento</th><th>Tipo</th><th>Responsável</th><th>Elaboração</th><th>Validade</th><th>Status</th><th>Ações</th></tr></thead>
-        <tbody id="outrosDocsBody"><tr><td colspan="7"><div class="empty"><div class="empty-text">Nenhum documento adicional cadastrado.</div></div></td></tr></tbody>
-      </table>
-    </div>
-
-    <!-- RISCOS POR CARGO -->
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <span class="card-title">🎯 Riscos Ocupacionais por Cargo</span>
-          <div style="font-size:11px;color:var(--gray-300);margin-top:2px">Baseado no PGR e PCMSO vigentes</div>
-        </div>
-        <div style="display:flex;gap:10px;align-items:center">
-          <select class="status-sel" id="filtroDepto" onchange="filtrarRiscos()">
-            <option value="">Todos os departamentos</option>
-            <option>Administrativo</option><option>Comercial</option><option>Logística</option>
-            <option>Produção / Indústria</option><option>Manejo / Florestal</option>
-            <option>Técnico / Manutenção</option><option>Gestão / Liderança</option>
-          </select>
-          <button class="btn btn-primary btn-sm" onclick="abrirModalRisco()">+ Cadastrar Cargo</button>
-        </div>
-      </div>
-
-      <!-- LEGENDA -->
-      <div style="padding:12px 16px;background:var(--beige);border-bottom:1px solid var(--beige-dark);display:flex;gap:12px;flex-wrap:wrap;align-items:center">
-        <span style="font-size:11px;font-weight:600;color:var(--gray-500)">Grau de Risco:</span>
-        <span class="badge grau-1">1 — Leve</span>
-        <span class="badge grau-2">2 — Moderado</span>
-        <span class="badge grau-3">3 — Alto</span>
-        <span class="badge grau-4">4 — Crítico</span>
-      </div>
-
-      <div style="overflow-x:auto">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Cargo / Função</th><th>Departamento</th>
-              <th>Riscos Físicos</th><th>Riscos Químicos</th>
-              <th>Riscos Biológicos</th><th>Riscos Ergonômicos</th><th>Riscos de Acidente</th>
-              <th>Grau Máx.</th><th>EPIs Obrigatórios</th><th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="riscosBody">
-            <tr><td colspan="10"><div class="empty"><div class="empty-icon">🛡️</div><div class="empty-text">Nenhum cargo cadastrado ainda.</div></div></td></tr>
-          </tbody>
-        </table>
-      </div>
+    <div class="nr-card">
+      <span class="nr-badge">CLT art.59</span>
+      <div class="nr-title">Horas Extras</div>
+      <div class="nr-desc">Limite de 2h extras/dia. Banco de horas exige acordo coletivo. Verificar habitualidade nas equipes de produção.</div>
+      <div class="nr-status s-alert">🔴 Verificar habitualidade</div>
     </div>
   </div>
-</div>
 
-<!-- MODAL RISCO POR CARGO -->
-<div class="modal-overlay" id="modalRisco" style="align-items:flex-start;padding:20px 0;overflow-y:auto">
-  <div class="modal" style="width:700px;max-width:96vw">
-    <div class="modal-header">
-      <span class="modal-title" id="modalRiscoTitle">Cadastrar Riscos do Cargo</span>
-      <button class="modal-close" onclick="fecharModalRisco()">×</button>
-    </div>
-    <div class="modal-body" style="display:flex;flex-direction:column;gap:16px">
-      <div>
-        <div class="sec-title">Identificação</div>
-        <div class="g2">
-          <div class="form-group"><label class="form-label">Cargo / Função *</label><input type="text" class="form-input" id="rCargo" placeholder="Nome do cargo" /></div>
-          <div class="form-group"><label class="form-label">Departamento</label>
-            <select class="form-select" id="rDepto">
-              <option>Administrativo</option><option>Comercial</option><option>Logística</option>
-              <option>Produção / Indústria</option><option>Manejo / Florestal</option>
-              <option>Técnico / Manutenção</option><option>Gestão / Liderança</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <div class="sec-title">Riscos Identificados</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-          <div>
-            <div class="form-group">
-              <label class="form-label">⚡ Riscos Físicos</label>
-              <textarea class="form-textarea" id="rFisico" placeholder="Ex: Ruído, vibração, calor excessivo, radiação solar, iluminação inadequada..."></textarea>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Grau — Risco Físico</label>
-              <select class="form-select" id="rGrauFisico">
-                <option value="0">Não aplicável</option><option value="1">1 — Leve</option>
-                <option value="2">2 — Moderado</option><option value="3">3 — Alto</option><option value="4">4 — Crítico</option>
-              </select>
-            </div>
-          </div>
-          <div>
-            <div class="form-group">
-              <label class="form-label">🧪 Riscos Químicos</label>
-              <textarea class="form-textarea" id="rQuimico" placeholder="Ex: Poeira de madeira, produtos químicos, vernizes, solventes, fumaça..."></textarea>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Grau — Risco Químico</label>
-              <select class="form-select" id="rGrauQuimico">
-                <option value="0">Não aplicável</option><option value="1">1 — Leve</option>
-                <option value="2">2 — Moderado</option><option value="3">3 — Alto</option><option value="4">4 — Crítico</option>
-              </select>
-            </div>
-          </div>
-          <div>
-            <div class="form-group">
-              <label class="form-label">🦠 Riscos Biológicos</label>
-              <textarea class="form-textarea" id="rBiologico" placeholder="Ex: Exposição a animais peçonhentos, fungos, bactérias, trabalho em matas..."></textarea>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Grau — Risco Biológico</label>
-              <select class="form-select" id="rGrauBiologico">
-                <option value="0">Não aplicável</option><option value="1">1 — Leve</option>
-                <option value="2">2 — Moderado</option><option value="3">3 — Alto</option><option value="4">4 — Crítico</option>
-              </select>
-            </div>
-          </div>
-          <div>
-            <div class="form-group">
-              <label class="form-label">💪 Riscos Ergonômicos</label>
-              <textarea class="form-textarea" id="rErgonomico" placeholder="Ex: Esforço físico intenso, postura inadequada, movimentos repetitivos, jornada..."></textarea>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Grau — Risco Ergonômico</label>
-              <select class="form-select" id="rGrauErgonomico">
-                <option value="0">Não aplicável</option><option value="1">1 — Leve</option>
-                <option value="2">2 — Moderado</option><option value="3">3 — Alto</option><option value="4">4 — Crítico</option>
-              </select>
-            </div>
-          </div>
-          <div style="grid-column:1/-1">
-            <div class="form-group">
-              <label class="form-label">⚠️ Riscos de Acidente</label>
-              <textarea class="form-textarea" id="rAcidente" placeholder="Ex: Trabalho em altura, maquinário sem proteção, corte, impacto, eletricidade, veículos..."></textarea>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Grau — Risco de Acidente</label>
-              <select class="form-select" id="rGrauAcidente">
-                <option value="0">Não aplicável</option><option value="1">1 — Leve</option>
-                <option value="2">2 — Moderado</option><option value="3">3 — Alto</option><option value="4">4 — Crítico</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <div class="sec-title">Controles e EPIs</div>
-        <div class="form-group"><label class="form-label">EPIs obrigatórios</label><textarea class="form-textarea" id="rEPIs" placeholder="Ex: Capacete, protetor auricular, máscara PFF2, luvas de raspa, botina com biqueira, óculos de proteção..."></textarea></div>
-        <div class="form-group"><label class="form-label">Controles coletivos (EPCs)</label><textarea class="form-textarea" id="rEPCs" placeholder="Ex: Enclausuramento de máquinas, ventilação, proteções coletivas..."></textarea></div>
-        <div class="form-group"><label class="form-label">Treinamentos NR obrigatórios</label><input type="text" class="form-input" id="rNRs" placeholder="Ex: NR-12, NR-35, NR-11, Trabalho em Moto..." /></div>
-        <div class="form-group"><label class="form-label">Exames médicos específicos (PCMSO)</label><input type="text" class="form-input" id="rExames" placeholder="Ex: Audiometria anual, espirometria, hemograma..." /></div>
-        <div class="form-group"><label class="form-label">Observações adicionais</label><textarea class="form-textarea" id="rObs"></textarea></div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost btn-sm" onclick="fecharModalRisco()">Cancelar</button>
-      <button class="btn btn-primary btn-sm" onclick="salvarRisco()">Salvar</button>
-    </div>
+  <div class="card">
+    <div class="card-hdr">Matriz de Treinamentos Obrigatórios</div>
+    <table class="t">
+      <thead><tr>
+        <th>Treinamento</th><th>NR / Base Legal</th><th>Departamentos</th>
+        <th>Periodicidade</th><th>Carga Horária</th><th>Status</th>
+      </tr></thead>
+      <tbody>
+        <tr><td><strong>PGR — Programa de Ger. de Riscos</strong></td><td>NR-1</td><td>Todos</td><td>Anual</td><td>4h</td><td><span class="badge b-gold">Pendente</span></td></tr>
+        <tr><td><strong>Ergonomia Básica</strong></td><td>NR-17</td><td>Produção / Administrativo</td><td>Anual</td><td>8h</td><td><span class="badge b-gold">Pendente</span></td></tr>
+        <tr><td><strong>Segurança em Máquinas</strong></td><td>NR-12</td><td>Serraria / Faqueado / Beneficiamento</td><td>Anual</td><td>8h</td><td><span class="badge b-red">Urgente</span></td></tr>
+        <tr><td><strong>Operador de Caldeira</strong></td><td>NR-13</td><td>Caldeira (4 operadores)</td><td>3 anos</td><td>40h</td><td><span class="badge b-gold">Verificar</span></td></tr>
+        <tr><td><strong>SIPAT — Semana Interna de Prev.</strong></td><td>NR-5</td><td>Todos</td><td>Anual</td><td>—</td><td><span class="badge b-gray">Programar</span></td></tr>
+        <tr><td><strong>Trabalho Florestal — EPI</strong></td><td>NR-31</td><td>Extração / Fazendas</td><td>Anual</td><td>8h</td><td><span class="badge b-gold">Pendente</span></td></tr>
+        <tr><td><strong>Jovem Aprendiz — Segurança</strong></td><td>CLT / NR-1</td><td>Aprendizes (5 ativos)</td><td>No ingresso</td><td>4h</td><td><span class="badge b-red">Urgente</span></td></tr>
+      </tbody>
+    </table>
   </div>
-</div>
 
-<!-- MODAL OUTROS DOCUMENTOS -->
-<div class="modal-overlay" id="modalDoc">
-  <div class="modal" style="width:540px">
-    <div class="modal-header">
-      <span class="modal-title">Adicionar Documento de Segurança</span>
-      <button class="modal-close" onclick="fecharModalDoc()">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="g2">
-        <div class="form-group"><label class="form-label">Nome do Documento *</label><input type="text" class="form-input" id="dNome" placeholder="Ex: LTCAT, Laudo de Insalubridade..." /></div>
-        <div class="form-group"><label class="form-label">Tipo</label>
-          <select class="form-select" id="dTipo">
-            <option>LTCAT</option><option>Laudo de Insalubridade</option><option>Laudo de Periculosidade</option>
-            <option>Treinamento NR</option><option>CIPA</option><option>AET — Análise Ergonômica</option>
-            <option>APR — Análise Preliminar de Risco</option><option>Outro</option>
-          </select>
-        </div>
-      </div>
-      <div class="g2">
-        <div class="form-group"><label class="form-label">Responsável / Empresa</label><input type="text" class="form-input" id="dResponsavel" /></div>
-        <div class="form-group"><label class="form-label">NR relacionada</label><input type="text" class="form-input" id="dNR" placeholder="Ex: NR-15, NR-16, NR-17..." /></div>
-      </div>
-      <div class="g2">
-        <div class="form-group"><label class="form-label">Data de elaboração</label><input type="date" class="form-input" id="dData" /></div>
-        <div class="form-group"><label class="form-label">Validade</label><input type="date" class="form-input" id="dValidade" /></div>
-      </div>
-      <div class="form-group"><label class="form-label">Status</label>
-        <select class="form-select" id="dStatus">
-          <option value="vigente">✓ Vigente</option><option value="vencido">⚠️ Vencido</option>
-          <option value="revisao">Em revisão</option><option value="pendente">Pendente</option>
-        </select>
-      </div>
-      <div class="form-group"><label class="form-label">Observações</label><textarea class="form-textarea" id="dObs"></textarea></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost btn-sm" onclick="fecharModalDoc()">Cancelar</button>
-      <button class="btn btn-primary btn-sm" onclick="salvarDoc2()">Salvar</button>
-    </div>
+  <div class="card">
+    <div class="card-hdr">Líderes em Desenvolvimento — Frentes de Segurança</div>
+    <table class="t">
+      <thead><tr><th>Líder</th><th>Cargo</th><th>Frentes</th><th>Status PDI</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Marlon</strong></td><td>Gerente de Produção</td><td>NR-1 · NR-17 · NR-12 · Sistema Weex</td><td><span class="badge b-gold">Em desenvolvimento</span></td></tr>
+        <tr><td><strong>Vanderlei</strong></td><td>Gerente Administrativo</td><td>NR-1 · CLT art.59 · Jovem Aprendiz · SIPAT</td><td><span class="badge b-gold">Em desenvolvimento</span></td></tr>
+        <tr><td><strong>Fabiano</strong></td><td>Gerente de Compras</td><td>NR-1 · SIPAT · Sistema Weex</td><td><span class="badge b-gold">Em desenvolvimento</span></td></tr>
+      </tbody>
+    </table>
   </div>
-</div>
-
-<div id="toast" class="toast"></div>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
+</main>
 <script>
-let currentUser,currentPerfil,editingRiscoId=null,todosRiscos=[];
-
-requireAuth((user,perfil)=>{
-  currentUser=user;currentPerfil=perfil;
-  document.getElementById('userName').textContent=perfil.nome||user.email;
-  if(isAdmin(perfil))document.getElementById('sideUsuarios').style.display='flex';
-  carregarDocs();carregarRiscos();carregarOutrosDocs();
-});
-
-// ── DOCUMENTOS PRINCIPAIS ──────────────────────────────────
-const DOCS_CAMPOS={
-  pgr:['empresa','data','validade','numero','status','riscos','controles','link'],
-  pcmso:['medico','data','validade','empresa','status','exames','periodicidade','link'],
-  nr1:['responsavel','data','validade','inventario','plano']
-};
-
-function carregarDocs(){
-  db.collection('seguranca').doc('documentos').get().then(d=>{
-    if(!d.exists)return;
-    const data=d.data();
-    Object.keys(DOCS_CAMPOS).forEach(doc=>{
-      DOCS_CAMPOS[doc].forEach(campo=>{
-        const el=document.getElementById(`${doc}_${campo}`);
-        if(el&&data[`${doc}_${campo}`])el.value=data[`${doc}_${campo}`];
-      });
-    });
-  });
+function checkSessao(){
+  try{const s=JSON.parse(localStorage.getItem('pccs_sessao')||'{}');
+    if(s.email&&s.expira>Date.now()){document.getElementById('user-nome').textContent=s.nome||s.email;return;}
+  }catch(e){}window.location.href='index.html';
 }
-
-function salvarDoc(doc){
-  const data={};
-  DOCS_CAMPOS[doc].forEach(campo=>{
-    const el=document.getElementById(`${doc}_${campo}`);
-    if(el)data[`${doc}_${campo}`]=el.value;
-  });
-  data.atualizadoPor=currentPerfil.nome||currentUser.email;
-  data.atualizadoEm=firebase.firestore.FieldValue.serverTimestamp();
-  db.collection('seguranca').doc('documentos').set(data,{merge:true}).then(()=>showToast(`${doc.toUpperCase()} salvo!`,'ok'));
-}
-
-// ── OUTROS DOCUMENTOS ─────────────────────────────────────
-function carregarOutrosDocs(){
-  db.collection('seguranca').doc('outros').collection('docs').orderBy('criadoEm','desc').onSnapshot(snap=>{
-    const tbody=document.getElementById('outrosDocsBody');
-    if(snap.empty){tbody.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-text">Nenhum documento adicional.</div></div></td></tr>';return;}
-    const sBadge={vigente:'badge-green',vencido:'badge',revisao:'badge-amber',pendente:'badge-gray'};
-    const sLabel={vigente:'✓ Vigente',vencido:'⚠️ Vencido',revisao:'Em revisão',pendente:'Pendente'};
-    tbody.innerHTML=snap.docs.map(d=>{const c=d.data();return `<tr>
-      <td><strong>${c.nome||'—'}</strong>${c.nr?`<div style="font-size:10px;color:var(--gray-300)">${c.nr}</div>`:''}</td>
-      <td><span class="badge badge-gray">${c.tipo||'—'}</span></td>
-      <td style="font-size:12px">${c.responsavel||'—'}</td>
-      <td style="font-size:12px">${c.data?new Date(c.data+'T00:00:00').toLocaleDateString('pt-BR'):'—'}</td>
-      <td style="font-size:12px">${c.validade?new Date(c.validade+'T00:00:00').toLocaleDateString('pt-BR'):'—'}</td>
-      <td><span class="badge ${sBadge[c.status]||'badge-gray'}" ${c.status==='vencido'?'style="background:#FEE;color:var(--red)"':''}>${sLabel[c.status]||'—'}</span></td>
-      <td><button class="btn btn-danger btn-sm" onclick="removerDoc('${d.id}')">×</button></td>
-    </tr>`;}).join('');
-  });
-}
-
-function abrirModalDoc(){document.getElementById('modalDoc').classList.add('show');}
-function fecharModalDoc(){document.getElementById('modalDoc').classList.remove('show');}
-function salvarDoc2(){
-  const nome=document.getElementById('dNome').value.trim();if(!nome){showToast('Informe o nome.','erro');return;}
-  db.collection('seguranca').doc('outros').collection('docs').add({nome,tipo:document.getElementById('dTipo').value,responsavel:document.getElementById('dResponsavel').value.trim(),nr:document.getElementById('dNR').value.trim(),data:document.getElementById('dData').value,validade:document.getElementById('dValidade').value,status:document.getElementById('dStatus').value,obs:document.getElementById('dObs').value.trim(),criadoPor:currentPerfil.nome||currentUser.email,criadoEm:firebase.firestore.FieldValue.serverTimestamp()}).then(()=>{fecharModalDoc();showToast('Documento salvo!','ok');});
-}
-function removerDoc(id){if(!confirm('Remover?'))return;db.collection('seguranca').doc('outros').collection('docs').doc(id).delete().then(()=>showToast('Removido.','ok'));}
-
-// ── RISCOS POR CARGO ──────────────────────────────────────
-const GRAU_BADGE=['','grau-1','grau-2','grau-3','grau-4'];
-const GRAU_LABEL=['—','1-Leve','2-Mod.','3-Alto','4-Crít.'];
-
-function carregarRiscos(){
-  db.collection('seguranca').doc('riscos').collection('cargos').orderBy('cargo').onSnapshot(snap=>{
-    todosRiscos=snap.docs.map(d=>({id:d.id,...d.data()}));
-    filtrarRiscos();
-  });
-}
-
-function filtrarRiscos(){
-  const f=document.getElementById('filtroDepto').value;
-  renderRiscos(f?todosRiscos.filter(r=>r.depto===f):todosRiscos);
-}
-
-function renderRiscos(lista){
-  const tbody=document.getElementById('riscosBody');
-  if(!lista.length){tbody.innerHTML='<tr><td colspan="10"><div class="empty"><div class="empty-icon">🛡️</div><div class="empty-text">Nenhum cargo cadastrado ainda.</div></div></td></tr>';return;}
-  tbody.innerHTML=lista.map(r=>{
-    const graus=[r.grauFisico,r.grauQuimico,r.grauBiologico,r.grauErgonomico,r.grauAcidente].map(Number).filter(g=>g>0);
-    const maxGrau=graus.length?Math.max(...graus):0;
-    return `<tr>
-      <td><strong>${r.cargo||'—'}</strong></td>
-      <td><span class="badge badge-gold" style="font-size:10px">${r.depto||'—'}</span></td>
-      <td style="font-size:11px;max-width:120px">${r.fisico?`<span class="badge ${GRAU_BADGE[r.grauFisico]||''}">${GRAU_LABEL[r.grauFisico]||''}</span> ${r.fisico.substring(0,40)}...`:'<span style="color:var(--gray-300)">—</span>'}</td>
-      <td style="font-size:11px;max-width:120px">${r.quimico?`<span class="badge ${GRAU_BADGE[r.grauQuimico]||''}">${GRAU_LABEL[r.grauQuimico]||''}</span> ${r.quimico.substring(0,30)}...`:'<span style="color:var(--gray-300)">—</span>'}</td>
-      <td style="font-size:11px">${r.biologico?`<span class="badge ${GRAU_BADGE[r.grauBiologico]||''}">${GRAU_LABEL[r.grauBiologico]||''}</span>`:'<span style="color:var(--gray-300)">—</span>'}</td>
-      <td style="font-size:11px">${r.ergonomico?`<span class="badge ${GRAU_BADGE[r.grauErgonomico]||''}">${GRAU_LABEL[r.grauErgonomico]||''}</span>`:'<span style="color:var(--gray-300)">—</span>'}</td>
-      <td style="font-size:11px">${r.acidente?`<span class="badge ${GRAU_BADGE[r.grauAcidente]||''}">${GRAU_LABEL[r.grauAcidente]||''}</span>`:'<span style="color:var(--gray-300)">—</span>'}</td>
-      <td><span class="badge ${GRAU_BADGE[maxGrau]||'badge-gray'}" style="font-size:13px;padding:6px 12px">${maxGrau>0?GRAU_LABEL[maxGrau]:'—'}</span></td>
-      <td style="font-size:11px;max-width:150px;color:var(--gray-500)">${r.epis||'—'}</td>
-      <td><div style="display:flex;gap:4px">
-        <button class="btn btn-ghost btn-sm" onclick="editarRisco('${r.id}')">✏️</button>
-        <button class="btn btn-danger btn-sm" onclick="removerRisco('${r.id}','${r.cargo}')">×</button>
-      </div></td>
-    </tr>`;
-  }).join('');
-}
-
-function abrirModalRisco(){
-  editingRiscoId=null;
-  document.getElementById('modalRiscoTitle').textContent='Cadastrar Riscos do Cargo';
-  ['rCargo','rFisico','rQuimico','rBiologico','rErgonomico','rAcidente','rEPIs','rEPCs','rNRs','rExames','rObs'].forEach(id=>document.getElementById(id).value='');
-  ['rGrauFisico','rGrauQuimico','rGrauBiologico','rGrauErgonomico','rGrauAcidente'].forEach(id=>document.getElementById(id).value='0');
-  document.getElementById('modalRisco').classList.add('show');
-}
-
-function editarRisco(id){
-  const r=todosRiscos.find(x=>x.id===id);if(!r)return;
-  editingRiscoId=id;
-  document.getElementById('modalRiscoTitle').textContent='Editar Riscos do Cargo';
-  document.getElementById('rCargo').value=r.cargo||'';
-  document.getElementById('rDepto').value=r.depto||'Administrativo';
-  document.getElementById('rFisico').value=r.fisico||'';
-  document.getElementById('rGrauFisico').value=r.grauFisico||'0';
-  document.getElementById('rQuimico').value=r.quimico||'';
-  document.getElementById('rGrauQuimico').value=r.grauQuimico||'0';
-  document.getElementById('rBiologico').value=r.biologico||'';
-  document.getElementById('rGrauBiologico').value=r.grauBiologico||'0';
-  document.getElementById('rErgonomico').value=r.ergonomico||'';
-  document.getElementById('rGrauErgonomico').value=r.grauErgonomico||'0';
-  document.getElementById('rAcidente').value=r.acidente||'';
-  document.getElementById('rGrauAcidente').value=r.grauAcidente||'0';
-  document.getElementById('rEPIs').value=r.epis||'';
-  document.getElementById('rEPCs').value=r.epcs||'';
-  document.getElementById('rNRs').value=r.nrs||'';
-  document.getElementById('rExames').value=r.exames||'';
-  document.getElementById('rObs').value=r.obs||'';
-  document.getElementById('modalRisco').classList.add('show');
-}
-
-function fecharModalRisco(){document.getElementById('modalRisco').classList.remove('show');}
-
-function salvarRisco(){
-  const cargo=document.getElementById('rCargo').value.trim();if(!cargo){showToast('Informe o cargo.','erro');return;}
-  const data={cargo,depto:document.getElementById('rDepto').value,fisico:document.getElementById('rFisico').value.trim(),grauFisico:document.getElementById('rGrauFisico').value,quimico:document.getElementById('rQuimico').value.trim(),grauQuimico:document.getElementById('rGrauQuimico').value,biologico:document.getElementById('rBiologico').value.trim(),grauBiologico:document.getElementById('rGrauBiologico').value,ergonomico:document.getElementById('rErgonomico').value.trim(),grauErgonomico:document.getElementById('rGrauErgonomico').value,acidente:document.getElementById('rAcidente').value.trim(),grauAcidente:document.getElementById('rGrauAcidente').value,epis:document.getElementById('rEPIs').value.trim(),epcs:document.getElementById('rEPCs').value.trim(),nrs:document.getElementById('rNRs').value.trim(),exames:document.getElementById('rExames').value.trim(),obs:document.getElementById('rObs').value.trim(),atualizadoPor:currentPerfil.nome||currentUser.email,atualizadoEm:firebase.firestore.FieldValue.serverTimestamp()};
-  const ref=db.collection('seguranca').doc('riscos').collection('cargos');
-  const op=editingRiscoId?ref.doc(editingRiscoId).update(data):ref.add(data);
-  op.then(()=>{fecharModalRisco();showToast('Riscos salvos!','ok');}).catch(()=>showToast('Erro.','erro'));
-}
-
-function removerRisco(id,cargo){if(!confirm(`Remover riscos de "${cargo}"?`))return;db.collection('seguranca').doc('riscos').collection('cargos').doc(id).delete().then(()=>showToast('Removido.','ok'));}
-
-document.getElementById('modalRisco').addEventListener('click',function(e){if(e.target===this)fecharModalRisco();});
-document.getElementById('modalDoc').addEventListener('click',function(e){if(e.target===this)fecharModalDoc();});
+function sair(){localStorage.removeItem('pccs_sessao');try{auth.signOut();}catch(e){}window.location.href='index.html';}
+window.addEventListener('load',checkSessao);
 </script>
 </body>
 </html>

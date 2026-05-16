@@ -3,350 +3,95 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fase 5 — Implantação | PCS SM Madeiras</title>
-<link rel="stylesheet" href="style.css">
+<title>Fase 5 — Implantação | PCCS SM Madeiras</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f5f4ef;display:flex;min-height:100vh}
+.sidebar{width:220px;background:#0d0d0d;color:#fff;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto;display:flex;flex-direction:column}
+.sb-logo{padding:20px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-logo a{color:#B8860B;font-size:15px;font-weight:700;text-decoration:none;display:block}
+.sb-logo small{color:rgba(255,255,255,.3);font-size:10px;display:block;margin-top:3px}
+.sb-sec{padding:16px 16px 4px;font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px}
+.sidebar a{display:block;padding:9px 16px;font-size:13px;color:rgba(255,255,255,.6);text-decoration:none;border-left:3px solid transparent;transition:.15s}
+.sidebar a:hover{color:#fff;background:rgba(255,255,255,.05)}
+.sidebar a.active{color:#B8860B;border-left-color:#B8860B;background:rgba(184,134,11,.08)}
+.fn{font-size:10px;color:rgba(255,255,255,.28);margin-right:6px}
+.topbar{position:fixed;top:0;left:220px;right:0;height:52px;background:#0d0d0d;display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:99}
+.tb-title{font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px}
+.tb-right{display:flex;align-items:center;gap:12px}
+.tb-user{font-size:12px;color:rgba(255,255,255,.6)}
+.tb-user span{color:#B8860B;font-weight:600}
+.btn-sair{background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.45);padding:6px 12px;border-radius:4px;font-size:11px;cursor:pointer}
+.main{margin-left:220px;margin-top:52px;padding:32px;flex:1}
+.fase-label{font-size:11px;color:#B8860B;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.page-title{font-size:28px;font-weight:300;color:#0d0d0d;margin-bottom:4px}
+.page-sub{font-size:13px;color:#999;margin-bottom:32px}
+.coming{background:#fff;border-radius:12px;border:1px solid #e8e6e0;padding:60px;text-align:center}
+.coming-icon{font-size:56px;margin-bottom:20px}
+.coming h2{font-size:20px;font-weight:500;color:#0d0d0d;margin-bottom:10px}
+.coming p{font-size:13px;color:#aaa;max-width:400px;margin:0 auto 24px}
+.btn-prev{background:#0d0d0d;color:#B8860B;border:1px solid #B8860B;padding:10px 24px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block}
+.prereqs{margin-top:32px;text-align:left;max-width:480px;margin-left:auto;margin-right:auto}
+.prereqs h4{font-size:12px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+.req{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0ede6;font-size:13px}
+.req-ok{color:#059669}
+.req-pend{color:#aaa}
+</style>
 </head>
 <body>
-<div class="topbar">
-  <a href="dashboard.html" class="topbar-logo">Instituto Primazia</a>
-  <div class="topbar-sep"></div>
-  <span class="topbar-project">PCS · Fase 5 · Implantação</span>
-  <div class="topbar-right">
-    <span class="topbar-user">Olá, <strong id="userName">...</strong></span>
-    <button class="topbar-btn" onclick="window.print()">⬇ PDF</button>
-    <button class="topbar-btn" onclick="logout()">Sair</button>
+<aside class="sidebar">
+  <div class="sb-logo"><a href="dashboard.html">Instituto Primazia</a><small>Sistema PCCS</small></div>
+  <div class="sb-sec">Navegação</div>
+  <a href="dashboard.html">🏠 Dashboard</a>
+  <div class="sb-sec">Fases do PCCS</div>
+  <a href="fase1.html"><span class="fn">01</span> Levantamento</a>
+  <a href="fase2.html" class="52 ? 'active' : ''"><span class="fn">02</span> Descrição</a>
+  <a href="fase3.html"><span class="fn">03</span> Avaliação</a>
+  <a href="fase4.html"><span class="fn">04</span> Estrutura Salarial</a>
+  <a href="fase5.html"><span class="fn">05</span> Implantação</a>
+  <div class="sb-sec" style="margin-top:4px"></div>
+  <a href="marcos.html">🏁 Marcos Críticos</a>
+  <a href="seguranca.html">🛡️ Segurança do Trabalho</a>
+</aside>
+<header class="topbar">
+  <span class="tb-title">PCCS · Fase 5 · Implantação</span>
+  <div class="tb-right">
+    <span class="tb-user">Olá, <span id="user-nome">...</span></span>
+    <button class="btn-sair" onclick="sair()">Sair</button>
   </div>
-</div>
-<div class="layout">
-  <div class="sidebar">
-    <div class="sidebar-label">Navegação</div>
-    <div class="sidebar-section"><a href="dashboard.html" class="sidebar-link"><span class="icon">🏠</span> Dashboard</a></div>
-    <div class="sidebar-label">Fases do PCS</div>
-    <div class="sidebar-section">
-      <a href="fase1.html" class="sidebar-link"><span class="sidebar-phase-num">01</span> Levantamento</a>
-      <a href="fase2.html" class="sidebar-link"><span class="sidebar-phase-num">02</span> Descrição</a>
-      <a href="fase3.html" class="sidebar-link"><span class="sidebar-phase-num">03</span> Avaliação</a>
-      <a href="fase4.html" class="sidebar-link"><span class="sidebar-phase-num">04</span> Estrutura Salarial</a>
-      <a href="fase5.html" class="sidebar-link active"><span class="sidebar-phase-num">05</span> Implantação</a>
-    </div>
-    <div class="sidebar-divider"></div>
-    <div class="sidebar-section">
-      <a href="marcos.html" class="sidebar-link"><span class="icon">🏁</span> Marcos Críticos</a>
-      <a href="seguranca.html" class="sidebar-link"><span class="icon">🛡️</span> Segurança do Trabalho</a>
-      <a href="usuarios.html" class="sidebar-link" id="sideUsuarios" style="display:none"><span class="icon">👥</span> Usuários</a>
-    </div>
-  </div>
-  <div class="content">
-    <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between">
-      <div>
-        <div class="page-eyebrow">Fase 05 · Setembro · Semanas 1 a 4</div>
-        <div class="page-title">Implantação</div>
-        <div class="page-sub">Capacitação · Comunicação · Adequação · Encerramento com Ata de Diretoria</div>
-      </div>
-      <div style="text-align:right">
-        <div style="font-size:32px;font-family:'Cormorant Garamond',serif;font-weight:700;color:var(--gold)" id="fasePct">0%</div>
-        <div style="font-size:11px;color:var(--gray-300)" id="faseTasks">0 de 5 atividades</div>
-        <div class="progress-track" style="width:120px;margin-top:6px;margin-left:auto"><div class="progress-fill" id="faseBar" style="width:0%"></div></div>
-      </div>
-    </div>
-
-    <!-- ATIVIDADES -->
-    <div class="card" style="margin-bottom:24px">
-      <div class="card-header"><span class="card-title">Atividades da Fase</span></div>
-      <table class="table">
-        <thead><tr><th></th><th>Atividade</th><th>Responsável</th><th>Entregável</th><th>Status</th><th>Atualizado por</th></tr></thead>
-        <tbody id="atvsBody"></tbody>
-      </table>
-    </div>
-
-    <!-- CHECKLIST LÍDERES -->
-    <div class="card" style="margin-bottom:24px">
-      <div class="card-header"><span class="card-title">Checklist de Capacitação dos Líderes</span></div>
-      <table class="table">
-        <thead><tr><th></th><th>Líder</th><th>Área</th><th>Data Workshop</th><th>Status</th><th>Obs</th></tr></thead>
-        <tbody id="lideresBody"></tbody>
-      </table>
-    </div>
-
-    <!-- COMUNICAÇÃO -->
-    <div class="card" style="margin-bottom:24px">
-      <div class="card-header"><span class="card-title">Registro de Comunicação Interna</span><button class="btn btn-primary btn-sm" onclick="abrirModalComm()">+ Registrar</button></div>
-      <table class="table">
-        <thead><tr><th>Data</th><th>Público</th><th>Formato</th><th>Responsável</th><th>Status</th><th></th></tr></thead>
-        <tbody id="commBody">
-          <tr><td colspan="6"><div class="empty"><div class="empty-text">Nenhuma comunicação registrada ainda.</div></div></td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- ATA DE ENCERRAMENTO -->
-    <div class="card" style="margin-bottom:24px;border:2px solid var(--gold)">
-      <div class="card-header" style="background:var(--gray-900)">
-        <span class="card-title" style="color:var(--gold-light)">🏆 Ata de Encerramento e Implantação Oficial</span>
-        <button class="btn btn-primary btn-sm" onclick="salvarAta()">Salvar Ata</button>
-      </div>
-      <div class="card-body">
-        <div class="grid-2" style="gap:16px;margin-bottom:16px">
-          <div class="form-group">
-            <label class="form-label">Data da Reunião de Diretoria</label>
-            <input type="date" class="form-input" id="ataData" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Status da Implantação</label>
-            <select class="form-select" id="ataStatus">
-              <option value="pendente">Pendente</option>
-              <option value="andamento">Em andamento</option>
-              <option value="implantado">✓ Implantado Oficialmente</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Participantes da Reunião</label>
-          <input type="text" class="form-input" id="ataParticipantes" placeholder="Ex: Diretoria, Ana Kátia (Primazia), Karine (Primazia), Michele (RH)..." />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Resumo da Reunião e Decisões</label>
-          <textarea class="form-textarea" id="ataResumo" style="min-height:140px" placeholder="Descreva o que foi apresentado, decisões tomadas, encaminhamentos, prazos definidos..."></textarea>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Encaminhamentos Pós-Implantação</label>
-          <textarea class="form-textarea" id="ataEncaminhamentos" placeholder="Próximos passos, responsáveis, prazos para revisão anual..."></textarea>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
-          <span style="font-size:11px;color:var(--gray-300)" id="ataSalva"></span>
-          <div id="ataStatusBadge"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- NOTAS -->
-    <div class="card">
-      <div class="card-header"><span class="card-title">📝 Notas e Encaminhamentos da Fase 5</span></div>
-      <div class="card-body">
-        <textarea class="form-textarea" id="notasFase" style="min-height:100px" placeholder="Registre encaminhamentos, pendências, observações gerais da fase final..."></textarea>
-        <div style="display:flex;justify-content:flex-end;margin-top:12px;gap:10px;align-items:center">
-          <span style="font-size:11px;color:var(--gray-300)" id="notasSalvas"></span>
-          <button class="btn btn-primary btn-sm" onclick="salvarNotas()">Salvar Notas</button>
-        </div>
-      </div>
+</header>
+<main class="main">
+  <div class="fase-label">Fase 05 · Julho · Semanas 3 e 4</div>
+  <h1 class="page-title">Implantação</h1>
+  <p class="page-sub">Esta fase será liberada após a conclusão das etapas anteriores.</p>
+  <div class="coming">
+    <div class="coming-icon">🔒</div>
+    <h2>Fase 5 em preparação</h2>
+    <p>O conteúdo desta fase será disponibilizado conforme o avanço do projeto PCCS com a SM Madeiras.</p>
+    <a class="btn-prev" href="fase4.html">← Voltar para Fase 4</a>
+    <div class="prereqs">
+      <h4>Pré-requisitos</h4>
+      <div class="req"><span id="r1">⏳</span> Fase 1 — Levantamento e Diagnóstico concluída</div>
+      <div class="req"><span>⏳</span> Alinhamento com Vilson e Michele realizado</div>
+      <div class="req"><span>⏳</span> Inconsistências salariais mapeadas</div>
     </div>
   </div>
-</div>
-
-<!-- MODAL COMUNICAÇÃO -->
-<div class="modal-overlay" id="modalComm">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title">Registrar Comunicação</span>
-      <button class="modal-close" onclick="fecharModalComm()">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Data</label>
-        <input type="date" class="form-input" id="cData" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">Público-alvo</label>
-        <input type="text" class="form-input" id="cPublico" placeholder="Ex: Todos os colaboradores da área florestal" />
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div class="form-group">
-          <label class="form-label">Formato</label>
-          <select class="form-select" id="cFormato">
-            <option>Reunião presencial</option><option>E-mail</option><option>Comunicado impresso</option>
-            <option>WhatsApp grupo</option><option>Mural</option><option>Outro</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Responsável</label>
-          <input type="text" class="form-input" id="cResponsavel" placeholder="Nome" />
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Status</label>
-        <select class="form-select" id="cStatus">
-          <option value="pendente">Pendente</option>
-          <option value="realizado">Realizado</option>
-        </select>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost btn-sm" onclick="fecharModalComm()">Cancelar</button>
-      <button class="btn btn-primary btn-sm" onclick="salvarComm()">Registrar</button>
-    </div>
-  </div>
-</div>
-
-<div id="toast" class="toast"></div>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
+</main>
 <script>
-const FASE_ID='fase05';
-const ATIVIDADES_DEF=[
-  {id:'atv1',nome:'Capacitação de Fabiano, Vanderlei, João, Vandi e Ebner para operar o PCS (apoio DP — Jessica)',resp:'Primazia',respClass:'primazia',entregavel:'Workshop de líderes realizado'},
-  {id:'atv2',nome:'Comunicação interna escalonada aos colaboradores',resp:'RH SM + Líderes',respClass:'',entregavel:'Comunicado interno formal'},
-  {id:'atv3',nome:'Adequação das fichas de função e registros',resp:'RH SM',respClass:'',entregavel:'Documentação operacional atualizada'},
-  {id:'atv4',nome:'Definição do ciclo anual de revisão do PCS',resp:'Primazia + RH',respClass:'primazia',entregavel:'Calendário de manutenção'},
-  {id:'atv5',nome:'Reunião de Diretoria — Ata de Encerramento e Implantação oficial do PCS',resp:'Primazia + Diretoria',respClass:'',entregavel:'Ata descritiva com marco de implantação'}
-];
-const LIDERES=[
-  {id:'fabiano',nome:'Fabiano',area:'Produção'},
-  {id:'vanderlei',nome:'Vanderlei',area:'Operações'},
-  {id:'joao',nome:'João',area:'Florestal'},
-  {id:'vandi',nome:'Vandi',area:'Manutenção'},
-  {id:'ebner',nome:'Ebner',area:'Logística'},
-  {id:'jessica',nome:'Jessica',area:'DP — Apoio'}
-];
-let currentUser,currentPerfil;
-
-requireAuth((user,perfil)=>{
-  currentUser=user;currentPerfil=perfil;
-  document.getElementById('userName').textContent=perfil.nome||user.email;
-  if(isAdmin(perfil))document.getElementById('sideUsuarios').style.display='flex';
-  carregarAtividades();carregarLideres();carregarComm();carregarAta();carregarNotas();
+function checkSessao(){
+  try{const s=JSON.parse(localStorage.getItem('pccs_sessao')||'{}');
+    if(s.email&&s.expira>Date.now()){document.getElementById('user-nome').textContent=s.nome||s.email;return;}
+  }catch(e){}window.location.href='index.html';
+}
+function sair(){localStorage.removeItem('pccs_sessao');try{auth.signOut();}catch(e){}window.location.href='index.html';}
+window.addEventListener('load',()=>{checkSessao();
+  const cols=JSON.parse(localStorage.getItem('pccs_col_f1')||'[]');
+  if(cols.length>0)document.getElementById('r1').textContent='✅';
 });
-
-function carregarAtividades(){
-  db.collection('fases').doc(FASE_ID).collection('atividades').onSnapshot(snap=>{
-    const data={};snap.forEach(d=>data[d.id]=d.data());
-    let done=0;
-    document.getElementById('atvsBody').innerHTML=ATIVIDADES_DEF.map(a=>{
-      const s=(data[a.id]||{}).status||'pendente';
-      if(s==='concluido')done++;
-      return `<tr style="${s==='concluido'?'opacity:0.6':''}">
-        <td><input type="checkbox" class="task-check" ${s==='concluido'?'checked':''} onchange="toggleCheck('${a.id}',this.checked)"></td>
-        <td>${a.nome}</td><td><span class="resp ${a.respClass}">${a.resp}</span></td>
-        <td><span style="font-size:12px;color:var(--gray-500);font-style:italic">${a.entregavel}</span></td>
-        <td><select class="status-sel s-${s}" onchange="updateStatus('${a.id}',this)">
-          <option value="pendente" ${s==='pendente'?'selected':''}>Pendente</option>
-          <option value="andamento" ${s==='andamento'?'selected':''}>Em andamento</option>
-          <option value="concluido" ${s==='concluido'?'selected':''}>Concluído</option>
-        </select></td>
-        <td><span style="font-size:11px;color:var(--gray-300)">${(data[a.id]||{}).atualizadoPor||'—'}</span></td>
-      </tr>`;
-    }).join('');
-    const pct=Math.round((done/ATIVIDADES_DEF.length)*100);
-    document.getElementById('fasePct').textContent=pct+'%';
-    document.getElementById('faseTasks').textContent=done+' de '+ATIVIDADES_DEF.length+' atividades';
-    document.getElementById('faseBar').style.width=pct+'%';
-  });
-}
-function toggleCheck(id,v){updateStatusDB(id,v?'concluido':'pendente');}
-function updateStatus(id,sel){sel.className='status-sel s-'+sel.value;updateStatusDB(id,sel.value);}
-function updateStatusDB(id,status){db.collection('fases').doc(FASE_ID).collection('atividades').doc(id).set({status,atualizadoPor:currentPerfil.nome||currentUser.email,atualizadoEm:firebase.firestore.FieldValue.serverTimestamp()},{merge:true}).then(()=>showToast('Atualizado!','ok'));}
-
-function carregarLideres(){
-  db.collection('fases').doc(FASE_ID).collection('lideres').get().then(snap=>{
-    const data={};snap.forEach(d=>data[d.id]=d.data());
-    document.getElementById('lideresBody').innerHTML=LIDERES.map(l=>{
-      const s=data[l.id]||{};
-      const ck=s.status==='realizado';
-      return `<tr style="${ck?'opacity:0.6':''}">
-        <td><input type="checkbox" class="task-check" ${ck?'checked':''} onchange="toggleLider('${l.id}',this.checked)"></td>
-        <td><strong>${l.nome}</strong></td>
-        <td><span class="badge badge-gray">${l.area}</span></td>
-        <td><input type="date" value="${s.dataWorkshop||''}" style="border:1px solid var(--beige-dark);padding:4px 8px;font-size:12px;border-radius:2px;outline:none"
-          onblur="salvarLider('${l.id}','dataWorkshop',this.value)" /></td>
-        <td><span class="badge ${ck?'badge-green':'badge-gray'}">${ck?'✓ Capacitado':'Pendente'}</span></td>
-        <td><input type="text" value="${s.obs||''}" placeholder="Observação..." style="border:1px solid var(--beige-dark);padding:4px 8px;font-size:12px;border-radius:2px;outline:none;width:150px"
-          onblur="salvarLider('${l.id}','obs',this.value)" /></td>
-      </tr>`;
-    }).join('');
-  });
-}
-
-function toggleLider(id,checked){
-  db.collection('fases').doc(FASE_ID).collection('lideres').doc(id).set({status:checked?'realizado':'pendente'},{merge:true}).then(()=>{showToast('Atualizado!','ok');carregarLideres();});
-}
-function salvarLider(id,campo,valor){
-  if(!valor)return;
-  db.collection('fases').doc(FASE_ID).collection('lideres').doc(id).set({[campo]:valor},{merge:true});
-}
-
-function carregarComm(){
-  db.collection('fases').doc(FASE_ID).collection('comunicacoes').orderBy('criadoEm','desc').onSnapshot(snap=>{
-    const tbody=document.getElementById('commBody');
-    if(snap.empty){tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-text">Nenhuma comunicação registrada.</div></div></td></tr>';return;}
-    tbody.innerHTML=snap.docs.map(d=>{
-      const c=d.data();
-      return `<tr>
-        <td style="font-size:12px">${c.data||'—'}</td>
-        <td style="font-size:12px">${c.publico||'—'}</td>
-        <td><span class="badge badge-gray">${c.formato||'—'}</span></td>
-        <td style="font-size:12px">${c.responsavel||'—'}</td>
-        <td><span class="badge ${c.status==='realizado'?'badge-green':'badge-gray'}">${c.status==='realizado'?'✓ Realizado':'Pendente'}</span></td>
-        <td><button class="btn btn-danger btn-sm" onclick="removerComm('${d.id}')">×</button></td>
-      </tr>`;
-    }).join('');
-  });
-}
-
-function abrirModalComm(){document.getElementById('modalComm').classList.add('show');}
-function fecharModalComm(){document.getElementById('modalComm').classList.remove('show');}
-function salvarComm(){
-  const publico=document.getElementById('cPublico').value.trim();
-  if(!publico){showToast('Informe o público-alvo.','erro');return;}
-  db.collection('fases').doc(FASE_ID).collection('comunicacoes').add({
-    data:document.getElementById('cData').value,
-    publico,
-    formato:document.getElementById('cFormato').value,
-    responsavel:document.getElementById('cResponsavel').value.trim(),
-    status:document.getElementById('cStatus').value,
-    criadoPor:currentPerfil.nome||currentUser.email,
-    criadoEm:firebase.firestore.FieldValue.serverTimestamp()
-  }).then(()=>{fecharModalComm();showToast('Comunicação registrada!','ok');});
-}
-function removerComm(id){
-  if(!confirm('Remover este registro?'))return;
-  db.collection('fases').doc(FASE_ID).collection('comunicacoes').doc(id).delete().then(()=>showToast('Removido.','ok'));
-}
-
-function carregarAta(){
-  db.collection('fases').doc(FASE_ID).get().then(d=>{
-    if(!d.exists)return;
-    const data=d.data();
-    if(data.ataData)document.getElementById('ataData').value=data.ataData;
-    if(data.ataStatus)document.getElementById('ataStatus').value=data.ataStatus;
-    if(data.ataParticipantes)document.getElementById('ataParticipantes').value=data.ataParticipantes;
-    if(data.ataResumo)document.getElementById('ataResumo').value=data.ataResumo;
-    if(data.ataEncaminhamentos)document.getElementById('ataEncaminhamentos').value=data.ataEncaminhamentos;
-    if(data.notas)document.getElementById('notasFase').value=data.notas;
-    renderAtaStatus(data.ataStatus);
-  });
-}
-
-function renderAtaStatus(s){
-  const el=document.getElementById('ataStatusBadge');
-  if(s==='implantado') el.innerHTML='<span class="badge badge-green" style="font-size:13px;padding:8px 16px">🏆 PCS IMPLANTADO OFICIALMENTE</span>';
-  else if(s==='andamento') el.innerHTML='<span class="badge badge-amber">Em andamento</span>';
-  else el.innerHTML='<span class="badge badge-gray">Pendente</span>';
-}
-
-function salvarAta(){
-  const data={
-    ataData:document.getElementById('ataData').value,
-    ataStatus:document.getElementById('ataStatus').value,
-    ataParticipantes:document.getElementById('ataParticipantes').value,
-    ataResumo:document.getElementById('ataResumo').value,
-    ataEncaminhamentos:document.getElementById('ataEncaminhamentos').value,
-    ataSalvaPor:currentPerfil.nome,
-    ataSalvaEm:firebase.firestore.FieldValue.serverTimestamp()
-  };
-  db.collection('fases').doc(FASE_ID).set(data,{merge:true}).then(()=>{
-    document.getElementById('ataSalva').textContent='✓ Ata salva às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    renderAtaStatus(data.ataStatus);
-    showToast('Ata salva com sucesso!','ok');
-  });
-}
-
-function carregarNotas(){db.collection('fases').doc(FASE_ID).get().then(d=>{if(d.exists&&d.data().notas)document.getElementById('notasFase').value=d.data().notas;});}
-function salvarNotas(){
-  db.collection('fases').doc(FASE_ID).set({notas:document.getElementById('notasFase').value,notasAtualizadoPor:currentPerfil.nome,notasAtualizadoEm:firebase.firestore.FieldValue.serverTimestamp()},{merge:true})
-    .then(()=>{document.getElementById('notasSalvas').textContent='✓ Salvo às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});showToast('Notas salvas!','ok');});
-}
-document.getElementById('modalComm').addEventListener('click',function(e){if(e.target===this)fecharModalComm();});
 </script>
 </body>
 </html>
