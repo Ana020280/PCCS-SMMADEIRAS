@@ -1004,7 +1004,7 @@ function baixarModelo(){
   XLSX.writeFile(wb,'modelo_pccs_colaboradores.xlsx');
 }
 
-function gerarRelatorio(){alert('Relatório em desenvolvimento.');}
+function gerarRelatorio(){window.location.href="relatorio.html";}
 
 // ── INIT ──────────────────────────────────────────────────
 window.addEventListener('load',()=>{checkSessao();load();updProg();});

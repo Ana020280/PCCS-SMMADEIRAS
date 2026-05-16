@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório | PCCS SM Madeiras</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f5f4ef;color:#1a1a1a;display:flex;min-height:100vh}
+.sidebar{width:220px;background:#0d0d0d;color:#fff;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
+.sb-logo{padding:20px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-logo a{color:#B8860B;font-size:15px;font-weight:700;text-decoration:none;display:block}
+.sb-logo small{color:rgba(255,255,255,.3);font-size:10px;display:block;margin-top:3px}
+.sb-sec{padding:16px 16px 4px;font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px}
+.sidebar a{display:block;padding:9px 16px;font-size:13px;color:rgba(255,255,255,.6);text-decoration:none;border-left:3px solid transparent;transition:.15s}
+.sidebar a:hover{color:#fff;background:rgba(255,255,255,.05)}
+.sidebar a.active{color:#B8860B;border-left-color:#B8860B;background:rgba(184,134,11,.08)}
+.fn{font-size:10px;color:rgba(255,255,255,.28);margin-right:6px}
+.topbar{position:fixed;top:0;left:220px;right:0;height:52px;background:#0d0d0d;display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:99}
+.tb-title{font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px}
+.tb-right{display:flex;align-items:center;gap:12px}
+.tb-user{font-size:12px;color:rgba(255,255,255,.6)}
+.tb-user span{color:#B8860B;font-weight:600}
+.btn-sair{background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.45);padding:6px 12px;border-radius:4px;font-size:11px;cursor:pointer}
+.main{margin-left:220px;margin-top:52px;padding:28px;flex:1;min-width:0}
+.page-title{font-size:26px;font-weight:300;margin-bottom:4px}
+.page-sub{font-size:13px;color:#999;margin-bottom:24px}
+
+/* PAINEL DE FILTROS */
+.filtros-card{background:#fff;border-radius:10px;border:1px solid #e8e6e0;padding:20px;margin-bottom:20px}
+.filtros-card h3{font-size:13px;font-weight:600;margin-bottom:14px;color:#0d0d0d}
+.filtros-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:10px;font-weight:600;color:#777;text-transform:uppercase;letter-spacing:.5px}
+.fg select,.fg input{padding:8px 10px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:12px;background:#fff;outline:none;transition:.2s}
+.fg select:focus,.fg input:focus{border-color:#B8860B}
+.tipo-rel{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.tipo-btn{padding:8px 18px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #e0e0e0;background:#fff;color:#666;transition:.2s}
+.tipo-btn.active{background:#B8860B;color:#fff;border-color:#B8860B}
+.btn-gerar{background:#B8860B;color:#fff;border:none;padding:10px 24px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s}
+.btn-gerar:hover{background:#9a7009}
+.btn-imprimir{background:#0d0d0d;color:#fff;border:none;padding:10px 20px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;margin-left:10px}
+.btn-limpar{background:#f5f5f5;color:#666;border:1px solid #e0e0e0;padding:10px 16px;border-radius:6px;font-size:13px;cursor:pointer;margin-left:10px}
+
+/* ÁREA DO RELATÓRIO */
+#relatorio-area{display:none}
+.rel-header{background:#fff;border-radius:10px;border:1px solid #e8e6e0;padding:24px;margin-bottom:16px}
+.rel-logo{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:16px;border-bottom:2px solid #0d0d0d}
+.rel-logo-nome{font-size:18px;font-weight:700;color:#0d0d0d}
+.rel-logo-sub{font-size:11px;color:#B8860B;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.rel-titulo{font-size:20px;font-weight:600;color:#0d0d0d;margin-bottom:4px}
+.rel-subtitulo{font-size:13px;color:#666;margin-bottom:16px}
+.rel-meta{display:flex;gap:24px;flex-wrap:wrap}
+.rel-meta-item{font-size:12px;color:#888}
+.rel-meta-item strong{color:#0d0d0d}
+
+/* CARDS RESUMO */
+.resumo-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+.resumo-card{background:#fff;border-radius:8px;border:1px solid #e8e6e0;padding:16px;text-align:center}
+.resumo-val{font-size:24px;font-weight:300;color:#B8860B;line-height:1}
+.resumo-lbl{font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-top:5px}
+
+/* TABELA ANALÍTICA */
+.tabela-card{background:#fff;border-radius:10px;border:1px solid #e8e6e0;margin-bottom:16px;overflow:hidden}
+.tabela-titulo{padding:14px 18px;border-bottom:1px solid #f0ede6;font-size:14px;font-weight:600;background:#faf9f6;display:flex;align-items:center;justify-content:space-between}
+.tabela-titulo span{font-size:12px;color:#888;font-weight:400}
+table.rel-table{width:100%;border-collapse:collapse;font-size:12px}
+table.rel-table th{padding:9px 12px;background:#0d0d0d;color:#B8860B;font-size:10px;font-weight:600;text-align:left;white-space:nowrap}
+table.rel-table td{padding:9px 12px;border-bottom:1px solid #f0ede6;vertical-align:middle}
+table.rel-table tr:hover td{background:#faf9f6}
+table.rel-table .total-row td{font-weight:700;background:#f5f4ef;border-top:2px solid #e8e6e0}
+.badge{display:inline-block;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:600}
+.b-green{background:#d1fae5;color:#065f46}
+.b-gold{background:#fef3c7;color:#92400e}
+.b-gray{background:#f3f4f6;color:#6b7280}
+.b-red{background:#fee2e2;color:#991b1b}
+.b-blue{background:#dbeafe;color:#1e40af}
+.b-orange{background:#ffedd5;color:#9a3412}
+.tag-i{font-size:10px;padding:2px 5px;border-radius:3px;background:#ffedd5;color:#9a3412}
+.tag-inf{font-size:10px;padding:2px 5px;border-radius:3px;background:#dbeafe;color:#1e40af}
+
+/* SEÇÃO POR DEPARTAMENTO */
+.dep-secao{margin-bottom:20px}
+.dep-header{background:#0d0d0d;color:#B8860B;padding:12px 18px;border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:space-between}
+.dep-header h4{font-size:13px;font-weight:700}
+.dep-header .dep-stats{font-size:11px;color:rgba(255,255,255,.6);display:flex;gap:16px}
+.dep-header .dep-stats span{color:#fff}
+
+/* SEÇÃO INCONSISTÊNCIAS */
+.inc-card{background:#fff;border-radius:10px;border:1px solid #e8e6e0;margin-bottom:16px;overflow:hidden}
+.inc-resumo{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px;background:#fffbeb;border-bottom:1px solid #fde68a}
+.inc-stat{text-align:center}
+.inc-stat-val{font-size:20px;font-weight:600;color:#92400e}
+.inc-stat-lbl{font-size:10px;color:#aaa;text-transform:uppercase}
+
+/* PRINT */
+@media print{
+  body{background:#fff}
+  .sidebar,.topbar,.filtros-card,.btn-imprimir,.btn-gerar,.btn-limpar,.no-print{display:none!important}
+  .main{margin:0;padding:16px}
+  #relatorio-area{display:block!important}
+  .rel-header,.tabela-card,.resumo-card,.dep-secao,.inc-card{box-shadow:none;border:1px solid #ddd;break-inside:avoid}
+  table.rel-table th{background:#333!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .dep-header{background:#333!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .badge{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .resumo-grid{grid-template-columns:repeat(5,1fr)}
+  page{size:A4 landscape}
+}
+
+@media(max-width:1200px){.filtros-grid{grid-template-columns:repeat(2,1fr)}.resumo-grid{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sb-logo"><a href="dashboard.html">Instituto Primazia</a><small>Sistema PCCS</small></div>
+  <div class="sb-sec">Navegação</div>
+  <a href="dashboard.html">🏠 Dashboard</a>
+  <div class="sb-sec">Fases do PCCS</div>
+  <a href="fase1.html"><span class="fn">01</span> Levantamento</a>
+  <a href="fase2.html"><span class="fn">02</span> Descrição</a>
+  <a href="fase3.html"><span class="fn">03</span> Avaliação</a>
+  <a href="fase4.html"><span class="fn">04</span> Estrutura Salarial</a>
+  <a href="fase5.html"><span class="fn">05</span> Implantação</a>
+  <div class="sb-sec" style="margin-top:4px"></div>
+  <a href="marcos.html">🏁 Marcos Críticos</a>
+  <a href="seguranca.html">🛡️ Segurança do Trabalho</a>
+  <a href="relatorio.html" class="active">📄 Relatórios</a>
+  <a href="usuarios.html">👥 Usuários</a>
+</aside>
+
+<header class="topbar">
+  <span class="tb-title">PCCS · Central de Relatórios</span>
+  <div class="tb-right">
+    <span class="tb-user">Olá, <span id="user-nome">...</span></span>
+    <button class="btn-sair" onclick="sair()">Sair</button>
+  </div>
+</header>
+
+<main class="main">
+  <h1 class="page-title">Central de Relatórios</h1>
+  <p class="page-sub">Gere relatórios analíticos filtrados por departamento, situação, vínculo e inconsistências.</p>
+
+  <!-- FILTROS -->
+  <div class="filtros-card no-print">
+    <h3>🔍 Configurar Relatório</h3>
+
+    <div style="margin-bottom:14px">
+      <div style="font-size:11px;font-weight:600;color:#777;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Tipo de Relatório</div>
+      <div class="tipo-rel">
+        <button class="tipo-btn active" onclick="setTipo('geral',this)">📋 Geral Completo</button>
+        <button class="tipo-btn" onclick="setTipo('departamento',this)">🏢 Por Departamento</button>
+        <button class="tipo-btn" onclick="setTipo('situacao',this)">📊 Por Situação</button>
+        <button class="tipo-btn" onclick="setTipo('inconsistencias',this)">⚠️ Inconsistências</button>
+        <button class="tipo-btn" onclick="setTipo('folha',this)">💰 Folha Salarial</button>
+      </div>
+    </div>
+
+    <div class="filtros-grid">
+      <div class="fg">
+        <label>Departamento</label>
+        <select id="f-dep">
+          <option value="">Todos</option>
+          <option>Administrativo</option><option>Comercial</option><option>Logística</option>
+          <option>Produção / Indústria</option><option>Manejo / Florestal</option>
+          <option>Técnico / Manutenção</option><option>Gestão / Liderança</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Situação</label>
+        <select id="f-sit">
+          <option value="">Todas</option>
+          <option>1 - Trabalhando</option>
+          <option>2 - Afastado Direitos Integrais</option>
+          <option>5 - Licença Maternidade</option>
+          <option>6 - Doença &gt;15 dias</option>
+          <option>8 - Demitido</option>
+          <option>9 - Férias</option>
+          <option>Aguardando Recontratação</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Vínculo</label>
+        <select id="f-vin">
+          <option value="">Todos</option>
+          <option>CLT</option><option>Jovem Aprendiz</option><option>Estágio</option>
+          <option>Terceirizado</option><option>PJ</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Inconsistência</label>
+        <select id="f-inc">
+          <option value="">Todos</option>
+          <option value="s">Com inconsistência</option>
+          <option value="n">Sem inconsistência</option>
+          <option value="informal">Com remuneração informal</option>
+          <option value="aguard">Aguardando recontratação</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <button class="btn-gerar" onclick="gerarRelatorio()">▶ Gerar Relatório</button>
+      <button class="btn-imprimir" onclick="imprimir()" id="btn-imp" style="display:none">🖨️ Imprimir / Salvar PDF</button>
+      <button class="btn-limpar" onclick="limpar()">Limpar</button>
+      <span style="font-size:12px;color:#aaa;margin-left:8px" id="contagem-filtro"></span>
+    </div>
+  </div>
+
+  <!-- ÁREA DO RELATÓRIO -->
+  <div id="relatorio-area">
+
+    <!-- CABEÇALHO DO RELATÓRIO -->
+    <div class="rel-header">
+      <div class="rel-logo">
+        <div>
+          <div class="rel-logo-nome">Instituto Primazia</div>
+          <div class="rel-logo-sub">Sistema PCCS — Plano de Cargos, Carreiras e Salários</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:13px;color:#666">SM Madeiras e Laminados Ltda</div>
+          <div style="font-size:11px;color:#aaa">CNPJ 02.525.555/0001-82 · Aripuanã/MT</div>
+        </div>
+      </div>
+      <div class="rel-titulo" id="rel-titulo">Relatório Geral de Colaboradores</div>
+      <div class="rel-subtitulo" id="rel-subtitulo">Fase 1 — Levantamento e Diagnóstico</div>
+      <div class="rel-meta">
+        <div class="rel-meta-item">Gerado em: <strong id="rel-data">—</strong></div>
+        <div class="rel-meta-item">Responsável: <strong id="rel-resp">—</strong></div>
+        <div class="rel-meta-item" id="rel-filtro-info" style="display:none">Filtro: <strong id="rel-filtro-val">—</strong></div>
+      </div>
+    </div>
+
+    <!-- RESUMO EXECUTIVO -->
+    <div class="resumo-grid" id="resumo-grid"></div>
+
+    <!-- CONTEÚDO DO RELATÓRIO -->
+    <div id="rel-conteudo"></div>
+
+  </div>
+</main>
+
+<script>
+let tipoRel = 'geral';
+let sessao = {};
+let cols = [], incs = [];
+
+function checkSessao(){
+  try{
+    sessao = JSON.parse(localStorage.getItem('pccs_sessao')||'{}');
+    if(!sessao.email||sessao.expira<Date.now()){window.location.href='index.html';return;}
+    document.getElementById('user-nome').textContent = sessao.nome||sessao.email;
+    document.getElementById('rel-resp').textContent = sessao.nome||sessao.email;
+  }catch(e){window.location.href='index.html';}
+}
+function sair(){localStorage.removeItem('pccs_sessao');try{auth.signOut();}catch(e){}window.location.href='index.html';}
+
+function setTipo(tipo, btn){
+  tipoRel = tipo;
+  document.querySelectorAll('.tipo-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('relatorio-area').style.display='none';
+  document.getElementById('btn-imp').style.display='none';
+}
+
+function fmtR(v){return v?'R$ '+parseFloat(v).toLocaleString('pt-BR',{minimumFractionDigits:2}):'R$ 0,00';}
+function totalReal(c){return(parseFloat(c.salario)||0)+(parseFloat(c.gratificacao)||0)+(parseFloat(c.beneficios)||0);}
+function tempo(d){
+  if(!d)return'—';
+  const m=Math.floor((Date.now()-new Date(d).getTime())/(1000*60*60*24*30));
+  if(m<12)return m+'m'; return Math.floor(m/12)+'a'+(m%12?''+m%12+'m':'');
+}
+function sitLabel(s){
+  if(!s)return'Trabalhando';
+  if(s.startsWith('1'))return'Trabalhando';
+  if(s.startsWith('9'))return'Férias';
+  if(s.startsWith('8'))return'Demitido';
+  if(s.includes('Aguardando'))return'Ag. Recontr.';
+  return s.split(' - ')[1]||s;
+}
+function sitBadge(s){
+  const l=sitLabel(s);
+  if(l==='Trabalhando')return`<span class="badge b-green">${l}</span>`;
+  if(l==='Férias')return`<span class="badge b-blue">${l}</span>`;
+  if(l==='Demitido')return`<span class="badge b-gray">${l}</span>`;
+  if(l.includes('Ag.'))return`<span class="badge b-red">${l}</span>`;
+  return`<span class="badge b-gold">${l}</span>`;
+}
+
+function getFiltered(){
+  const dep = document.getElementById('f-dep').value;
+  const sit = document.getElementById('f-sit').value;
+  const vin = document.getElementById('f-vin').value;
+  const inc = document.getElementById('f-inc').value;
+  let d = cols;
+  if(dep) d = d.filter(c=>c.departamento===dep);
+  if(sit) d = d.filter(c=>c.situacao===sit);
+  if(vin) d = d.filter(c=>c.vinculo===vin);
+  if(inc==='s') d = d.filter(c=>c.temI);
+  if(inc==='n') d = d.filter(c=>!c.temI);
+  if(inc==='informal') d = d.filter(c=>c.gratificacao&&parseFloat(c.gratificacao)>0);
+  if(inc==='aguard') d = d.filter(c=>c.situacao&&c.situacao.includes('Aguardando'));
+  return d;
+}
+
+function gerarRelatorio(){
+  cols = JSON.parse(localStorage.getItem('pccs_col_f1')||'[]');
+  incs = JSON.parse(localStorage.getItem('pccs_inc_f1')||'[]');
+
+  if(!cols.length){alert('Nenhum colaborador cadastrado. Importe os dados na Fase 1 primeiro.');return;}
+
+  const dados = getFiltered();
+  const dep = document.getElementById('f-dep').value;
+  const sit = document.getElementById('f-sit').value;
+
+  // Meta
+  const now = new Date();
+  document.getElementById('rel-data').textContent = now.toLocaleDateString('pt-BR')+' às '+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('contagem-filtro').textContent = dados.length+' registros';
+
+  // Filtro info
+  const filtros = [dep,sit,document.getElementById('f-vin').value].filter(Boolean);
+  if(filtros.length){
+    document.getElementById('rel-filtro-info').style.display='block';
+    document.getElementById('rel-filtro-val').textContent = filtros.join(' · ');
+  } else {
+    document.getElementById('rel-filtro-info').style.display='none';
+  }
+
+  // Título
+  const titulos = {
+    geral:'Relatório Geral de Colaboradores',
+    departamento:'Relatório por Departamento',
+    situacao:'Relatório por Situação Funcional',
+    inconsistencias:'Relatório de Inconsistências',
+    folha:'Relatório de Folha Salarial'
+  };
+  document.getElementById('rel-titulo').textContent = titulos[tipoRel]+(dep?' — '+dep:'');
+  document.getElementById('rel-subtitulo').textContent = 'Fase 1 — Levantamento e Diagnóstico · SM Madeiras e Laminados Ltda';
+
+  // RESUMO
+  const folhaCTPS = dados.reduce((s,c)=>s+(parseFloat(c.salario)||0),0);
+  const folhaReal = dados.reduce((s,c)=>s+totalReal(c),0);
+  const folhaInf = dados.reduce((s,c)=>s+(parseFloat(c.gratificacao)||0),0);
+  const qtdInc = dados.filter(c=>c.temI||c.gratificacao>0).length;
+  const cargos = [...new Set(dados.map(c=>c.funcaoReal||c.cargoCtps))];
+
+  document.getElementById('resumo-grid').innerHTML = `
+    <div class="resumo-card"><div class="resumo-val">${dados.length}</div><div class="resumo-lbl">Colaboradores</div></div>
+    <div class="resumo-card"><div class="resumo-val">${cargos.length}</div><div class="resumo-lbl">Cargos distintos</div></div>
+    <div class="resumo-card"><div class="resumo-val" style="font-size:18px">${fmtR(folhaCTPS)}</div><div class="resumo-lbl">Folha CTPS</div></div>
+    <div class="resumo-card"><div class="resumo-val" style="font-size:18px;color:${folhaInf>0?'#d97706':'#B8860B'}">${fmtR(folhaReal)}</div><div class="resumo-lbl">Total Real (c/ informal)</div></div>
+    <div class="resumo-card"><div class="resumo-val" style="color:${qtdInc>0?'#dc2626':'#B8860B'}">${qtdInc}</div><div class="resumo-lbl">⚠️ Inconsistências</div></div>
+  `;
+
+  // CONTEÚDO por tipo
+  let html = '';
+  if(tipoRel==='geral') html = renderGeral(dados);
+  else if(tipoRel==='departamento') html = renderPorDepartamento(dados);
+  else if(tipoRel==='situacao') html = renderPorSituacao(dados);
+  else if(tipoRel==='inconsistencias') html = renderInconsistencias(dados);
+  else if(tipoRel==='folha') html = renderFolha(dados);
+
+  document.getElementById('rel-conteudo').innerHTML = html;
+  document.getElementById('relatorio-area').style.display = 'block';
+  document.getElementById('btn-imp').style.display = 'inline-block';
+  window.scrollTo({top:document.getElementById('relatorio-area').offsetTop-60,behavior:'smooth'});
+}
+
+function renderGeral(dados){
+  const rows = dados.map(c=>{
+    const temGrat = c.gratificacao&&parseFloat(c.gratificacao)>0;
+    const incTag = c.temI?`<span class="tag-i">⚠ ${c.tipoI||'Cargo≠Função'}</span> `:'';
+    const infTag = temGrat?`<span class="tag-inf">💰 Informal</span>`:'';
+    return`<tr>
+      <td><strong>${c.nome}</strong></td>
+      <td style="font-size:11px">${c.cargoCtps||'—'}</td>
+      <td style="font-size:11px">${c.funcaoReal||'—'}</td>
+      <td><span class="badge b-gray" style="font-size:10px">${c.departamento||'—'}</span></td>
+      <td><span class="badge b-blue" style="font-size:10px">${c.vinculo||'CLT'}</span></td>
+      <td style="font-size:11px">${c.dataAdmissao||c.dataAdm1||'—'}</td>
+      <td style="font-size:11px;color:#aaa">${tempo(c.dataAdmissao||c.dataAdm1)}</td>
+      <td style="font-weight:600">${fmtR(c.salario)}</td>
+      <td style="color:${temGrat?'#d97706':'inherit'};font-weight:${temGrat?'600':'400'}">${fmtR(totalReal(c))}</td>
+      <td>${incTag}${infTag}</td>
+      <td>${sitBadge(c.situacao)}</td>
+    </tr>`;
+  }).join('');
+  const total = dados.reduce((s,c)=>s+(parseFloat(c.salario)||0),0);
+  const totalR = dados.reduce((s,c)=>s+totalReal(c),0);
+  return`<div class="tabela-card">
+    <div class="tabela-titulo">Lista Completa de Colaboradores <span>${dados.length} registros</span></div>
+    <div style="overflow-x:auto">
+      <table class="rel-table">
+        <thead><tr>
+          <th>Colaborador</th><th>Cargo CTPS</th><th>Função Real</th>
+          <th>Departamento</th><th>Vínculo</th><th>Admissão</th>
+          <th>Tempo</th><th>Salário CTPS</th><th>Total Real</th>
+          <th>Inconsistência</th><th>Situação</th>
+        </tr></thead>
+        <tbody>
+          ${rows}
+          <tr class="total-row">
+            <td colspan="7"><strong>TOTAL GERAL</strong></td>
+            <td><strong>${fmtR(total)}</strong></td>
+            <td><strong>${fmtR(totalR)}</strong></td>
+            <td colspan="2"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderPorDepartamento(dados){
+  const deps = ['Administrativo','Comercial','Logística','Produção / Indústria','Manejo / Florestal','Técnico / Manutenção','Gestão / Liderança'];
+  let html = '';
+  deps.forEach(dep=>{
+    const d = dados.filter(c=>c.departamento===dep);
+    if(!d.length) return;
+    const sal = d.reduce((s,c)=>s+(parseFloat(c.salario)||0),0);
+    const rl = d.reduce((s,c)=>s+totalReal(c),0);
+    const inc = d.filter(c=>c.temI||parseFloat(c.gratificacao||0)>0).length;
+    const rows = d.map(c=>{
+      const temGrat = c.gratificacao&&parseFloat(c.gratificacao)>0;
+      return`<tr>
+        <td><strong>${c.nome}</strong></td>
+        <td style="font-size:11px">${c.cargoCtps||'—'}</td>
+        <td style="font-size:11px">${c.funcaoReal||'—'}</td>
+        <td><span class="badge b-blue" style="font-size:10px">${c.vinculo||'CLT'}</span></td>
+        <td style="font-size:11px">${c.dataAdmissao||c.dataAdm1||'—'}</td>
+        <td style="font-size:11px;color:#aaa">${tempo(c.dataAdmissao||c.dataAdm1)}</td>
+        <td style="font-weight:600">${fmtR(c.salario)}</td>
+        <td style="color:${temGrat?'#d97706':'inherit'};font-weight:${temGrat?'600':'400'}">${fmtR(totalReal(c))}</td>
+        <td>${c.temI?'<span class="tag-i">⚠</span>':''}${temGrat?'<span class="tag-inf">💰</span>':''}</td>
+        <td>${sitBadge(c.situacao)}</td>
+      </tr>`;
+    }).join('');
+    html += `<div class="dep-secao">
+      <div class="dep-header">
+        <h4>${dep}</h4>
+        <div class="dep-stats">
+          <span>${d.length} colaboradores</span>
+          <span>Folha CTPS: ${fmtR(sal)}</span>
+          <span>Total Real: ${fmtR(rl)}</span>
+          <span style="color:${inc>0?'#fca5a5':'inherit'}">${inc} inconsistência(s)</span>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="rel-table">
+          <thead><tr>
+            <th>Colaborador</th><th>Cargo CTPS</th><th>Função Real</th>
+            <th>Vínculo</th><th>Admissão</th><th>Tempo</th>
+            <th>Salário CTPS</th><th>Total Real</th><th>Inconsist.</th><th>Situação</th>
+          </tr></thead>
+          <tbody>
+            ${rows}
+            <tr class="total-row">
+              <td colspan="6"><strong>Subtotal ${dep}</strong></td>
+              <td><strong>${fmtR(sal)}</strong></td>
+              <td><strong>${fmtR(rl)}</strong></td>
+              <td colspan="2"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  });
+  return html;
+}
+
+function renderPorSituacao(dados){
+  const sits = [...new Set(dados.map(c=>c.situacao||'1 - Trabalhando'))].sort();
+  let html = '';
+  sits.forEach(sit=>{
+    const d = dados.filter(c=>(c.situacao||'1 - Trabalhando')===sit);
+    if(!d.length) return;
+    const sal = d.reduce((s,c)=>s+(parseFloat(c.salario)||0),0);
+    const rows = d.map(c=>`<tr>
+      <td><strong>${c.nome}</strong></td>
+      <td style="font-size:11px">${c.cargoCtps||'—'}</td>
+      <td><span class="badge b-gray" style="font-size:10px">${c.departamento||'—'}</span></td>
+      <td><span class="badge b-blue" style="font-size:10px">${c.vinculo||'CLT'}</span></td>
+      <td style="font-size:11px">${c.dataAdmissao||c.dataAdm1||'—'}</td>
+      <td style="font-weight:600">${fmtR(c.salario)}</td>
+      <td style="font-size:11px;color:#888">${c.obsSituacao||'—'}</td>
+    </tr>`).join('');
+    html += `<div class="tabela-card" style="margin-bottom:16px">
+      <div class="tabela-titulo">${sitBadge(sit)} ${sitLabel(sit)} <span>${d.length} colaborador(es) · Folha: ${fmtR(sal)}</span></div>
+      <table class="rel-table">
+        <thead><tr><th>Colaborador</th><th>Cargo</th><th>Departamento</th><th>Vínculo</th><th>Admissão</th><th>Salário</th><th>Observação</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  });
+  return html;
+}
+
+function renderInconsistencias(dados){
+  const incAuto = dados.filter(c=>c.temI).map(c=>({
+    nome:c.nome, cargo:c.cargoCtps, tipo:'Cargo diferente da função',
+    detalhe:`CTPS: "${c.cargoCtps}" → Real: "${c.funcaoReal}"`,
+    prio:'🔴 Alta', dep:c.departamento, impacto:0, origem:'Automático'
+  }));
+  const incGrat = dados.filter(c=>c.gratificacao&&parseFloat(c.gratificacao)>0).map(c=>({
+    nome:c.nome, cargo:c.cargoCtps, tipo:'Remuneração informal',
+    detalhe:`Valor informal: ${fmtR(c.gratificacao)}/mês = ${fmtR(parseFloat(c.gratificacao)*12)}/ano`,
+    prio:'🟡 Média', dep:c.departamento, impacto:parseFloat(c.gratificacao)*12, origem:'Automático'
+  }));
+  const incAguard = dados.filter(c=>c.situacao&&c.situacao.includes('Aguardando')).map(c=>({
+    nome:c.nome, cargo:c.cargoCtps, tipo:'Trabalhando sem registro',
+    detalhe:c.obsSituacao||'Aguardando recontratação formal',
+    prio:'🔴 Alta', dep:c.departamento, impacto:0, origem:'Automático'
+  }));
+  const incManuais = incs.map(i=>({
+    nome:i.colaborador, cargo:'—', tipo:i.tipo,
+    detalhe:i.descricao, prio:i.prioridade, dep:'—', impacto:i.impacto||0, origem:'Manual'
+  }));
+  const clt = dados.filter(c=>c.vinculo==='CLT').length;
+  const apr = dados.filter(c=>c.vinculo==='Jovem Aprendiz').length;
+  const cotaMin = Math.ceil(clt*0.05);
+  const incCota = apr<cotaMin&&clt>0?[{
+    nome:'EMPRESA — SM Madeiras', cargo:'—', tipo:'Jovem Aprendiz fora da cota',
+    detalhe:`Mínimo legal: ${cotaMin} aprendiz(es) · Atual: ${apr} · Déficit: ${cotaMin-apr}`,
+    prio:'🔴 Alta', dep:'—', impacto:0, origem:'Automático'
+  }]:[];
+
+  const all = [...incAuto,...incGrat,...incAguard,...incCota,...incManuais];
+  const altas = all.filter(i=>i.prio.includes('Alta')).length;
+  const medias = all.filter(i=>i.prio.includes('Média')).length;
+  const impTot = all.reduce((s,i)=>s+(parseFloat(i.impacto)||0),0);
+
+  const rows = all.map(i=>`<tr>
+    <td><strong>${i.nome}</strong></td>
+    <td style="font-size:11px">${i.cargo}</td>
+    <td style="font-size:12px">${i.tipo}</td>
+    <td style="font-size:11px;color:#666">${i.detalhe}</td>
+    <td><span class="badge b-gray" style="font-size:10px">${i.dep}</span></td>
+    <td style="font-weight:${i.prio.includes('Alta')?'700':'400'};color:${i.prio.includes('Alta')?'#dc2626':i.prio.includes('Média')?'#d97706':'#059669'}">${i.prio}</td>
+    <td>${i.impacto?fmtR(i.impacto):'—'}</td>
+    <td><span class="badge ${i.origem==='Automático'?'b-orange':'b-blue'}" style="font-size:10px">${i.origem}</span></td>
+  </tr>`).join('');
+
+  return`<div class="inc-card">
+    <div class="inc-resumo">
+      <div class="inc-stat"><div class="inc-stat-val">${all.length}</div><div class="inc-stat-lbl">Total</div></div>
+      <div class="inc-stat"><div class="inc-stat-val" style="color:#dc2626">${altas}</div><div class="inc-stat-lbl">🔴 Alta prioridade</div></div>
+      <div class="inc-stat"><div class="inc-stat-val" style="color:#d97706">${medias}</div><div class="inc-stat-lbl">🟡 Média prioridade</div></div>
+      <div class="inc-stat"><div class="inc-stat-val">${fmtR(impTot)}</div><div class="inc-stat-lbl">Impacto anual est.</div></div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="rel-table">
+        <thead><tr><th>Colaborador</th><th>Cargo</th><th>Tipo de Inconsistência</th><th>Detalhamento</th><th>Departamento</th><th>Prioridade</th><th>Impacto (R$)</th><th>Origem</th></tr></thead>
+        <tbody>${rows||'<tr><td colspan="8" style="text-align:center;padding:32px;color:#ccc">Nenhuma inconsistência encontrada para os filtros selecionados.</td></tr>'}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderFolha(dados){
+  const deps = ['Administrativo','Comercial','Logística','Produção / Indústria','Manejo / Florestal','Técnico / Manutenção','Gestão / Liderança'];
+  let depRows = '';
+  let totalGeral = 0, totalRealGeral = 0, totalInfGeral = 0;
+
+  deps.forEach(dep=>{
+    const d = dados.filter(c=>c.departamento===dep);
+    if(!d.length) return;
+    const sal = d.reduce((s,c)=>s+(parseFloat(c.salario)||0),0);
+    const inf = d.reduce((s,c)=>s+(parseFloat(c.gratificacao)||0),0);
+    const ben = d.reduce((s,c)=>s+(parseFloat(c.beneficios)||0),0);
+    const rl = sal+inf+ben;
+    totalGeral += sal; totalRealGeral += rl; totalInfGeral += inf;
+    depRows += `<tr>
+      <td><strong>${dep}</strong></td>
+      <td style="text-align:center">${d.length}</td>
+      <td>${fmtR(sal)}</td>
+      <td style="color:${inf>0?'#d97706':'#aaa'};font-weight:${inf>0?'600':'400'}">${inf>0?fmtR(inf):'—'}</td>
+      <td>${ben>0?fmtR(ben):'—'}</td>
+      <td style="font-weight:700">${fmtR(rl)}</td>
+      <td>${d.length?fmtR(rl/d.length):'—'}</td>
+    </tr>`;
+  });
+
+  const rowsInd = dados.map(c=>{
+    const temGrat = c.gratificacao&&parseFloat(c.gratificacao)>0;
+    return`<tr>
+      <td><strong>${c.nome}</strong></td>
+      <td style="font-size:11px">${c.cargoCtps||'—'}</td>
+      <td><span class="badge b-gray" style="font-size:10px">${c.departamento||'—'}</span></td>
+      <td><span class="badge b-blue" style="font-size:10px">${c.vinculo||'CLT'}</span></td>
+      <td style="font-weight:600">${fmtR(c.salario)}</td>
+      <td style="color:${temGrat?'#d97706':'#aaa'}">${temGrat?fmtR(c.gratificacao):'—'}</td>
+      <td>${c.beneficios&&parseFloat(c.beneficios)>0?fmtR(c.beneficios):'—'}</td>
+      <td style="font-weight:700;color:${temGrat?'#d97706':'inherit'}">${fmtR(totalReal(c))}</td>
+    </tr>`;
+  }).join('');
+
+  return`
+    <div class="tabela-card" style="margin-bottom:16px">
+      <div class="tabela-titulo">Resumo por Departamento <span>Folha consolidada</span></div>
+      <table class="rel-table">
+        <thead><tr><th>Departamento</th><th>Colaboradores</th><th>Folha CTPS</th><th>Informal</th><th>Benefícios</th><th>Total Real</th><th>Ticket Médio</th></tr></thead>
+        <tbody>
+          ${depRows}
+          <tr class="total-row">
+            <td><strong>TOTAL GERAL</strong></td>
+            <td style="text-align:center"><strong>${dados.length}</strong></td>
+            <td><strong>${fmtR(totalGeral)}</strong></td>
+            <td style="color:${totalInfGeral>0?'#d97706':'inherit'}"><strong>${totalInfGeral>0?fmtR(totalInfGeral):'—'}</strong></td>
+            <td>—</td>
+            <td><strong>${fmtR(totalRealGeral)}</strong></td>
+            <td><strong>${dados.length?fmtR(totalRealGeral/dados.length):'—'}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tabela-card">
+      <div class="tabela-titulo">Detalhamento Individual <span>${dados.length} colaboradores</span></div>
+      <div style="overflow-x:auto">
+        <table class="rel-table">
+          <thead><tr><th>Colaborador</th><th>Cargo</th><th>Departamento</th><th>Vínculo</th><th>Salário CTPS</th><th>Informal</th><th>Benefícios</th><th>Total Real</th></tr></thead>
+          <tbody>${rowsInd}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function limpar(){
+  ['f-dep','f-sit','f-vin','f-inc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('relatorio-area').style.display='none';
+  document.getElementById('btn-imp').style.display='none';
+  document.getElementById('contagem-filtro').textContent='';
+}
+
+function imprimir(){
+  window.print();
+}
+
+window.addEventListener('load',()=>{checkSessao();});
+</script>
+</body>
+</html>
