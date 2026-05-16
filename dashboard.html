@@ -11,12 +11,12 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',Arial,sans-serif;background:#f5f4ef;display:flex;min-height:100vh}
-.sidebar{width:220px;background:#0d0d0d;color:#fff;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto;display:flex;flex-direction:column}
+.sidebar{width:220px;background:#0d0d0d;color:#fff;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
 .sb-logo{padding:20px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
 .sb-logo a{color:#B8860B;font-size:15px;font-weight:700;text-decoration:none;display:block}
 .sb-logo small{color:rgba(255,255,255,.3);font-size:10px;display:block;margin-top:3px}
 .sb-sec{padding:16px 16px 4px;font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px}
-.sidebar a{display:block;padding:9px 16px;font-size:13px;color:rgba(255,255,255,.6);text-decoration:none;transition:.15s;border-left:3px solid transparent}
+.sidebar a{display:block;padding:9px 16px;font-size:13px;color:rgba(255,255,255,.6);text-decoration:none;border-left:3px solid transparent;transition:.15s}
 .sidebar a:hover{color:#fff;background:rgba(255,255,255,.05)}
 .sidebar a.active{color:#B8860B;border-left-color:#B8860B;background:rgba(184,134,11,.08)}
 .fn{font-size:10px;color:rgba(255,255,255,.28);margin-right:6px}
@@ -43,14 +43,13 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f5f4ef;display:flex;min
 .fase-prog{margin-top:12px;background:#f0ede6;border-radius:3px;height:4px}
 .fase-prog-bar{height:100%;background:#B8860B;border-radius:3px}
 .card{background:#fff;border-radius:10px;border:1px solid #e8e6e0;margin-bottom:20px;overflow:hidden}
-.card-hdr{padding:16px 20px;border-bottom:1px solid #f0ede6;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:space-between}
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.info-item{padding:16px 20px;border-bottom:1px solid #f8f7f4}
-.info-label{font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-.info-value{font-size:14px;font-weight:500;color:#0d0d0d}
+.card-hdr{padding:16px 20px;border-bottom:1px solid #f0ede6;font-size:14px;font-weight:600}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.info-item{padding:14px 20px;border-bottom:1px solid #f8f7f4}
+.info-label{font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.info-value{font-size:13px;font-weight:500;color:#0d0d0d}
 .badge{display:inline-block;padding:3px 9px;border-radius:4px;font-size:11px;font-weight:600}
 .b-gold{background:#fef3c7;color:#92400e}
-.b-green{background:#d1fae5;color:#065f46}
 </style>
 </head>
 <body>
@@ -67,6 +66,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f5f4ef;display:flex;min
   <div class="sb-sec" style="margin-top:4px"></div>
   <a href="marcos.html">🏁 Marcos Críticos</a>
   <a href="seguranca.html">🛡️ Segurança do Trabalho</a>
+  <a href="usuarios.html">👥 Usuários</a>
 </aside>
 <header class="topbar">
   <span class="tb-title">PCCS · Dashboard</span>
@@ -78,55 +78,19 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f5f4ef;display:flex;min
 <main class="main">
   <h1 class="page-title">Dashboard</h1>
   <p class="page-sub">SM Madeiras e Laminados Ltda · Aripuanã · Projeto PCCS 2026</p>
-
   <div class="kpi-grid">
-    <div class="kpi" onclick="location.href='fase1.html'">
-      <div class="kpi-val" id="k-col">0</div><div class="kpi-lbl">Colaboradores</div>
-    </div>
-    <div class="kpi" onclick="location.href='fase1.html'">
-      <div class="kpi-val" id="k-car">0</div><div class="kpi-lbl">Cargos distintos</div>
-    </div>
-    <div class="kpi" onclick="location.href='fase1.html'">
-      <div class="kpi-val" id="k-inc">0</div><div class="kpi-lbl">⚠️ Inconsistências</div>
-    </div>
-    <div class="kpi" onclick="location.href='fase1.html'">
-      <div class="kpi-val" id="k-fol">R$0</div><div class="kpi-lbl">Folha total</div>
-    </div>
+    <div class="kpi" onclick="location.href='fase1.html'"><div class="kpi-val" id="k-col">0</div><div class="kpi-lbl">Colaboradores</div></div>
+    <div class="kpi" onclick="location.href='fase1.html'"><div class="kpi-val" id="k-car">0</div><div class="kpi-lbl">Cargos distintos</div></div>
+    <div class="kpi" onclick="location.href='fase1.html'"><div class="kpi-val" id="k-inc">0</div><div class="kpi-lbl">⚠️ Inconsistências</div></div>
+    <div class="kpi" onclick="location.href='fase1.html'"><div class="kpi-val" id="k-fol">R$0</div><div class="kpi-lbl">Folha total</div></div>
   </div>
-
   <div class="fases-grid">
-    <a class="fase-card" href="fase1.html">
-      <span class="fase-num-badge">FASE 01</span>
-      <div class="fase-title">Levantamento e Diagnóstico</div>
-      <div class="fase-sub">Coleta de colaboradores e inconsistências</div>
-      <div class="fase-prog"><div class="fase-prog-bar" id="p1" style="width:0%"></div></div>
-    </a>
-    <a class="fase-card" href="fase2.html">
-      <span class="fase-num-badge">FASE 02</span>
-      <div class="fase-title">Descrição de Cargos</div>
-      <div class="fase-sub">Fichas e requisitos por cargo</div>
-      <div class="fase-prog"><div class="fase-prog-bar" style="width:0%"></div></div>
-    </a>
-    <a class="fase-card" href="fase3.html">
-      <span class="fase-num-badge">FASE 03</span>
-      <div class="fase-title">Avaliação e Pontuação</div>
-      <div class="fase-sub">Critérios e pesos por fator</div>
-      <div class="fase-prog"><div class="fase-prog-bar" style="width:0%"></div></div>
-    </a>
-    <a class="fase-card" href="fase4.html">
-      <span class="fase-num-badge">FASE 04</span>
-      <div class="fase-title">Estrutura Salarial</div>
-      <div class="fase-sub">Faixas, graus e progressão</div>
-      <div class="fase-prog"><div class="fase-prog-bar" style="width:0%"></div></div>
-    </a>
-    <a class="fase-card" href="fase5.html">
-      <span class="fase-num-badge">FASE 05</span>
-      <div class="fase-title">Implantação</div>
-      <div class="fase-sub">Comunicação e ativação do plano</div>
-      <div class="fase-prog"><div class="fase-prog-bar" style="width:0%"></div></div>
-    </a>
+    <a class="fase-card" href="fase1.html"><span class="fase-num-badge">FASE 01</span><div class="fase-title">Levantamento e Diagnóstico</div><div class="fase-sub">Coleta de colaboradores e inconsistências</div><div class="fase-prog"><div class="fase-prog-bar" style="width:0%" id="p1"></div></div></a>
+    <a class="fase-card" href="fase2.html"><span class="fase-num-badge">FASE 02</span><div class="fase-title">Descrição de Cargos</div><div class="fase-sub">Fichas e requisitos por cargo</div><div class="fase-prog"><div class="fase-prog-bar" style="width:0%"></div></div></a>
+    <a class="fase-card" href="fase3.html"><span class="fase-num-badge">FASE 03</span><div class="fase-title">Avaliação e Pontuação</div><div class="fase-sub">Critérios e pesos por fator</div><div class="fase-prog"><div class="fase-prog-bar" style="width:0%"></div></div></a>
+    <a class="fase-card" href="fase4.html"><span class="fase-num-badge">FASE 04</span><div class="fase-title">Estrutura Salarial</div><div class="fase-sub">Faixas, graus e progressão</div><div class="fase-prog"><div class="fase-prog-bar" style="width:0%"></div></div></a>
+    <a class="fase-card" href="fase5.html"><span class="fase-num-badge">FASE 05</span><div class="fase-title">Implantação</div><div class="fase-sub">Comunicação e ativação do plano</div><div class="fase-prog"><div class="fase-prog-bar" style="width:0%"></div></div></a>
   </div>
-
   <div class="card">
     <div class="card-hdr">Informações do Projeto</div>
     <div class="info-grid">
@@ -145,8 +109,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f5f4ef;display:flex;min
 function checkSessao(){
   try{const s=JSON.parse(localStorage.getItem('pccs_sessao')||'{}');
     if(s.email&&s.expira>Date.now()){document.getElementById('user-nome').textContent=s.nome||s.email;return;}
-  }catch(e){}
-  window.location.href='index.html';
+  }catch(e){}window.location.href='index.html';
 }
 function sair(){localStorage.removeItem('pccs_sessao');try{auth.signOut();}catch(e){}window.location.href='index.html';}
 function updKPIs(){

@@ -1,60 +1,45 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Segurança do Trabalho | PCCS SM Madeiras</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Segurança | PCCS SM Madeiras</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',Arial,sans-serif;background:#f5f4ef;display:flex;min-height:100vh}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',Arial,sans-serif;background:#f5f4ef;display:flex;min-height:100vh}
 .sidebar{width:220px;background:#0d0d0d;color:#fff;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
-.sb-logo{padding:20px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
-.sb-logo a{color:#B8860B;font-size:15px;font-weight:700;text-decoration:none;display:block}
-.sb-logo small{color:rgba(255,255,255,.3);font-size:10px;display:block;margin-top:3px}
+.sb-logo{padding:20px 16px;border-bottom:1px solid rgba(255,255,255,.08)}.sb-logo a{color:#B8860B;font-size:15px;font-weight:700;text-decoration:none;display:block}.sb-logo small{color:rgba(255,255,255,.3);font-size:10px;display:block;margin-top:3px}
 .sb-sec{padding:16px 16px 4px;font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px}
 .sidebar a{display:block;padding:9px 16px;font-size:13px;color:rgba(255,255,255,.6);text-decoration:none;border-left:3px solid transparent;transition:.15s}
-.sidebar a:hover{color:#fff;background:rgba(255,255,255,.05)}
-.sidebar a.active{color:#B8860B;border-left-color:#B8860B;background:rgba(184,134,11,.08)}
+.sidebar a:hover{color:#fff;background:rgba(255,255,255,.05)}.sidebar a.active{color:#B8860B;border-left-color:#B8860B;background:rgba(184,134,11,.08)}
 .fn{font-size:10px;color:rgba(255,255,255,.28);margin-right:6px}
 .topbar{position:fixed;top:0;left:220px;right:0;height:52px;background:#0d0d0d;display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:99}
 .tb-title{font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px}
-.tb-right{display:flex;align-items:center;gap:12px}
-.tb-user{font-size:12px;color:rgba(255,255,255,.6)}
-.tb-user span{color:#B8860B;font-weight:600}
+.tb-right{display:flex;align-items:center;gap:12px}.tb-user{font-size:12px;color:rgba(255,255,255,.6)}.tb-user span{color:#B8860B;font-weight:600}
 .btn-sair{background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.45);padding:6px 12px;border-radius:4px;font-size:11px;cursor:pointer}
 .main{margin-left:220px;margin-top:52px;padding:32px;flex:1}
-.page-title{font-size:28px;font-weight:300;color:#0d0d0d;margin-bottom:4px}
-.page-sub{font-size:13px;color:#999;margin-bottom:28px}
+.page-title{font-size:28px;font-weight:300;margin-bottom:4px}.page-sub{font-size:13px;color:#999;margin-bottom:28px}
 .nr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
-.nr-card{background:#fff;border-radius:10px;border:1px solid #e8e6e0;padding:20px}
-.nr-badge{background:#0d0d0d;color:#B8860B;font-size:10px;font-weight:700;padding:4px 10px;border-radius:4px;display:inline-block;margin-bottom:10px}
+.nr-card{background:#fff;border-radius:10px;border:1px solid #e8e6e0;padding:18px}
+.nr-badge{background:#0d0d0d;color:#B8860B;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;display:inline-block;margin-bottom:8px}
 .nr-title{font-size:14px;font-weight:600;color:#0d0d0d;margin-bottom:6px}
-.nr-desc{font-size:12px;color:#888;line-height:1.5;margin-bottom:12px}
-.nr-status{font-size:11px;font-weight:600}
-.s-ok{color:#059669}
-.s-pend{color:#d97706}
-.s-alert{color:#dc2626}
+.nr-desc{font-size:12px;color:#888;line-height:1.5;margin-bottom:10px}
+.s-pend{color:#d97706;font-size:12px;font-weight:600}.s-alert{color:#dc2626;font-size:12px;font-weight:600}
 .card{background:#fff;border-radius:10px;border:1px solid #e8e6e0;margin-bottom:20px;overflow:hidden}
-.card-hdr{padding:16px 20px;border-bottom:1px solid #f0ede6;font-size:14px;font-weight:600}
+.card-hdr{padding:14px 18px;border-bottom:1px solid #f0ede6;font-size:14px;font-weight:600}
 table.t{width:100%;border-collapse:collapse;font-size:12px}
-table.t th{padding:10px 12px;background:#faf9f6;border-bottom:1px solid #f0ede6;font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.3px;font-weight:600;text-align:left}
-table.t td{padding:11px 12px;border-bottom:1px solid #f8f7f4}
+table.t th{padding:9px 12px;background:#faf9f6;border-bottom:1px solid #f0ede6;font-size:10px;color:#aaa;text-transform:uppercase;font-weight:600;text-align:left}
+table.t td{padding:10px 12px;border-bottom:1px solid #f8f7f4}
 .badge{display:inline-block;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:600}
-.b-red{background:#fee2e2;color:#991b1b}
-.b-gold{background:#fef3c7;color:#92400e}
-.b-green{background:#d1fae5;color:#065f46}
-.b-gray{background:#f3f4f6;color:#6b7280}
+.b-red{background:#fee2e2;color:#991b1b}.b-gold{background:#fef3c7;color:#92400e}.b-gray{background:#f3f4f6;color:#6b7280}.b-green{background:#d1fae5;color:#065f46}
 </style>
 </head>
 <body>
 <aside class="sidebar">
   <div class="sb-logo"><a href="dashboard.html">Instituto Primazia</a><small>Sistema PCCS</small></div>
-  <div class="sb-sec">Navegação</div>
-  <a href="dashboard.html">🏠 Dashboard</a>
+  <div class="sb-sec">Navegação</div><a href="dashboard.html">🏠 Dashboard</a>
   <div class="sb-sec">Fases do PCCS</div>
   <a href="fase1.html"><span class="fn">01</span> Levantamento</a>
   <a href="fase2.html"><span class="fn">02</span> Descrição</a>
@@ -64,94 +49,37 @@ table.t td{padding:11px 12px;border-bottom:1px solid #f8f7f4}
   <div class="sb-sec" style="margin-top:4px"></div>
   <a href="marcos.html">🏁 Marcos Críticos</a>
   <a href="seguranca.html" class="active">🛡️ Segurança do Trabalho</a>
+  <a href="usuarios.html">👥 Usuários</a>
 </aside>
 <header class="topbar">
   <span class="tb-title">PCCS · Segurança do Trabalho</span>
-  <div class="tb-right">
-    <span class="tb-user">Olá, <span id="user-nome">...</span></span>
-    <button class="btn-sair" onclick="sair()">Sair</button>
-  </div>
+  <div class="tb-right"><span class="tb-user">Olá, <span id="user-nome">...</span></span><button class="btn-sair" onclick="sair()">Sair</button></div>
 </header>
 <main class="main">
   <h1 class="page-title">Segurança do Trabalho</h1>
   <p class="page-sub">NRs aplicáveis · Treinamentos obrigatórios · SIPAT · CLT art. 59</p>
-
   <div class="nr-grid">
-    <div class="nr-card">
-      <span class="nr-badge">NR-1</span>
-      <div class="nr-title">Disposições Gerais</div>
-      <div class="nr-desc">Obrigações de empregadores e trabalhadores. PGR — Programa de Gerenciamento de Riscos.</div>
-      <div class="nr-status s-pend">⏳ Implementação em andamento</div>
-    </div>
-    <div class="nr-card">
-      <span class="nr-badge">NR-17</span>
-      <div class="nr-title">Ergonomia</div>
-      <div class="nr-desc">Condições de trabalho adequadas. AET — Análise Ergonômica do Trabalho obrigatória para setores de produção.</div>
-      <div class="nr-status s-pend">⏳ Laudo pendente</div>
-    </div>
-    <div class="nr-card">
-      <span class="nr-badge">NR-12</span>
-      <div class="nr-title">Segurança em Máquinas</div>
-      <div class="nr-desc">Proteções e dispositivos de segurança em serraria, faqueado, beneficiamento e caldeira.</div>
-      <div class="nr-status s-alert">🔴 Verificar adequações</div>
-    </div>
-    <div class="nr-card">
-      <span class="nr-badge">NR-13</span>
-      <div class="nr-title">Caldeiras e Vasos</div>
-      <div class="nr-desc">Operadores de caldeira com habilitação obrigatória. 4 operadores identificados — certificações a verificar.</div>
-      <div class="nr-status s-pend">⏳ Verificar certificações</div>
-    </div>
-    <div class="nr-card">
-      <span class="nr-badge">NR-31</span>
-      <div class="nr-title">Agricultura e Florestal</div>
-      <div class="nr-desc">Aplicável às equipes de extração florestal nas Fazendas. EPI obrigatório para motosserras e derrubamento.</div>
-      <div class="nr-status s-pend">⏳ Mapear fazendas</div>
-    </div>
-    <div class="nr-card">
-      <span class="nr-badge">CLT art.59</span>
-      <div class="nr-title">Horas Extras</div>
-      <div class="nr-desc">Limite de 2h extras/dia. Banco de horas exige acordo coletivo. Verificar habitualidade nas equipes de produção.</div>
-      <div class="nr-status s-alert">🔴 Verificar habitualidade</div>
-    </div>
+    <div class="nr-card"><span class="nr-badge">NR-1</span><div class="nr-title">Disposições Gerais / PGR</div><div class="nr-desc">Programa de Gerenciamento de Riscos obrigatório para todos os colaboradores.</div><div class="s-pend">⏳ Em andamento</div></div>
+    <div class="nr-card"><span class="nr-badge">NR-17</span><div class="nr-title">Ergonomia</div><div class="nr-desc">AET obrigatória para produção. Avaliação de postos de trabalho e cargas.</div><div class="s-pend">⏳ Laudo pendente</div></div>
+    <div class="nr-card"><span class="nr-badge">NR-12</span><div class="nr-title">Segurança em Máquinas</div><div class="nr-desc">Proteções obrigatórias em serraria, faqueado, beneficiamento e caldeira.</div><div class="s-alert">🔴 Verificar adequações</div></div>
+    <div class="nr-card"><span class="nr-badge">NR-13</span><div class="nr-title">Caldeiras e Vasos</div><div class="nr-desc">4 operadores identificados — certificações habilitação devem ser verificadas.</div><div class="s-pend">⏳ Verificar certificações</div></div>
+    <div class="nr-card"><span class="nr-badge">NR-31</span><div class="nr-title">Trabalho Florestal</div><div class="nr-desc">EPI obrigatório para extração, derrubamento e operação de motosserra.</div><div class="s-pend">⏳ Mapear fazendas</div></div>
+    <div class="nr-card"><span class="nr-badge">CLT art.59</span><div class="nr-title">Horas Extras</div><div class="nr-desc">Limite 2h/dia. Banco de horas exige acordo coletivo. Verificar habitualidade.</div><div class="s-alert">🔴 Verificar habitualidade</div></div>
   </div>
-
-  <div class="card">
-    <div class="card-hdr">Matriz de Treinamentos Obrigatórios</div>
-    <table class="t">
-      <thead><tr>
-        <th>Treinamento</th><th>NR / Base Legal</th><th>Departamentos</th>
-        <th>Periodicidade</th><th>Carga Horária</th><th>Status</th>
-      </tr></thead>
-      <tbody>
-        <tr><td><strong>PGR — Programa de Ger. de Riscos</strong></td><td>NR-1</td><td>Todos</td><td>Anual</td><td>4h</td><td><span class="badge b-gold">Pendente</span></td></tr>
-        <tr><td><strong>Ergonomia Básica</strong></td><td>NR-17</td><td>Produção / Administrativo</td><td>Anual</td><td>8h</td><td><span class="badge b-gold">Pendente</span></td></tr>
-        <tr><td><strong>Segurança em Máquinas</strong></td><td>NR-12</td><td>Serraria / Faqueado / Beneficiamento</td><td>Anual</td><td>8h</td><td><span class="badge b-red">Urgente</span></td></tr>
-        <tr><td><strong>Operador de Caldeira</strong></td><td>NR-13</td><td>Caldeira (4 operadores)</td><td>3 anos</td><td>40h</td><td><span class="badge b-gold">Verificar</span></td></tr>
-        <tr><td><strong>SIPAT — Semana Interna de Prev.</strong></td><td>NR-5</td><td>Todos</td><td>Anual</td><td>—</td><td><span class="badge b-gray">Programar</span></td></tr>
-        <tr><td><strong>Trabalho Florestal — EPI</strong></td><td>NR-31</td><td>Extração / Fazendas</td><td>Anual</td><td>8h</td><td><span class="badge b-gold">Pendente</span></td></tr>
-        <tr><td><strong>Jovem Aprendiz — Segurança</strong></td><td>CLT / NR-1</td><td>Aprendizes (5 ativos)</td><td>No ingresso</td><td>4h</td><td><span class="badge b-red">Urgente</span></td></tr>
-      </tbody>
-    </table>
-  </div>
-
   <div class="card">
     <div class="card-hdr">Líderes em Desenvolvimento — Frentes de Segurança</div>
     <table class="t">
-      <thead><tr><th>Líder</th><th>Cargo</th><th>Frentes</th><th>Status PDI</th></tr></thead>
+      <thead><tr><th>Líder</th><th>Cargo</th><th>Frentes</th><th>Status</th></tr></thead>
       <tbody>
-        <tr><td><strong>Marlon</strong></td><td>Gerente de Produção</td><td>NR-1 · NR-17 · NR-12 · Sistema Weex</td><td><span class="badge b-gold">Em desenvolvimento</span></td></tr>
+        <tr><td><strong>Marlon</strong></td><td>Gerente de Produção</td><td>NR-1 · NR-17 · NR-12 · Weex</td><td><span class="badge b-gold">Em desenvolvimento</span></td></tr>
         <tr><td><strong>Vanderlei</strong></td><td>Gerente Administrativo</td><td>NR-1 · CLT art.59 · Jovem Aprendiz · SIPAT</td><td><span class="badge b-gold">Em desenvolvimento</span></td></tr>
-        <tr><td><strong>Fabiano</strong></td><td>Gerente de Compras</td><td>NR-1 · SIPAT · Sistema Weex</td><td><span class="badge b-gold">Em desenvolvimento</span></td></tr>
+        <tr><td><strong>Fabiano</strong></td><td>Gerente de Compras</td><td>NR-1 · SIPAT · Weex</td><td><span class="badge b-gold">Em desenvolvimento</span></td></tr>
       </tbody>
     </table>
   </div>
 </main>
 <script>
-function checkSessao(){
-  try{const s=JSON.parse(localStorage.getItem('pccs_sessao')||'{}');
-    if(s.email&&s.expira>Date.now()){document.getElementById('user-nome').textContent=s.nome||s.email;return;}
-  }catch(e){}window.location.href='index.html';
-}
+function checkSessao(){try{const s=JSON.parse(localStorage.getItem('pccs_sessao')||'{}');if(s.email&&s.expira>Date.now()){document.getElementById('user-nome').textContent=s.nome||s.email;return;}}catch(e){}window.location.href='index.html';}
 function sair(){localStorage.removeItem('pccs_sessao');try{auth.signOut();}catch(e){}window.location.href='index.html';}
 window.addEventListener('load',checkSessao);
 </script>

@@ -1,97 +1,66 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fase 2 — Descrição de Cargos | PCCS SM Madeiras</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',Arial,sans-serif;background:#f5f4ef;display:flex;min-height:100vh}
-.sidebar{width:220px;background:#0d0d0d;color:#fff;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto;display:flex;flex-direction:column}
-.sb-logo{padding:20px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
-.sb-logo a{color:#B8860B;font-size:15px;font-weight:700;text-decoration:none;display:block}
-.sb-logo small{color:rgba(255,255,255,.3);font-size:10px;display:block;margin-top:3px}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',Arial,sans-serif;background:#f5f4ef;display:flex;min-height:100vh}
+.sidebar{width:220px;background:#0d0d0d;color:#fff;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
+.sb-logo{padding:20px 16px;border-bottom:1px solid rgba(255,255,255,.08)}.sb-logo a{color:#B8860B;font-size:15px;font-weight:700;text-decoration:none;display:block}.sb-logo small{color:rgba(255,255,255,.3);font-size:10px;display:block;margin-top:3px}
 .sb-sec{padding:16px 16px 4px;font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px}
 .sidebar a{display:block;padding:9px 16px;font-size:13px;color:rgba(255,255,255,.6);text-decoration:none;border-left:3px solid transparent;transition:.15s}
-.sidebar a:hover{color:#fff;background:rgba(255,255,255,.05)}
-.sidebar a.active{color:#B8860B;border-left-color:#B8860B;background:rgba(184,134,11,.08)}
+.sidebar a:hover{color:#fff;background:rgba(255,255,255,.05)}.sidebar a.active{color:#B8860B;border-left-color:#B8860B;background:rgba(184,134,11,.08)}
 .fn{font-size:10px;color:rgba(255,255,255,.28);margin-right:6px}
 .topbar{position:fixed;top:0;left:220px;right:0;height:52px;background:#0d0d0d;display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:99}
 .tb-title{font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px}
-.tb-right{display:flex;align-items:center;gap:12px}
-.tb-user{font-size:12px;color:rgba(255,255,255,.6)}
-.tb-user span{color:#B8860B;font-weight:600}
+.tb-right{display:flex;align-items:center;gap:12px}.tb-user{font-size:12px;color:rgba(255,255,255,.6)}.tb-user span{color:#B8860B;font-weight:600}
 .btn-sair{background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.45);padding:6px 12px;border-radius:4px;font-size:11px;cursor:pointer}
 .main{margin-left:220px;margin-top:52px;padding:32px;flex:1}
 .fase-label{font-size:11px;color:#B8860B;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
 .page-title{font-size:28px;font-weight:300;color:#0d0d0d;margin-bottom:4px}
 .page-sub{font-size:13px;color:#999;margin-bottom:32px}
 .coming{background:#fff;border-radius:12px;border:1px solid #e8e6e0;padding:60px;text-align:center}
-.coming-icon{font-size:56px;margin-bottom:20px}
-.coming h2{font-size:20px;font-weight:500;color:#0d0d0d;margin-bottom:10px}
+.coming-icon{font-size:56px;margin-bottom:20px}.coming h2{font-size:20px;font-weight:500;margin-bottom:10px}
 .coming p{font-size:13px;color:#aaa;max-width:400px;margin:0 auto 24px}
 .btn-prev{background:#0d0d0d;color:#B8860B;border:1px solid #B8860B;padding:10px 24px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block}
-.prereqs{margin-top:32px;text-align:left;max-width:480px;margin-left:auto;margin-right:auto}
-.prereqs h4{font-size:12px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
-.req{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0ede6;font-size:13px}
-.req-ok{color:#059669}
-.req-pend{color:#aaa}
 </style>
 </head>
 <body>
 <aside class="sidebar">
   <div class="sb-logo"><a href="dashboard.html">Instituto Primazia</a><small>Sistema PCCS</small></div>
-  <div class="sb-sec">Navegação</div>
-  <a href="dashboard.html">🏠 Dashboard</a>
+  <div class="sb-sec">Navegação</div><a href="dashboard.html">🏠 Dashboard</a>
   <div class="sb-sec">Fases do PCCS</div>
   <a href="fase1.html"><span class="fn">01</span> Levantamento</a>
-  <a href="fase2.html" class="22 ? 'active' : ''"><span class="fn">02</span> Descrição</a>
-  <a href="fase3.html"><span class="fn">03</span> Avaliação</a>
-  <a href="fase4.html"><span class="fn">04</span> Estrutura Salarial</a>
-  <a href="fase5.html"><span class="fn">05</span> Implantação</a>
+  <a href="fase2.html" 2==2 && echo 'class="active"'><span class="fn">02</span> Descrição</a>
+  <a href="fase3.html" 2==3 && echo 'class="active"'><span class="fn">03</span> Avaliação</a>
+  <a href="fase4.html" 2==4 && echo 'class="active"'><span class="fn">04</span> Estrutura Salarial</a>
+  <a href="fase5.html" 2==5 && echo 'class="active"'><span class="fn">05</span> Implantação</a>
   <div class="sb-sec" style="margin-top:4px"></div>
-  <a href="marcos.html">🏁 Marcos Críticos</a>
-  <a href="seguranca.html">🛡️ Segurança do Trabalho</a>
+  <a href="marcos.html">🏁 Marcos Críticos</a><a href="seguranca.html">🛡️ Segurança do Trabalho</a><a href="usuarios.html">👥 Usuários</a>
 </aside>
 <header class="topbar">
   <span class="tb-title">PCCS · Fase 2 · Descrição de Cargos</span>
-  <div class="tb-right">
-    <span class="tb-user">Olá, <span id="user-nome">...</span></span>
-    <button class="btn-sair" onclick="sair()">Sair</button>
-  </div>
+  <div class="tb-right"><span class="tb-user">Olá, <span id="user-nome">...</span></span><button class="btn-sair" onclick="sair()">Sair</button></div>
 </header>
 <main class="main">
-  <div class="fase-label">Fase 02 · Junho · Semanas 1 e 2</div>
+  <div class="fase-label">Fase 02</div>
   <h1 class="page-title">Descrição de Cargos</h1>
   <p class="page-sub">Esta fase será liberada após a conclusão das etapas anteriores.</p>
   <div class="coming">
     <div class="coming-icon">🔒</div>
     <h2>Fase 2 em preparação</h2>
-    <p>O conteúdo desta fase será disponibilizado conforme o avanço do projeto PCCS com a SM Madeiras.</p>
+    <p>O conteúdo será disponibilizado conforme o avanço do projeto PCCS com a SM Madeiras.</p>
     <a class="btn-prev" href="fase1.html">← Voltar para Fase 1</a>
-    <div class="prereqs">
-      <h4>Pré-requisitos</h4>
-      <div class="req"><span id="r1">⏳</span> Fase 1 — Levantamento e Diagnóstico concluída</div>
-      <div class="req"><span>⏳</span> Alinhamento com Vilson e Michele realizado</div>
-      <div class="req"><span>⏳</span> Inconsistências salariais mapeadas</div>
-    </div>
   </div>
 </main>
 <script>
-function checkSessao(){
-  try{const s=JSON.parse(localStorage.getItem('pccs_sessao')||'{}');
-    if(s.email&&s.expira>Date.now()){document.getElementById('user-nome').textContent=s.nome||s.email;return;}
-  }catch(e){}window.location.href='index.html';
-}
+function checkSessao(){try{const s=JSON.parse(localStorage.getItem('pccs_sessao')||'{}');if(s.email&&s.expira>Date.now()){document.getElementById('user-nome').textContent=s.nome||s.email;return;}}catch(e){}window.location.href='index.html';}
 function sair(){localStorage.removeItem('pccs_sessao');try{auth.signOut();}catch(e){}window.location.href='index.html';}
-window.addEventListener('load',()=>{checkSessao();
-  const cols=JSON.parse(localStorage.getItem('pccs_col_f1')||'[]');
-  if(cols.length>0)document.getElementById('r1').textContent='✅';
-});
+window.addEventListener('load',checkSessao);
 </script>
 </body>
 </html>
