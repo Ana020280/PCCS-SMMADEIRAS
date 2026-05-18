@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PCCS 360 — Instituto Primazia</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --bg2: #141414;
+    --bg3: #1a1a1a;
+    --gold: #c9a84c;
+    --gold2: #e2c97e;
+    --gold-dim: rgba(201,168,76,0.12);
+    --text: #f0ece0;
+    --text2: #a09880;
+    --danger: #e05c5c;
+    --success: #4caf7d;
+    --border: rgba(201,168,76,0.2);
+    --radius: 12px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+  }
+
+  .logo span { color: var(--text2); font-weight: 400; font-size: 0.85rem; display:block; letter-spacing:0.1em; }
+
+  .header-right { display:flex; align-items:center; gap:1rem; }
+
+  .user-info { text-align:right; }
+  .user-info strong { display:block; font-size:0.85rem; color:var(--gold2); }
+  .user-info small { color:var(--text2); font-size:0.75rem; }
+
+  .avatar {
+    width:38px; height:38px; border-radius:50%;
+    background: var(--gold-dim);
+    border: 2px solid var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Syne',sans-serif; font-weight:700; color:var(--gold); font-size:0.9rem;
+    cursor:pointer;
+  }
+
+  /* ── VIEWS ── */
+  .view { display:none; padding:2rem; max-width:1100px; margin:0 auto; }
+  .view.active { display:block; }
+
+  /* ── LOGIN ── */
+  #view-login {
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; padding:2rem;
+  }
+
+  .login-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3rem 2.5rem;
+    width: 100%; max-width: 420px;
+    text-align: center;
+  }
+
+  .login-box h1 {
+    font-family:'Syne',sans-serif; font-weight:800;
+    font-size:2rem; color:var(--gold); margin-bottom:0.3rem;
+  }
+
+  .login-box p { color:var(--text2); margin-bottom:2rem; font-size:0.9rem; }
+
+  .inp {
+    width:100%; padding:0.85rem 1rem;
+    background:var(--bg3); border:1px solid var(--border);
+    border-radius:var(--radius); color:var(--text);
+    font-family:'DM Sans',sans-serif; font-size:0.95rem;
+    margin-bottom:1rem; outline:none;
+    transition: border-color 0.2s;
+  }
+  .inp:focus { border-color:var(--gold); }
+
+  .btn {
+    display:inline-flex; align-items:center; justify-content:center; gap:0.5rem;
+    padding:0.85rem 1.8rem; border-radius:var(--radius);
+    font-family:'Syne',sans-serif; font-weight:700; font-size:0.9rem;
+    cursor:pointer; border:none; transition: all 0.2s; text-decoration:none;
+  }
+
+  .btn-gold {
+    background: var(--gold); color:#0d0d0d; width:100%;
+  }
+  .btn-gold:hover { background:var(--gold2); transform:translateY(-1px); }
+
+  .btn-outline {
+    background:transparent; border:1px solid var(--border); color:var(--text2);
+  }
+  .btn-outline:hover { border-color:var(--gold); color:var(--gold); }
+
+  .btn-danger {
+    background:rgba(224,92,92,0.15); border:1px solid rgba(224,92,92,0.3); color:var(--danger);
+  }
+
+  /* ── DASHBOARD ── */
+  .page-header {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:2rem; flex-wrap:wrap; gap:1rem;
+  }
+
+  .page-title {
+    font-family:'Syne',sans-serif; font-weight:800;
+    font-size:1.8rem; color:var(--text);
+  }
+
+  .page-title span { color:var(--gold); }
+
+  .stats-row {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:1rem; margin-bottom:2rem;
+  }
+
+  .stat-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--radius); padding:1.2rem;
+    text-align:center;
+  }
+
+  .stat-card .num {
+    font-family:'Syne',sans-serif; font-weight:800;
+    font-size:2rem; color:var(--gold);
+  }
+
+  .stat-card .lbl { color:var(--text2); font-size:0.78rem; margin-top:0.2rem; text-transform:uppercase; letter-spacing:0.08em; }
+
+  /* ── EMPRESA CARDS ── */
+  .empresas-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+    gap:1.2rem;
+  }
+
+  .empresa-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:16px; padding:1.5rem;
+    cursor:pointer; transition:all 0.25s;
+    position:relative; overflow:hidden;
+  }
+
+  .empresa-card:hover {
+    border-color:var(--gold); transform:translateY(-3px);
+    box-shadow:0 8px 30px rgba(201,168,76,0.1);
+  }
+
+  .empresa-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold2));
+    opacity:0; transition:opacity 0.25s;
+  }
+
+  .empresa-card:hover::before { opacity:1; }
+
+  .empresa-icon {
+    width:48px; height:48px; border-radius:12px;
+    background:var(--gold-dim); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.4rem; margin-bottom:1rem;
+  }
+
+  .empresa-nome {
+    font-family:'Syne',sans-serif; font-weight:700;
+    font-size:1.1rem; margin-bottom:0.3rem;
+  }
+
+  .empresa-setor { color:var(--text2); font-size:0.82rem; margin-bottom:1rem; }
+
+  .empresa-progress-bar {
+    height:4px; background:var(--bg3); border-radius:99px;
+    margin-bottom:0.5rem; overflow:hidden;
+  }
+
+  .empresa-progress-fill {
+    height:100%; background:linear-gradient(90deg,var(--gold),var(--gold2));
+    border-radius:99px; transition:width 0.5s;
+  }
+
+  .empresa-progress-info {
+    display:flex; justify-content:space-between;
+    font-size:0.78rem; color:var(--text2);
+  }
+
+  .empresa-progress-info strong { color:var(--gold); }
+
+  .fases-mini {
+    display:flex; gap:4px; margin-top:1rem;
+  }
+
+  .fase-dot {
+    flex:1; height:6px; border-radius:99px;
+    background:var(--bg3);
+    transition: background 0.3s;
+  }
+
+  .fase-dot.done { background:var(--gold); }
+  .fase-dot.active { background:var(--gold2); opacity:0.6; }
+
+  .empresa-data { color:var(--text2); font-size:0.75rem; margin-top:0.8rem; }
+
+  /* ── ADD EMPRESA ── */
+  .add-card {
+    background:transparent; border:2px dashed var(--border);
+    border-radius:16px; padding:1.5rem;
+    cursor:pointer; transition:all 0.25s;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    min-height:180px; gap:0.8rem;
+    color:var(--text2);
+  }
+
+  .add-card:hover { border-color:var(--gold); color:var(--gold); }
+
+  .add-card .add-icon {
+    width:48px; height:48px; border-radius:12px;
+    background:var(--gold-dim); display:flex;
+    align-items:center; justify-content:center;
+    font-size:1.5rem; transition:background 0.25s;
+  }
+
+  .add-card:hover .add-icon { background:rgba(201,168,76,0.2); }
+
+  .add-card span { font-family:'Syne',sans-serif; font-weight:600; font-size:0.9rem; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position:fixed; inset:0; background:rgba(0,0,0,0.7);
+    z-index:200; display:none;
+    align-items:center; justify-content:center; padding:1rem;
+  }
+
+  .modal-overlay.open { display:flex; }
+
+  .modal {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:20px; padding:2rem;
+    width:100%; max-width:480px;
+    animation: slideUp 0.25s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity:0; transform:translateY(20px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+
+  .modal h2 {
+    font-family:'Syne',sans-serif; font-weight:800;
+    font-size:1.3rem; margin-bottom:1.5rem; color:var(--gold);
+  }
+
+  .form-group { margin-bottom:1rem; }
+  .form-group label { display:block; font-size:0.82rem; color:var(--text2); margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:0.08em; }
+
+  .modal-btns { display:flex; gap:0.8rem; margin-top:1.5rem; }
+  .modal-btns .btn { flex:1; }
+
+  /* ── FASES VIEW ── */
+  .back-btn {
+    display:inline-flex; align-items:center; gap:0.5rem;
+    color:var(--text2); cursor:pointer; margin-bottom:1.5rem;
+    font-size:0.88rem; transition:color 0.2s;
+    background:none; border:none;
+  }
+  .back-btn:hover { color:var(--gold); }
+
+  .empresa-header {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:16px; padding:1.5rem 2rem;
+    margin-bottom:1.5rem;
+    display:flex; align-items:center; gap:1.5rem;
+    flex-wrap:wrap;
+  }
+
+  .empresa-header .empresa-icon { margin:0; width:56px; height:56px; font-size:1.6rem; }
+
+  .empresa-header-info { flex:1; }
+  .empresa-header-info h2 { font-family:'Syne',sans-serif; font-weight:800; font-size:1.5rem; }
+  .empresa-header-info p { color:var(--text2); font-size:0.85rem; margin-top:0.2rem; }
+
+  .empresa-header-actions { display:flex; gap:0.7rem; }
+
+  .fases-list { display:flex; flex-direction:column; gap:1rem; }
+
+  .fase-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:16px; overflow:hidden;
+    transition: border-color 0.25s;
+  }
+
+  .fase-card.ativa { border-color:var(--gold); }
+  .fase-card.concluida { border-color:rgba(76,175,125,0.4); }
+
+  .fase-header {
+    padding:1.2rem 1.5rem;
+    display:flex; align-items:center; gap:1rem;
+    cursor:pointer;
+  }
+
+  .fase-num {
+    width:36px; height:36px; border-radius:50%;
+    background:var(--bg3); border:2px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Syne',sans-serif; font-weight:800;
+    font-size:0.85rem; color:var(--text2); flex-shrink:0;
+  }
+
+  .fase-card.ativa .fase-num { border-color:var(--gold); color:var(--gold); background:var(--gold-dim); }
+  .fase-card.concluida .fase-num { border-color:var(--success); color:var(--success); background:rgba(76,175,125,0.1); }
+
+  .fase-info { flex:1; }
+  .fase-info h3 { font-family:'Syne',sans-serif; font-weight:700; font-size:1rem; }
+  .fase-info p { color:var(--text2); font-size:0.8rem; margin-top:0.2rem; }
+
+  .fase-status {
+    font-size:0.75rem; font-family:'Syne',sans-serif; font-weight:700;
+    padding:0.3rem 0.8rem; border-radius:99px;
+    text-transform:uppercase; letter-spacing:0.08em;
+  }
+
+  .status-pendente { background:var(--bg3); color:var(--text2); }
+  .status-andamento { background:rgba(201,168,76,0.15); color:var(--gold); }
+  .status-concluida { background:rgba(76,175,125,0.15); color:var(--success); }
+
+  .fase-body {
+    padding:0 1.5rem;
+    max-height:0; overflow:hidden;
+    transition: max-height 0.35s ease, padding 0.35s;
+  }
+
+  .fase-body.open { max-height:600px; padding:0 1.5rem 1.5rem; }
+
+  .fase-divider { height:1px; background:var(--border); margin-bottom:1.2rem; }
+
+  .atividades-list { display:flex; flex-direction:column; gap:0.6rem; }
+
+  .atividade-item {
+    display:flex; align-items:center; gap:0.8rem;
+    padding:0.7rem 1rem;
+    background:var(--bg3); border-radius:var(--radius);
+    cursor:pointer; transition:background 0.2s;
+  }
+
+  .atividade-item:hover { background:#222; }
+
+  .atividade-check {
+    width:20px; height:20px; border-radius:50%;
+    border:2px solid var(--border); flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    transition:all 0.2s;
+  }
+
+  .atividade-item.done .atividade-check {
+    background:var(--success); border-color:var(--success);
+  }
+
+  .atividade-item.done .atividade-check::after {
+    content:'✓'; color:#fff; font-size:0.7rem; font-weight:700;
+  }
+
+  .atividade-item.done span { text-decoration:line-through; color:var(--text2); }
+
+  .atividade-item span { flex:1; font-size:0.9rem; }
+
+  .fase-actions { display:flex; gap:0.7rem; margin-top:1.2rem; flex-wrap:wrap; }
+
+  .progresso-geral {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:16px; padding:1.2rem 1.5rem;
+    margin-bottom:1.5rem;
+    display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;
+  }
+
+  .progresso-geral .bar { flex:1; min-width:150px; }
+  .progresso-geral .bar-bg { height:8px; background:var(--bg3); border-radius:99px; overflow:hidden; }
+  .progresso-geral .bar-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold2)); border-radius:99px; transition:width 0.5s; }
+  .progresso-geral .pct { font-family:'Syne',sans-serif; font-weight:800; font-size:1.5rem; color:var(--gold); white-space:nowrap; }
+  .progresso-geral .lbl { color:var(--text2); font-size:0.8rem; }
+
+  /* ── TOAST ── */
+  .toast {
+    position:fixed; bottom:2rem; right:2rem;
+    background:var(--bg2); border:1px solid var(--gold);
+    border-radius:var(--radius); padding:0.9rem 1.4rem;
+    color:var(--text); font-size:0.88rem;
+    z-index:999; transform:translateY(100px);
+    transition:transform 0.3s; pointer-events:none;
+  }
+  .toast.show { transform:translateY(0); }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:600px) {
+    header { padding:0 1rem; }
+    .view { padding:1rem; }
+    .page-title { font-size:1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header id="main-header" style="display:none">
+  <div style="display:flex;align-items:center;gap:0.8rem">
+    <img src="logo-pccs360.png" alt="PCCS 360" style="height:40px;object-fit:contain" onerror="this.style.display='none'">
+    <div class="logo">PCCS 360<span>Instituto Primazia</span></div>
+  </div>
+  <div class="header-right">
+    <div class="user-info">
+      <strong id="header-user-name">Ana Kátia</strong>
+      <small>Consultora</small>
+    </div>
+    <div class="avatar" onclick="logout()">AK</div>
+  </div>
+</header>
+
+<!-- ══ LOGIN ══ -->
+<div id="view-login" class="view active">
+  <div class="login-box">
+    <img src="logo-pccs360.png" alt="PCCS 360" style="height:90px;object-fit:contain;margin-bottom:1rem" onerror="this.style.display='none'">
+    <h1>PCCS 360</h1>
+    <p>Instituto Primazia · Gestão de Planos de Cargo, Carreira e Salário</p>
+    <input class="inp" type="email" id="login-email" placeholder="E-mail" />
+    <input class="inp" type="password" id="login-senha" placeholder="Senha" onkeydown="if(event.key==='Enter')entrar()" />
+    <button class="btn btn-gold" onclick="entrar()">Entrar</button>
+    <p style="margin-top:1rem;font-size:0.78rem;color:var(--text2)" id="login-erro"></p>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
+<div id="view-dashboard" class="view">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Projetos <span>PCCS</span></div>
+      <p style="color:var(--text2);font-size:0.85rem;margin-top:0.3rem">Gerencie todos os planos de cargo, carreira e salário</p>
+    </div>
+    <button class="btn btn-gold" onclick="abrirModalEmpresa()">+ Nova Empresa</button>
+  </div>
+
+  <div class="stats-row" id="stats-row">
+    <div class="stat-card"><div class="num" id="stat-total">0</div><div class="lbl">Empresas</div></div>
+    <div class="stat-card"><div class="num" id="stat-andamento">0</div><div class="lbl">Em Andamento</div></div>
+    <div class="stat-card"><div class="num" id="stat-concluidos">0</div><div class="lbl">Concluídos</div></div>
+  </div>
+
+  <div class="empresas-grid" id="empresas-grid">
+    <!-- cards gerados via JS -->
+  </div>
+</div>
+
+<!-- ══ FASES ══ -->
+<div id="view-fases" class="view">
+  <button class="back-btn" onclick="voltarDashboard()">← Voltar aos projetos</button>
+
+  <div class="empresa-header" id="empresa-header-info"></div>
+
+  <div class="progresso-geral" id="progresso-geral"></div>
+
+  <div class="fases-list" id="fases-list"></div>
+</div>
+
+<!-- ══ MODAL NOVA EMPRESA ══ -->
+<div class="modal-overlay" id="modal-empresa">
+  <div class="modal">
+    <h2>🏢 Nova Empresa</h2>
+    <div class="form-group">
+      <label>Nome da Empresa *</label>
+      <input class="inp" type="text" id="emp-nome" placeholder="Ex: SM Madeiras" />
+    </div>
+    <div class="form-group">
+      <label>Setor / Segmento</label>
+      <input class="inp" type="text" id="emp-setor" placeholder="Ex: Madeireira, Saúde, Educação..." />
+    </div>
+    <div class="form-group">
+      <label>Responsável na Empresa</label>
+      <input class="inp" type="text" id="emp-responsavel" placeholder="Nome do contato" />
+    </div>
+    <div class="form-group">
+      <label>Emoji / Ícone</label>
+      <input class="inp" type="text" id="emp-emoji" placeholder="🏢" maxlength="4" />
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-gold" onclick="salvarEmpresa()">Criar Projeto</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div class="toast" id="toast"></div>
+
+<!-- ══ FIREBASE CONFIG ══ -->
+<script src="firebase-config.js"></script>
+
+<script>
+// ══ FIREBASE INIT ══
+let db, auth;
+try {
+  db = firebase.firestore();
+  auth = firebase.auth();
+} catch(e) {
+  // firebase-config.js not loaded yet — will handle gracefully
+}
+
+// ══ FASES PADRÃO ══
+const FASES_PADRAO = [
+  {
+    id: 'fase1',
+    nome: 'Levantamento e Diagnóstico',
+    descricao: 'Coleta de dados e análise da situação atual',
+    atividades: [
+      'Levantamento de colaboradores',
+      'Identificar inconsistências salariais',
+      'Alinhamento com liderança',
+    ]
+  },
+  {
+    id: 'fase2',
+    nome: 'Descrição de Cargos',
+    descricao: 'Mapeamento e descrição de todos os cargos',
+    atividades: [
+      'Listar todos os cargos',
+      'Elaborar descrições de função',
+      'Validar com gestores',
+    ]
+  },
+  {
+    id: 'fase3',
+    nome: 'Avaliação de Cargos',
+    descricao: 'Pontuação e hierarquização dos cargos',
+    atividades: [
+      'Definir método de avaliação',
+      'Aplicar pontuação',
+      'Criar tabela de hierarquia',
+    ]
+  },
+  {
+    id: 'fase4',
+    nome: 'Estrutura Salarial',
+    descricao: 'Definição das faixas e tabelas salariais',
+    atividades: [
+      'Pesquisa de mercado',
+      'Definir faixas salariais',
+      'Elaborar política de remuneração',
+    ]
+  },
+  {
+    id: 'fase5',
+    nome: 'Implantação',
+    descricao: 'Implementação e comunicação do PCCS',
+    atividades: [
+      'Aprovação da diretoria',
+      'Comunicar aos colaboradores',
+      'Monitorar implantação',
+    ]
+  }
+];
+
+// ══ ESTADO ══
+let empresas = [];
+let empresaAtual = null;
+let faseAberta = null;
+
+// ══ LOGIN ══
+function entrar() {
+  const email = document.getElementById('login-email').value.trim();
+  const senha = document.getElementById('login-senha').value;
+  const erro = document.getElementById('login-erro');
+  erro.textContent = '';
+
+  if (!auth) {
+    // demo mode
+    mostrarDashboard('Demo');
+    return;
+  }
+
+  auth.signInWithEmailAndPassword(email, senha)
+    .then(u => mostrarDashboard(u.user.displayName || u.user.email))
+    .catch(e => {
+      erro.textContent = '❌ E-mail ou senha incorretos.';
+    });
+}
+
+function logout() {
+  if (auth) auth.signOut();
+  mostrarView('view-login');
+  document.getElementById('main-header').style.display = 'none';
+}
+
+function mostrarDashboard(nome) {
+  document.getElementById('header-user-name').textContent = nome || 'Consultora';
+  document.getElementById('main-header').style.display = 'flex';
+  mostrarView('view-dashboard');
+  carregarEmpresas();
+}
+
+// ══ VIEWS ══
+function mostrarView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ══ CARREGAR EMPRESAS ══
+function carregarEmpresas() {
+  if (!db) return;
+  db.collection('empresas').orderBy('criadoEm','desc').onSnapshot(snap => {
+    empresas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderEmpresas();
+    atualizarStats();
+  });
+}
+
+function atualizarStats() {
+  document.getElementById('stat-total').textContent = empresas.length;
+  const andamento = empresas.filter(e => {
+    const prog = calcProgresso(e);
+    return prog > 0 && prog < 100;
+  }).length;
+  const concluidos = empresas.filter(e => calcProgresso(e) === 100).length;
+  document.getElementById('stat-andamento').textContent = andamento;
+  document.getElementById('stat-concluidos').textContent = concluidos;
+}
+
+function calcProgresso(empresa) {
+  if (!empresa.fases) return 0;
+  let total = 0, done = 0;
+  FASES_PADRAO.forEach(f => {
+    const fase = empresa.fases[f.id] || {};
+    f.atividades.forEach((_, i) => {
+      total++;
+      if (fase.atividades && fase.atividades[i]) done++;
+    });
+  });
+  return total ? Math.round((done/total)*100) : 0;
+}
+
+function faseAtualIndex(empresa) {
+  for (let i = 0; i < FASES_PADRAO.length; i++) {
+    const f = FASES_PADRAO[i];
+    const fase = empresa.fases && empresa.fases[f.id];
+    if (!fase || fase.status !== 'concluida') return i;
+  }
+  return FASES_PADRAO.length - 1;
+}
+
+function renderEmpresas() {
+  const grid = document.getElementById('empresas-grid');
+  grid.innerHTML = '';
+
+  // add card
+  const addCard = document.createElement('div');
+  addCard.className = 'add-card';
+  addCard.onclick = abrirModalEmpresa;
+  addCard.innerHTML = `<div class="add-icon">＋</div><span>Nova Empresa</span><small style="color:var(--text2);font-size:0.78rem">Iniciar novo projeto PCCS</small>`;
+  grid.appendChild(addCard);
+
+  empresas.forEach(emp => {
+    const prog = calcProgresso(emp);
+    const faseIdx = faseAtualIndex(emp);
+    const card = document.createElement('div');
+    card.className = 'empresa-card';
+    card.onclick = () => abrirFases(emp.id);
+
+    const dotsHtml = FASES_PADRAO.map((f, i) => {
+      const fase = emp.fases && emp.fases[f.id];
+      let cls = '';
+      if (fase && fase.status === 'concluida') cls = 'done';
+      else if (i === faseIdx) cls = 'active';
+      return `<div class="fase-dot ${cls}"></div>`;
+    }).join('');
+
+    const data = emp.criadoEm ? new Date(emp.criadoEm.seconds*1000).toLocaleDateString('pt-BR') : '';
+
+    card.innerHTML = `
+      <div class="empresa-icon">${emp.emoji || '🏢'}</div>
+      <div class="empresa-nome">${emp.nome}</div>
+      <div class="empresa-setor">${emp.setor || 'Sem setor definido'}</div>
+      <div class="empresa-progress-bar">
+        <div class="empresa-progress-fill" style="width:${prog}%"></div>
+      </div>
+      <div class="empresa-progress-info">
+        <span>Progresso</span>
+        <strong>${prog}%</strong>
+      </div>
+      <div class="fases-mini">${dotsHtml}</div>
+      ${data ? `<div class="empresa-data">Iniciado em ${data}</div>` : ''}
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ══ MODAL EMPRESA ══
+function abrirModalEmpresa() {
+  ['emp-nome','emp-setor','emp-responsavel','emp-emoji'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('modal-empresa').classList.add('open');
+}
+
+function fecharModal() {
+  document.getElementById('modal-empresa').classList.remove('open');
+}
+
+async function salvarEmpresa() {
+  const nome = document.getElementById('emp-nome').value.trim();
+  if (!nome) { toast('⚠️ Digite o nome da empresa'); return; }
+
+  const dados = {
+    nome,
+    setor: document.getElementById('emp-setor').value.trim(),
+    responsavel: document.getElementById('emp-responsavel').value.trim(),
+    emoji: document.getElementById('emp-emoji').value.trim() || '🏢',
+    fases: {},
+    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  FASES_PADRAO.forEach(f => {
+    dados.fases[f.id] = { status: 'pendente', atividades: {} };
+  });
+
+  try {
+    await db.collection('empresas').add(dados);
+    fecharModal();
+    toast('✅ Empresa criada com sucesso!');
+  } catch(e) {
+    toast('❌ Erro ao salvar');
+  }
+}
+
+// ══ FASES ══
+function abrirFases(id) {
+  empresaAtual = empresas.find(e => e.id === id);
+  if (!empresaAtual) return;
+  faseAberta = null;
+  renderFases();
+  mostrarView('view-fases');
+}
+
+function voltarDashboard() {
+  mostrarView('view-dashboard');
+}
+
+function renderFases() {
+  const emp = empresaAtual;
+  const prog = calcProgresso(emp);
+
+  // header
+  document.getElementById('empresa-header-info').innerHTML = `
+    <div class="empresa-icon" style="width:56px;height:56px;font-size:1.6rem">${emp.emoji||'🏢'}</div>
+    <div class="empresa-header-info">
+      <h2>${emp.nome}</h2>
+      <p>${emp.setor||''} ${emp.responsavel ? '· Resp: '+emp.responsavel : ''}</p>
+    </div>
+    <div class="empresa-header-actions">
+      <button class="btn btn-outline btn-danger" onclick="excluirEmpresa('${emp.id}')">🗑 Excluir</button>
+    </div>
+  `;
+
+  // progresso geral
+  document.getElementById('progresso-geral').innerHTML = `
+    <div>
+      <div class="lbl">Progresso geral do PCCS</div>
+    </div>
+    <div class="bar">
+      <div class="bar-bg"><div class="bar-fill" style="width:${prog}%"></div></div>
+    </div>
+    <div class="pct">${prog}%</div>
+  `;
+
+  // fases
+  const list = document.getElementById('fases-list');
+  list.innerHTML = '';
+
+  FASES_PADRAO.forEach((f, idx) => {
+    const faseData = emp.fases && emp.fases[f.id] || { status: 'pendente', atividades: {} };
+    const status = faseData.status || 'pendente';
+    const isOpen = faseAberta === f.id;
+
+    const card = document.createElement('div');
+    card.className = `fase-card ${status === 'concluida' ? 'concluida' : status === 'andamento' ? 'ativa' : ''}`;
+    card.id = 'fase-card-' + f.id;
+
+    const statusLabel = { pendente:'Pendente', andamento:'Em andamento', concluida:'Concluída' }[status];
+    const statusCls = { pendente:'status-pendente', andamento:'status-andamento', concluida:'status-concluida' }[status];
+
+    const atvsHtml = f.atividades.map((atv, i) => {
+      const done = faseData.atividades && faseData.atividades[i];
+      return `
+        <div class="atividade-item ${done?'done':''}" onclick="toggleAtividade('${f.id}',${i})">
+          <div class="atividade-check"></div>
+          <span>${atv}</span>
+        </div>
+      `;
+    }).join('');
+
+    card.innerHTML = `
+      <div class="fase-header" onclick="toggleFase('${f.id}')">
+        <div class="fase-num">${idx+1}</div>
+        <div class="fase-info">
+          <h3>${f.nome}</h3>
+          <p>${f.descricao}</p>
+        </div>
+        <div class="fase-status ${statusCls}">${statusLabel}</div>
+      </div>
+      <div class="fase-body ${isOpen?'open':''}" id="fase-body-${f.id}">
+        <div class="fase-divider"></div>
+        <div class="atividades-list">${atvsHtml}</div>
+        <div class="fase-actions">
+          ${status !== 'andamento' ? `<button class="btn btn-outline" style="font-size:0.82rem;padding:0.6rem 1rem" onclick="mudarStatus('${f.id}','andamento')">▶ Iniciar fase</button>` : ''}
+          ${status !== 'concluida' ? `<button class="btn btn-gold" style="font-size:0.82rem;padding:0.6rem 1rem" onclick="mudarStatus('${f.id}','concluida')">✓ Concluir fase</button>` : ''}
+          ${status === 'concluida' ? `<button class="btn btn-outline" style="font-size:0.82rem;padding:0.6rem 1rem" onclick="mudarStatus('${f.id}','andamento')">↩ Reabrir</button>` : ''}
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function toggleFase(faseId) {
+  faseAberta = faseAberta === faseId ? null : faseId;
+  FASES_PADRAO.forEach(f => {
+    const body = document.getElementById('fase-body-' + f.id);
+    if (body) body.classList.toggle('open', faseAberta === f.id);
+  });
+}
+
+async function toggleAtividade(faseId, idx) {
+  const emp = empresaAtual;
+  const faseData = emp.fases && emp.fases[faseId] || { atividades: {} };
+  const atual = faseData.atividades && faseData.atividades[idx];
+
+  const update = {};
+  update[`fases.${faseId}.atividades.${idx}`] = !atual;
+
+  try {
+    await db.collection('empresas').doc(emp.id).update(update);
+  } catch(e) { toast('❌ Erro ao salvar'); }
+}
+
+async function mudarStatus(faseId, status) {
+  const update = {};
+  update[`fases.${faseId}.status`] = status;
+  try {
+    await db.collection('empresas').doc(empresaAtual.id).update(update);
+    toast(status === 'concluida' ? '✅ Fase concluída!' : '▶ Fase iniciada!');
+  } catch(e) { toast('❌ Erro'); }
+}
+
+async function excluirEmpresa(id) {
+  if (!confirm('Excluir esta empresa? Todos os dados serão perdidos.')) return;
+  try {
+    await db.collection('empresas').doc(id).delete();
+    voltarDashboard();
+    toast('🗑 Empresa excluída');
+  } catch(e) { toast('❌ Erro ao excluir'); }
+}
+
+// ══ TOAST ══
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ══ FECHAR MODAL CLICANDO FORA ══
+document.getElementById('modal-empresa').addEventListener('click', function(e) {
+  if (e.target === this) fecharModal();
+});
+
+// ══ AUTH OBSERVER ══
+if (auth) {
+  auth.onAuthStateChanged(user => {
+    if (user) mostrarDashboard(user.displayName || user.email);
+  });
+}
+
+// ══ OBSERVER DE MUDANÇAS ══
+if (db) {
+  const origCarregar = carregarEmpresas;
+}
+
+// Atualiza fases quando dados mudam
+function setupEmpresaListener(id) {
+  db.collection('empresas').doc(id).onSnapshot(snap => {
+    if (!snap.exists) return;
+    empresaAtual = { id: snap.id, ...snap.data() };
+    // atualiza na lista também
+    const idx = empresas.findIndex(e => e.id === id);
+    if (idx >= 0) empresas[idx] = empresaAtual;
+    if (document.getElementById('view-fases').classList.contains('active')) {
+      renderFases();
+    }
+  });
+}
+
+const origAbrirFases = abrirFases;
+function abrirFases(id) {
+  empresaAtual = empresas.find(e => e.id === id);
+  if (!empresaAtual) return;
+  faseAberta = null;
+  renderFases();
+  mostrarView('view-fases');
+  setupEmpresaListener(id);
+}
+</script>
+</body>
+</html>
