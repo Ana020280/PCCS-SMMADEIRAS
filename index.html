@@ -544,12 +544,36 @@ function irPara(id){
 }
 
 // ══ EMPRESAS FIREBASE ══
+const EMP_KEY='pccs360_empresas';
+
+function getEmpresasLocal(){
+  try{return JSON.parse(localStorage.getItem(EMP_KEY)||'[]');}catch{return[];}
+}
+function saveEmpresasLocal(lista){
+  localStorage.setItem(EMP_KEY,JSON.stringify(lista));
+}
+
 function carregarEmpresas(){
-  if(typeof db==='undefined')return;
-  db.collection('empresas').orderBy('criadoEm','desc').onSnapshot(snap=>{
-    empresas=snap.docs.map(d=>({id:d.id,...d.data()}));
+  // Tenta Firebase primeiro, usa localStorage como fallback
+  if(typeof db!=='undefined'){
+    try{
+      db.collection('empresas').orderBy('criadoEm','desc').onSnapshot(snap=>{
+        empresas=snap.docs.map(d=>({id:d.id,...d.data()}));
+        saveEmpresasLocal(empresas); // sincroniza local
+        renderDashboard();renderEmpresas();
+      }, err=>{
+        // Firebase falhou, usa local
+        empresas=getEmpresasLocal();
+        renderDashboard();renderEmpresas();
+      });
+    }catch(e){
+      empresas=getEmpresasLocal();
+      renderDashboard();renderEmpresas();
+    }
+  } else {
+    empresas=getEmpresasLocal();
     renderDashboard();renderEmpresas();
-  });
+  }
 }
 
 function calcProg(emp){
@@ -728,9 +752,48 @@ function renderDetalhe(){
 }
 
 function toggleFase(id){faseAberta=faseAberta===id?null:id;FASES.forEach(f=>{const b=document.getElementById('fb-'+f.id);if(b)b.classList.toggle('open',faseAberta===f.id);});}
-async function toggleAtv(faseId,idx){if(!podeEditar()){toast('⚠️ Sem permissão.');return;}const fd=empAtual.fases&&empAtual.fases[faseId]||{atividades:{}};const u={};u[`fases.${faseId}.atividades.${idx}`]=!(fd.atividades&&fd.atividades[idx]);try{await db.collection('empresas').doc(empAtual.id).update(u);}catch(e){toast('❌ Erro');}}
-async function mudarSt(faseId,st){if(!podeEditar()){toast('⚠️ Sem permissão.');return;}const u={};u[`fases.${faseId}.status`]=st;try{await db.collection('empresas').doc(empAtual.id).update(u);toast(st==='concluida'?'✅ Fase concluída!':'▶ Fase iniciada!');}catch(e){toast('❌ Erro');}}
-async function excluirEmpresa(id){if(!podeExcluir()){toast('⚠️ Somente administradores.');return;}if(!confirm('Excluir esta empresa?'))return;try{await db.collection('empresas').doc(id).delete();irPara('pg-empresas');toast('🗑 Empresa excluída');}catch(e){toast('❌ Erro');}}
+async function toggleAtv(faseId,idx){
+  if(!podeEditar()){toast('⚠️ Sem permissão.');return;}
+  const fd=empAtual.fases&&empAtual.fases[faseId]||{atividades:{}};
+  const novoVal=!(fd.atividades&&fd.atividades[idx]);
+  // Atualiza local
+  if(!empAtual.fases)empAtual.fases={};
+  if(!empAtual.fases[faseId])empAtual.fases[faseId]={status:'pendente',atividades:{}};
+  if(!empAtual.fases[faseId].atividades)empAtual.fases[faseId].atividades={};
+  empAtual.fases[faseId].atividades[idx]=novoVal;
+  // Salva local
+  const lista=getEmpresasLocal();const i=lista.findIndex(e=>e.id===empAtual.id);if(i>=0)lista[i]=empAtual;else lista.unshift(empAtual);saveEmpresasLocal(lista);
+  // Tenta Firebase
+  if(typeof db!=='undefined'&&empAtual.id&&!empAtual.id.startsWith('local_')){
+    try{const u={};u[`fases.${faseId}.atividades.${idx}`]=novoVal;await db.collection('empresas').doc(empAtual.id).update(u);}catch(e){}
+  }
+  renderDetalhe();
+}
+async function mudarSt(faseId,st){
+  if(!podeEditar()){toast('⚠️ Sem permissão.');return;}
+  if(!empAtual.fases)empAtual.fases={};
+  if(!empAtual.fases[faseId])empAtual.fases[faseId]={status:'pendente',atividades:{}};
+  empAtual.fases[faseId].status=st;
+  const lista=getEmpresasLocal();const i=lista.findIndex(e=>e.id===empAtual.id);if(i>=0)lista[i]=empAtual;else lista.unshift(empAtual);saveEmpresasLocal(lista);
+  if(typeof db!=='undefined'&&empAtual.id&&!empAtual.id.startsWith('local_')){
+    try{const u={};u[`fases.${faseId}.status`]=st;await db.collection('empresas').doc(empAtual.id).update(u);}catch(e){}
+  }
+  renderDetalhe();renderDashboard();
+  toast(st==='concluida'?'✅ Fase concluída!':'▶ Fase iniciada!');
+}
+async function excluirEmpresa(id){
+  if(!podeExcluir()){toast('⚠️ Somente administradores.');return;}
+  if(!confirm('Excluir esta empresa? Todos os dados serão perdidos.'))return;
+  // Remove local
+  const lista=getEmpresasLocal().filter(e=>e.id!==id);saveEmpresasLocal(lista);
+  empresas=lista;
+  // Tenta Firebase
+  if(typeof db!=='undefined'&&id&&!id.startsWith('local_')){
+    try{await db.collection('empresas').doc(id).delete();}catch(e){}
+  }
+  irPara('pg-empresas');renderDashboard();
+  toast('🗑 Empresa excluída');
+}
 function setupListener(id){if(typeof db==='undefined')return;db.collection('empresas').doc(id).onSnapshot(snap=>{if(!snap.exists)return;empAtual={id:snap.id,...snap.data()};const idx=empresas.findIndex(e=>e.id===id);if(idx>=0)empresas[idx]=empAtual;if(document.getElementById('pg-detalhe').classList.contains('active'))renderDetalhe();});}
 
 // ══ EMPRESA MODAL ══
@@ -742,23 +805,39 @@ function abrirModalEmpresa(){
 async function salvarEmpresa(){
   const nome=document.getElementById('e-nome').value.trim();
   if(!nome){toast('⚠️ Digite o nome da empresa');return;}
+  const ts={seconds:Math.floor(Date.now()/1000)};
   const dados={
     nome,
     setor:document.getElementById('e-setor').value.trim(),
     lider:document.getElementById('e-lider').value.trim(),
     responsavel:document.getElementById('e-resp').value.trim(),
-    dataInicio:document.getElementById('e-inicio').value||'',
-    dataFim:document.getElementById('e-fim').value||'',
-    emoji:'🏢',
+    dataInicio:document.getElementById('e-data-inicio').value||document.getElementById('e-inicio')?.value||'',
+    dataFim:document.getElementById('e-data-fim').value||document.getElementById('e-fim')?.value||'',
     fases:{},
-    criadoEm:firebase.firestore.FieldValue.serverTimestamp()
+    criadoEm:ts
   };
   FASES.forEach(f=>{dados.fases[f.id]={status:'pendente',atividades:{}};});
-  try{
-    await db.collection('empresas').add(dados);
-    fecharModal('mo-empresa');
-    toast('✅ Empresa criada!');
-  }catch(e){toast('❌ Erro ao salvar — verifique conexão');}
+
+  // Tenta Firebase, senão salva local
+  let ok=false;
+  if(typeof db!=='undefined'){
+    try{
+      const df={...dados,criadoEm:firebase.firestore.FieldValue.serverTimestamp()};
+      await db.collection('empresas').add(df);
+      ok=true;
+    }catch(e){ok=false;}
+  }
+  if(!ok){
+    // Salva no localStorage como fallback
+    const lista=getEmpresasLocal();
+    dados.id='local_'+Date.now();
+    lista.unshift(dados);
+    saveEmpresasLocal(lista);
+    empresas=lista;
+    renderDashboard();renderEmpresas();
+  }
+  fecharModal('mo-empresa');
+  toast('✅ Empresa criada com sucesso!');
 }
 
 // ══ SENHA ══
