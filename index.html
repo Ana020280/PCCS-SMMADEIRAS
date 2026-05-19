@@ -10,391 +10,268 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <style>
 :root {
-  --navy:  #1a2744;
-  --navy2: #243558;
-  --navy3: #0f1824;
-  --navy4: #162033;
-  --gold:  #c9a84c;
-  --gold2: #e2c97e;
-  --white: #ffffff;
-  --text:  #f0ece0;
-  --text2: #8a9bb5;
-  --danger:#e05c5c;
-  --success:#4caf7d;
-  --border:rgba(201,168,76,0.25);
-  --r: 12px;
+  --navy:#1a2744; --navy2:#243558; --navy3:#0f1824;
+  --gold:#c9a84c; --gold2:#e2c97e; --gold-dim:rgba(201,168,76,0.13);
+  --white:#ffffff; --text:#f0ece0; --text2:#8a9bb5;
+  --danger:#e05c5c; --success:#4caf7d; --warn:#f0a500;
+  --border:rgba(201,168,76,0.22); --r:12px;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--navy3);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
 
-/* ════ LOGIN ════ */
-#view-login {
-  min-height:100vh;
-  display:none;
-  align-items:stretch;
-}
-#view-login.active { display:flex; }
+/* LOGIN */
+#view-login{min-height:100vh;display:none;align-items:stretch;}
+#view-login.active{display:flex;}
+.login-left{flex:1.1;background:linear-gradient(145deg,var(--navy) 0%,var(--navy2) 60%,#1e3060 100%);display:flex;align-items:center;justify-content:center;padding:3rem 2.5rem;position:relative;overflow:hidden;border-right:1px solid #e4ddd0;}
+.login-left::before{content:'';position:absolute;top:0;left:0;width:140px;height:140px;border-top:4px solid var(--gold);border-left:4px solid var(--gold);opacity:0.2;pointer-events:none;}
+.login-left::after{content:'';position:absolute;bottom:0;right:0;width:140px;height:140px;border-bottom:4px solid var(--gold);border-right:4px solid var(--gold);opacity:0.2;}
+.logo-wrap{position:relative;z-index:1;text-align:center;max-width:500px;width:100%;display:flex;flex-direction:column;align-items:center;gap:1.5rem;}
+.logo-wrap img{width:100%;max-width:460px;filter:drop-shadow(0 12px 32px rgba(26,39,68,0.2));animation:floatIn 0.8s ease both;}
+.logo-wrap .tagline{font-family:'Syne',sans-serif;font-weight:600;font-size:0.75rem;letter-spacing:0.22em;color:#c9a84c;text-transform:uppercase;padding:0.5rem 1.5rem;border:1px solid rgba(201,168,76,0.45);border-radius:99px;background:rgba(201,168,76,0.07);}
+.login-right{flex:0.9;background:var(--navy3);display:flex;align-items:center;justify-content:center;padding:3rem 2.5rem;}
+.login-box{width:100%;max-width:370px;animation:floatIn 0.9s 0.1s ease both;}
+@keyframes floatIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.login-brand{margin-bottom:2.5rem;}
+.login-brand h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;color:var(--white);margin-bottom:0.4rem;}
+.login-brand h2 span{color:var(--gold);}
+.login-brand p{color:var(--text2);font-size:0.88rem;line-height:1.5;}
+.login-brand .divider{width:40px;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px;margin-top:1rem;}
+.field-label{display:block;font-size:0.72rem;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:0.5rem;}
+.field-wrap{position:relative;margin-bottom:1.2rem;}
+.field-wrap input{width:100%;padding:0.9rem 3rem 0.9rem 1rem;background:var(--navy2);border:1.5px solid var(--border);border-radius:var(--r);color:var(--white);font-family:'DM Sans',sans-serif;font-size:0.95rem;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+.field-wrap input::placeholder{color:var(--text2);}
+.field-wrap input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,0.1);}
+.eye-btn{position:absolute;right:0.9rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);display:flex;align-items:center;padding:0.2rem;transition:color 0.2s;}
+.eye-btn:hover{color:var(--gold);}
+.eye-btn svg{width:18px;height:18px;}
+.btn-entrar{width:100%;padding:1rem;background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 100%);color:var(--navy);font-family:'Syne',sans-serif;font-weight:800;font-size:0.95rem;letter-spacing:0.06em;border:none;border-radius:var(--r);cursor:pointer;transition:all 0.2s;margin-top:0.5rem;box-shadow:0 4px 16px rgba(201,168,76,0.2);}
+.btn-entrar:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(201,168,76,0.35);}
+.login-erro{color:var(--danger);font-size:0.82rem;margin-top:0.9rem;min-height:1.1rem;text-align:center;}
+.login-footer{margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(201,168,76,0.12);text-align:center;color:var(--text2);font-size:0.75rem;}
+.login-footer span{color:var(--gold);}
 
-/* LADO ESQUERDO — logo */
-.login-left {
-  flex: 1.15;
-  background: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 2.5rem;
-  position: relative;
-  overflow: hidden;
-  border-right: 1px solid #e4ddd0;
-}
-.login-left::before {
-  content:'';
-  position:absolute; top:0; left:0; width:140px; height:140px;
-  border-top:4px solid var(--gold); border-left:4px solid var(--gold);
-  opacity:0.2; pointer-events:none;
-}
-.login-left::after {
-  content:'';
-  position:absolute; bottom:0; right:0; width:140px; height:140px;
-  border-bottom:4px solid var(--gold); border-right:4px solid var(--gold);
-  opacity:0.2;
-}
-.logo-wrap {
-  position:relative; z-index:1;
-  text-align:center;
-  max-width:500px; width:100%;
-  display:flex; flex-direction:column; align-items:center; gap:1.5rem;
-}
-.logo-wrap img {
-  width:100%; max-width:460px;
-  filter: drop-shadow(0 12px 32px rgba(26,39,68,0.1));
-  animation: floatIn 0.8s ease both;
-}
-.logo-wrap .tagline {
-  font-family:'Syne',sans-serif; font-weight:600;
-  font-size:0.75rem; letter-spacing:0.22em;
-  color:var(--navy); text-transform:uppercase;
-  padding:0.5rem 1.5rem;
-  border:1px solid rgba(201,168,76,0.45);
-  border-radius:99px;
-  background:rgba(201,168,76,0.07);
-}
-@keyframes floatIn {
-  from{opacity:0;transform:translateY(20px)}
-  to{opacity:1;transform:translateY(0)}
-}
+/* HEADER */
+header{background:var(--navy);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:none;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+header.show{display:flex;}
+.logo-header{display:flex;align-items:center;gap:0.8rem;font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:var(--gold);}
+.logo-header img{height:34px;object-fit:contain;}
+.logo-header small{color:var(--text2);font-weight:400;font-size:0.72rem;display:block;}
+.header-right{display:flex;align-items:center;gap:1rem;position:relative;}
+.hdr-name{font-size:0.85rem;color:var(--gold2);font-family:'Syne',sans-serif;font-weight:600;}
+.hdr-role{font-size:0.7rem;color:var(--text2);background:var(--navy2);padding:0.15rem 0.5rem;border-radius:99px;border:1px solid var(--border);}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--gold-dim);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;color:var(--gold);font-size:0.82rem;cursor:pointer;user-select:none;}
 
-/* LADO DIREITO — form */
-.login-right {
-  flex: 0.9;
-  background: var(--navy3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 2.5rem;
-  border-left: 1px solid rgba(201,168,76,0.1);
-}
-.login-box {
-  width:100%; max-width:370px;
-  animation: floatIn 0.9s 0.1s ease both;
-}
+/* DROPDOWN MENU */
+.user-dropdown{position:absolute;right:0;top:calc(100% + 0.5rem);background:var(--navy);border:1px solid var(--border);border-radius:var(--r);padding:0.5rem;min-width:200px;z-index:300;box-shadow:0 8px 24px rgba(0,0,0,0.4);display:none;}
+.user-dropdown.open{display:block;}
+.udrop-header{padding:0.6rem 0.8rem;font-size:0.78rem;color:var(--text2);border-bottom:1px solid var(--border);margin-bottom:0.3rem;}
+.udrop-header strong{display:block;color:var(--gold2);font-family:'Syne',sans-serif;}
+.udrop-item{padding:0.6rem 0.8rem;border-radius:8px;cursor:pointer;font-size:0.85rem;transition:background 0.15s;display:flex;align-items:center;gap:0.6rem;color:var(--text);}
+.udrop-item:hover{background:var(--navy2);}
+.udrop-item.danger{color:var(--danger);}
+.udrop-divider{height:1px;background:var(--border);margin:0.3rem 0;}
 
-.login-brand {
-  margin-bottom: 2.5rem;
-}
-.login-brand h1 {
-  font-family:'Syne',sans-serif; font-weight:800;
-  font-size:2rem; color:var(--white);
-  letter-spacing:0.02em;
-}
-.login-brand h1 span { color:var(--gold); }
-.login-brand p {
-  color:var(--text2); font-size:0.85rem;
-  margin-top:0.4rem; line-height:1.5;
-}
-.login-brand .divider {
-  width:40px; height:3px;
-  background:linear-gradient(90deg,var(--gold),var(--gold2));
-  border-radius:99px; margin-top:1rem;
-}
-
-/* CAMPO */
-.field { margin-bottom:1.2rem; }
-.field label {
-  display:block; font-size:0.72rem; font-weight:500;
-  color:var(--text2); text-transform:uppercase;
-  letter-spacing:0.12em; margin-bottom:0.5rem;
-}
-.field-wrap { position:relative; }
-.field-wrap input {
-  width:100%; padding:0.9rem 3rem 0.9rem 1rem;
-  background: var(--navy2);
-  border: 1.5px solid rgba(201,168,76,0.2);
-  border-radius:var(--r);
-  color:var(--white);
-  font-family:'DM Sans',sans-serif; font-size:0.95rem;
-  outline:none; transition: border-color 0.2s, box-shadow 0.2s;
-}
-.field-wrap input::placeholder { color:var(--text2); }
-.field-wrap input:focus {
-  border-color:var(--gold);
-  box-shadow:0 0 0 3px rgba(201,168,76,0.1);
-}
-/* olho */
-.eye-btn {
-  position:absolute; right:0.9rem; top:50%;
-  transform:translateY(-50%);
-  background:none; border:none; cursor:pointer;
-  color:var(--text2); display:flex; align-items:center;
-  padding:0.2rem; transition:color 0.2s;
-}
-.eye-btn:hover { color:var(--gold); }
-.eye-btn svg { width:18px; height:18px; }
-
-/* BOTÃO LOGIN */
-.btn-entrar {
-  width:100%; padding:1rem;
-  background:linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
-  color:var(--navy);
-  font-family:'Syne',sans-serif; font-weight:800;
-  font-size:0.95rem; letter-spacing:0.06em;
-  border:none; border-radius:var(--r);
-  cursor:pointer; transition:all 0.2s;
-  margin-top:0.5rem;
-  box-shadow: 0 4px 16px rgba(201,168,76,0.2);
-}
-.btn-entrar:hover {
-  transform:translateY(-2px);
-  box-shadow:0 8px 28px rgba(201,168,76,0.35);
-}
-.btn-entrar:active { transform:translateY(0); }
-
-.login-erro {
-  color:var(--danger); font-size:0.82rem;
-  margin-top:0.9rem; min-height:1.1rem;
-  text-align:center;
-}
-
-.login-footer {
-  margin-top:2rem; padding-top:1.5rem;
-  border-top:1px solid rgba(201,168,76,0.12);
-  text-align:center;
-  color:var(--text2); font-size:0.75rem;
-}
-.login-footer span { color:var(--gold); }
-
-/* ════ HEADER ════ */
-header {
-  background:var(--navy);
-  border-bottom:1px solid var(--border);
-  padding:0 2rem; height:64px;
-  display:none; align-items:center; justify-content:space-between;
-  position:sticky; top:0; z-index:100;
-}
-header.show { display:flex; }
-.logo-header {
-  display:flex; align-items:center; gap:0.8rem;
-  font-family:'Syne',sans-serif; font-weight:800;
-  font-size:1.15rem; color:var(--gold);
-}
-.logo-header img { height:34px; object-fit:contain; }
-.logo-header small { color:var(--text2); font-weight:400; font-size:0.72rem; display:block; }
-.header-right { display:flex; align-items:center; gap:1rem; }
-.hdr-name { font-size:0.85rem; color:var(--gold2); font-family:'Syne',sans-serif; font-weight:600; }
-.avatar {
-  width:36px; height:36px; border-radius:50%;
-  background:rgba(201,168,76,0.13); border:2px solid var(--gold);
-  display:flex; align-items:center; justify-content:center;
-  font-family:'Syne',sans-serif; font-weight:700; color:var(--gold);
-  font-size:0.82rem; cursor:pointer;
-}
-
-/* ════ VIEWS ════ */
-.view { display:none; padding:2rem; max-width:1100px; margin:0 auto; }
-.view.active { display:block; }
+/* VIEWS */
+.view{display:none;padding:2rem;max-width:1100px;margin:0 auto;}
+.view.active{display:block;}
 
 /* DASHBOARD */
-.page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:2rem; flex-wrap:wrap; gap:1rem; }
-.page-title { font-family:'Syne',sans-serif; font-weight:800; font-size:1.8rem; }
-.page-title span { color:var(--gold); }
-.stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:1rem; margin-bottom:2rem; }
-.stat-card { background:var(--navy); border:1px solid var(--border); border-radius:var(--r); padding:1.2rem; text-align:center; }
-.stat-card .num { font-family:'Syne',sans-serif; font-weight:800; font-size:2rem; color:var(--gold); }
-.stat-card .lbl { color:var(--text2); font-size:0.75rem; margin-top:0.2rem; text-transform:uppercase; letter-spacing:0.08em; }
-.empresas-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:1.2rem; }
-.empresa-card { background:var(--navy); border:1px solid var(--border); border-radius:16px; padding:1.5rem; cursor:pointer; transition:all 0.25s; position:relative; overflow:hidden; }
-.empresa-card:hover { border-color:var(--gold); transform:translateY(-3px); box-shadow:0 8px 30px rgba(201,168,76,0.1); }
-.empresa-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--gold),var(--gold2)); opacity:0; transition:opacity 0.25s; }
-.empresa-card:hover::before { opacity:1; }
-.empresa-icon { width:48px; height:48px; border-radius:12px; background:rgba(201,168,76,0.13); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:1rem; }
-.empresa-nome { font-family:'Syne',sans-serif; font-weight:700; font-size:1.05rem; margin-bottom:0.3rem; }
-.empresa-setor { color:var(--text2); font-size:0.8rem; margin-bottom:1rem; }
-.empresa-progress-bar { height:4px; background:var(--navy2); border-radius:99px; margin-bottom:0.5rem; overflow:hidden; }
-.empresa-progress-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold2)); border-radius:99px; transition:width 0.5s; }
-.empresa-progress-info { display:flex; justify-content:space-between; font-size:0.78rem; color:var(--text2); }
-.empresa-progress-info strong { color:var(--gold); }
-.fases-mini { display:flex; gap:4px; margin-top:1rem; }
-.fase-dot { flex:1; height:6px; border-radius:99px; background:var(--navy2); }
-.fase-dot.done { background:var(--gold); }
-.fase-dot.active { background:var(--gold2); opacity:0.6; }
-.empresa-data { color:var(--text2); font-size:0.75rem; margin-top:0.8rem; }
-.add-card { background:transparent; border:2px dashed var(--border); border-radius:16px; padding:1.5rem; cursor:pointer; transition:all 0.25s; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:180px; gap:0.8rem; color:var(--text2); }
-.add-card:hover { border-color:var(--gold); color:var(--gold); }
-.add-card .add-icon { width:48px; height:48px; border-radius:12px; background:rgba(201,168,76,0.13); display:flex; align-items:center; justify-content:center; font-size:1.5rem; }
-.add-card span { font-family:'Syne',sans-serif; font-weight:600; font-size:0.9rem; }
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;}
+.page-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;}
+.page-title span{color:var(--gold);}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:2rem;}
+.stat-card{background:var(--navy);border:1px solid var(--border);border-radius:var(--r);padding:1.2rem;text-align:center;}
+.stat-card .num{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;color:var(--gold);}
+.stat-card .lbl{color:var(--text2);font-size:0.75rem;margin-top:0.2rem;text-transform:uppercase;letter-spacing:0.08em;}
+.empresas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1.2rem;}
+.empresa-card{background:var(--navy);border:1px solid var(--border);border-radius:16px;padding:1.5rem;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;}
+.empresa-card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 8px 30px rgba(201,168,76,0.1);}
+.empresa-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));opacity:0;transition:opacity 0.25s;}
+.empresa-card:hover::before{opacity:1;}
+.empresa-icon{width:48px;height:48px;border-radius:12px;background:var(--gold-dim);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1rem;}
+.empresa-nome{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:0.3rem;}
+.empresa-setor{color:var(--text2);font-size:0.8rem;margin-bottom:1rem;}
+.empresa-progress-bar{height:4px;background:var(--navy2);border-radius:99px;margin-bottom:0.5rem;overflow:hidden;}
+.empresa-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px;transition:width 0.5s;}
+.empresa-progress-info{display:flex;justify-content:space-between;font-size:0.78rem;color:var(--text2);}
+.empresa-progress-info strong{color:var(--gold);}
+.fases-mini{display:flex;gap:4px;margin-top:1rem;}
+.fase-dot{flex:1;height:6px;border-radius:99px;background:var(--navy2);}
+.fase-dot.done{background:var(--gold);}
+.fase-dot.active{background:var(--gold2);opacity:0.6;}
+.empresa-data{color:var(--text2);font-size:0.75rem;margin-top:0.8rem;}
+.add-card{background:transparent;border:2px dashed var(--border);border-radius:16px;padding:1.5rem;cursor:pointer;transition:all 0.25s;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;gap:0.8rem;color:var(--text2);}
+.add-card:hover{border-color:var(--gold);color:var(--gold);}
+.add-card .add-icon{width:48px;height:48px;border-radius:12px;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;font-size:1.5rem;}
+.add-card span{font-family:'Syne',sans-serif;font-weight:600;font-size:0.9rem;}
+
+/* BTN */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.8rem 1.6rem;border-radius:var(--r);font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;border:none;transition:all 0.2s;}
+.btn-gold{background:var(--gold);color:var(--navy);}
+.btn-gold:hover{background:var(--gold2);transform:translateY(-1px);}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2);}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold);}
+.btn-danger{background:rgba(224,92,92,0.12);border:1px solid rgba(224,92,92,0.3);color:var(--danger);}
+.btn-sm{padding:0.4rem 0.9rem;font-size:0.78rem;}
 
 /* MODAL */
-.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:200; display:none; align-items:center; justify-content:center; padding:1rem; }
-.modal-overlay.open { display:flex; }
-.modal { background:var(--navy); border:1px solid var(--border); border-radius:20px; padding:2rem; width:100%; max-width:460px; animation:slideUp 0.25s ease; }
-@keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-.modal h2 { font-family:'Syne',sans-serif; font-weight:800; font-size:1.3rem; margin-bottom:1.5rem; color:var(--gold); }
-.form-group { margin-bottom:1rem; }
-.form-group label { display:block; font-size:0.78rem; color:var(--text2); margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:0.08em; }
-.modal-btns { display:flex; gap:0.8rem; margin-top:1.5rem; }
-.modal-btns .btn { flex:1; }
-.btn { display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; padding:0.8rem 1.6rem; border-radius:var(--r); font-family:'Syne',sans-serif; font-weight:700; font-size:0.88rem; cursor:pointer; border:none; transition:all 0.2s; }
-.btn-gold { background:var(--gold); color:var(--navy); }
-.btn-gold:hover { background:var(--gold2); transform:translateY(-1px); }
-.btn-outline { background:transparent; border:1px solid var(--border); color:var(--text2); }
-.btn-outline:hover { border-color:var(--gold); color:var(--gold); }
-.btn-danger { background:rgba(224,92,92,0.12); border:1px solid rgba(224,92,92,0.3); color:var(--danger); }
-.inp-m { width:100%; padding:0.85rem 1rem; background:var(--navy2); border:1.5px solid var(--border); border-radius:var(--r); color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.95rem; outline:none; transition:border-color 0.2s; }
-.inp-m:focus { border-color:var(--gold); }
-.inp-m::placeholder { color:var(--text2); }
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--navy);border:1px solid var(--border);border-radius:20px;padding:2rem;width:100%;max-width:480px;animation:slideUp 0.25s ease;max-height:90vh;overflow-y:auto;}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.modal h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;margin-bottom:1.5rem;color:var(--gold);}
+.form-group{margin-bottom:1rem;}
+.form-group label{display:block;font-size:0.78rem;color:var(--text2);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.08em;}
+.inp-m{width:100%;padding:0.85rem 1rem;background:var(--navy2);border:1.5px solid var(--border);border-radius:var(--r);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.95rem;outline:none;transition:border-color 0.2s;}
+.inp-m:focus{border-color:var(--gold);}
+.inp-m::placeholder{color:var(--text2);}
+.inp-wrap{position:relative;}
+.inp-wrap .inp-m{padding-right:3rem;}
+.inp-wrap .eye-btn{position:absolute;right:0.9rem;top:50%;transform:translateY(-50%);}
+.select-m{width:100%;padding:0.85rem 1rem;background:var(--navy2);border:1.5px solid var(--border);border-radius:var(--r);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.95rem;outline:none;cursor:pointer;}
+.select-m:focus{border-color:var(--gold);}
+.modal-btns{display:flex;gap:0.8rem;margin-top:1.5rem;}
+.modal-btns .btn{flex:1;}
 
 /* FASES */
-.back-btn { display:inline-flex; align-items:center; gap:0.5rem; color:var(--text2); cursor:pointer; margin-bottom:1.5rem; font-size:0.88rem; transition:color 0.2s; background:none; border:none; }
-.back-btn:hover { color:var(--gold); }
-.empresa-header { background:var(--navy); border:1px solid var(--border); border-radius:16px; padding:1.5rem 2rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap; }
-.empresa-header-info { flex:1; }
-.empresa-header-info h2 { font-family:'Syne',sans-serif; font-weight:800; font-size:1.4rem; }
-.empresa-header-info p { color:var(--text2); font-size:0.85rem; margin-top:0.2rem; }
-.empresa-header-actions { display:flex; gap:0.7rem; }
-.fases-list { display:flex; flex-direction:column; gap:1rem; }
-.fase-card { background:var(--navy); border:1px solid var(--border); border-radius:16px; overflow:hidden; transition:border-color 0.25s; }
-.fase-card.ativa { border-color:var(--gold); }
-.fase-card.concluida { border-color:rgba(76,175,125,0.4); }
-.fase-header { padding:1.2rem 1.5rem; display:flex; align-items:center; gap:1rem; cursor:pointer; }
-.fase-num { width:36px; height:36px; border-radius:50%; background:var(--navy2); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:800; font-size:0.85rem; color:var(--text2); flex-shrink:0; }
-.fase-card.ativa .fase-num { border-color:var(--gold); color:var(--gold); background:rgba(201,168,76,0.13); }
-.fase-card.concluida .fase-num { border-color:var(--success); color:var(--success); background:rgba(76,175,125,0.1); }
-.fase-info { flex:1; }
-.fase-info h3 { font-family:'Syne',sans-serif; font-weight:700; font-size:1rem; }
-.fase-info p { color:var(--text2); font-size:0.8rem; margin-top:0.2rem; }
-.fase-status { font-size:0.73rem; font-family:'Syne',sans-serif; font-weight:700; padding:0.3rem 0.8rem; border-radius:99px; text-transform:uppercase; letter-spacing:0.08em; }
-.status-pendente { background:var(--navy2); color:var(--text2); }
-.status-andamento { background:rgba(201,168,76,0.15); color:var(--gold); }
-.status-concluida { background:rgba(76,175,125,0.15); color:var(--success); }
-.fase-body { padding:0 1.5rem; max-height:0; overflow:hidden; transition:max-height 0.35s ease, padding 0.35s; }
-.fase-body.open { max-height:600px; padding:0 1.5rem 1.5rem; }
-.fase-divider { height:1px; background:var(--border); margin-bottom:1.2rem; }
-.atividades-list { display:flex; flex-direction:column; gap:0.6rem; }
-.atividade-item { display:flex; align-items:center; gap:0.8rem; padding:0.7rem 1rem; background:var(--navy2); border-radius:var(--r); cursor:pointer; transition:background 0.2s; }
-.atividade-item:hover { background:#243558; }
-.atividade-check { width:20px; height:20px; border-radius:50%; border:2px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
-.atividade-item.done .atividade-check { background:var(--success); border-color:var(--success); }
-.atividade-item.done .atividade-check::after { content:'✓'; color:#fff; font-size:0.7rem; font-weight:700; }
-.atividade-item.done span { text-decoration:line-through; color:var(--text2); }
-.atividade-item span { flex:1; font-size:0.9rem; }
-.fase-actions { display:flex; gap:0.7rem; margin-top:1.2rem; flex-wrap:wrap; }
-.progresso-geral { background:var(--navy); border:1px solid var(--border); border-radius:16px; padding:1.2rem 1.5rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap; }
-.progresso-geral .bar { flex:1; min-width:150px; }
-.progresso-geral .bar-bg { height:8px; background:var(--navy2); border-radius:99px; overflow:hidden; }
-.progresso-geral .bar-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold2)); border-radius:99px; transition:width 0.5s; }
-.progresso-geral .pct { font-family:'Syne',sans-serif; font-weight:800; font-size:1.5rem; color:var(--gold); white-space:nowrap; }
-.progresso-geral .lbl { color:var(--text2); font-size:0.8rem; }
-.toast { position:fixed; bottom:2rem; right:2rem; background:var(--navy); border:1px solid var(--gold); border-radius:var(--r); padding:0.9rem 1.4rem; color:var(--text); font-size:0.88rem; z-index:999; transform:translateY(100px); transition:transform 0.3s; pointer-events:none; }
-.toast.show { transform:translateY(0); }
+.back-btn{display:inline-flex;align-items:center;gap:0.5rem;color:var(--text2);cursor:pointer;margin-bottom:1.5rem;font-size:0.88rem;transition:color 0.2s;background:none;border:none;}
+.back-btn:hover{color:var(--gold);}
+.empresa-header{background:var(--navy);border:1px solid var(--border);border-radius:16px;padding:1.5rem 2rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;}
+.empresa-header-info{flex:1;}
+.empresa-header-info h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;}
+.empresa-header-info p{color:var(--text2);font-size:0.85rem;margin-top:0.2rem;}
+.empresa-header-actions{display:flex;gap:0.7rem;}
+.fases-list{display:flex;flex-direction:column;gap:1rem;}
+.fase-card{background:var(--navy);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:border-color 0.25s;}
+.fase-card.ativa{border-color:var(--gold);}
+.fase-card.concluida{border-color:rgba(76,175,125,0.4);}
+.fase-header{padding:1.2rem 1.5rem;display:flex;align-items:center;gap:1rem;cursor:pointer;}
+.fase-num{width:36px;height:36px;border-radius:50%;background:var(--navy2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:0.85rem;color:var(--text2);flex-shrink:0;}
+.fase-card.ativa .fase-num{border-color:var(--gold);color:var(--gold);background:var(--gold-dim);}
+.fase-card.concluida .fase-num{border-color:var(--success);color:var(--success);background:rgba(76,175,125,0.1);}
+.fase-info{flex:1;}
+.fase-info h3{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;}
+.fase-info p{color:var(--text2);font-size:0.8rem;margin-top:0.2rem;}
+.fase-status{font-size:0.73rem;font-family:'Syne',sans-serif;font-weight:700;padding:0.3rem 0.8rem;border-radius:99px;text-transform:uppercase;letter-spacing:0.08em;}
+.status-pendente{background:var(--navy2);color:var(--text2);}
+.status-andamento{background:rgba(201,168,76,0.15);color:var(--gold);}
+.status-concluida{background:rgba(76,175,125,0.15);color:var(--success);}
+.fase-body{padding:0 1.5rem;max-height:0;overflow:hidden;transition:max-height 0.35s ease,padding 0.35s;}
+.fase-body.open{max-height:600px;padding:0 1.5rem 1.5rem;}
+.fase-divider{height:1px;background:var(--border);margin-bottom:1.2rem;}
+.atividades-list{display:flex;flex-direction:column;gap:0.6rem;}
+.atividade-item{display:flex;align-items:center;gap:0.8rem;padding:0.7rem 1rem;background:var(--navy2);border-radius:var(--r);cursor:pointer;transition:background 0.2s;}
+.atividade-item:hover{background:#243558;}
+.atividade-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.atividade-item.done .atividade-check{background:var(--success);border-color:var(--success);}
+.atividade-item.done .atividade-check::after{content:'✓';color:#fff;font-size:0.7rem;font-weight:700;}
+.atividade-item.done span{text-decoration:line-through;color:var(--text2);}
+.atividade-item span{flex:1;font-size:0.9rem;}
+.fase-actions{display:flex;gap:0.7rem;margin-top:1.2rem;flex-wrap:wrap;}
+.progresso-geral{background:var(--navy);border:1px solid var(--border);border-radius:16px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;}
+.progresso-geral .bar{flex:1;min-width:150px;}
+.progresso-geral .bar-bg{height:8px;background:var(--navy2);border-radius:99px;overflow:hidden;}
+.progresso-geral .bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px;transition:width 0.5s;}
+.progresso-geral .pct{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--gold);white-space:nowrap;}
+.progresso-geral .lbl{color:var(--text2);font-size:0.8rem;}
 
-@media(max-width:700px) {
-  #view-login { flex-direction:column; }
-  .login-left { flex:none; padding:2.5rem 1.5rem; }
-  .logo-wrap img { max-width:220px; }
-  .login-right { padding:2rem 1.5rem; }
-  header { padding:0 1rem; }
-  .view { padding:1rem; }
+/* USUÁRIOS */
+.user-table{width:100%;border-collapse:collapse;margin-top:1rem;}
+.user-table th{text-align:left;padding:0.7rem 1rem;font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid var(--border);}
+.user-table td{padding:0.8rem 1rem;border-bottom:1px solid rgba(201,168,76,0.08);font-size:0.88rem;vertical-align:middle;}
+.user-table tr:last-child td{border-bottom:none;}
+.role-badge{display:inline-flex;align-items:center;padding:0.25rem 0.7rem;border-radius:99px;font-size:0.72rem;font-family:'Syne',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;}
+.role-admin{background:rgba(201,168,76,0.15);color:var(--gold);border:1px solid rgba(201,168,76,0.3);}
+.role-editor{background:rgba(76,175,125,0.12);color:var(--success);border:1px solid rgba(76,175,125,0.3);}
+.role-visualizador{background:rgba(138,155,181,0.15);color:var(--text2);border:1px solid rgba(138,155,181,0.3);}
+.user-actions{display:flex;gap:0.4rem;}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--navy);border:1px solid var(--gold);border-radius:var(--r);padding:0.9rem 1.4rem;color:var(--text);font-size:0.88rem;z-index:999;transform:translateY(100px);transition:transform 0.3s;pointer-events:none;}
+.toast.show{transform:translateY(0);}
+
+/* BLOQUEIO PERMISSÃO */
+.no-perm{opacity:0.4;pointer-events:none;cursor:not-allowed;}
+
+@media(max-width:700px){
+  #view-login{flex-direction:column;}
+  .login-left{flex:none;padding:2.5rem 1.5rem;}
+  .logo-wrap img{max-width:220px;}
+  .login-right{padding:2rem 1.5rem;}
+  header{padding:0 1rem;}
+  .view{padding:1rem;}
+  .user-table{font-size:0.78rem;}
 }
 </style>
 </head>
 <body>
 
-<!-- ════ HEADER ════ -->
+<!-- HEADER -->
 <header id="main-header">
   <div class="logo-header">
     <img src="logo-pccs360.png" alt="PCCS 360" onerror="this.style.display='none'">
     <div>PCCS 360<small>Instituto Primazia</small></div>
   </div>
   <div class="header-right">
-    <span class="hdr-name" id="header-user-name"></span>
-    <div class="avatar" onclick="logout()" title="Sair">↩</div>
+    <div>
+      <div class="hdr-name" id="header-user-name"></div>
+      <div class="hdr-role" id="header-user-role"></div>
+    </div>
+    <div class="avatar" id="avatar-btn" onclick="toggleMenu()">AK</div>
+    <div class="user-dropdown" id="user-dropdown">
+      <div class="udrop-header">
+        <strong id="dd-nome"></strong>
+        <span id="dd-email" style="font-size:0.75rem"></span>
+      </div>
+      <div class="udrop-item" onclick="abrirModalSenha()">🔐 Alterar minha senha</div>
+      <div class="udrop-item" id="menu-usuarios" onclick="mostrarView('view-usuarios')" style="display:none">👥 Gerenciar usuários</div>
+      <div class="udrop-divider"></div>
+      <div class="udrop-item danger" onclick="logout()">↩ Sair do sistema</div>
+    </div>
   </div>
 </header>
 
-<!-- ════ LOGIN ════ -->
+<!-- LOGIN -->
 <div id="view-login" class="active">
-
-  <!-- ESQUERDA — LOGO GRANDE -->
   <div class="login-left">
     <div class="logo-wrap">
       <img src="logo-pccs360.png" alt="PCCS 360">
       <div class="tagline">Estrutura · Valorização · Estratégia · Visão 360°</div>
     </div>
   </div>
-
-  <!-- DIREITA — FORMULÁRIO -->
   <div class="login-right">
     <div class="login-box">
-
       <div class="login-brand">
-        <h1>Bem-vindo ao <span>PCCS 360</span></h1>
+        <h2>Bem-vindo ao <span>PCCS 360</span></h2>
         <p>Sistema de Gestão de Plano de Cargos,<br>Carreiras e Salários · Instituto Primazia</p>
         <div class="divider"></div>
       </div>
-
-      <!-- E-MAIL -->
-      <div class="field">
-        <label>E-mail</label>
-        <div class="field-wrap">
-          <input type="email" id="login-email" placeholder="seu@email.com.br">
-        </div>
+      <label class="field-label">E-mail</label>
+      <div class="field-wrap">
+        <input type="email" id="login-email" placeholder="seu@institutoprimazia.com.br">
       </div>
-
-      <!-- SENHA COM OLHO -->
-      <div class="field">
-        <label>Senha</label>
-        <div class="field-wrap">
-          <input type="password" id="login-senha" placeholder="••••••••"
-            onkeydown="if(event.key==='Enter')entrar()">
-          <button class="eye-btn" type="button" onclick="toggleSenha()" title="Mostrar/ocultar senha">
-            <!-- olho fechado (padrão) -->
-            <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/>
-            </svg>
-          </button>
-        </div>
+      <label class="field-label">Senha</label>
+      <div class="field-wrap">
+        <input type="password" id="login-senha" placeholder="••••••••" onkeydown="if(event.key==='Enter')entrar()">
+        <button class="eye-btn" type="button" onclick="toggleOlho('login-senha',this)">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg>
+        </button>
       </div>
-
       <button class="btn-entrar" onclick="entrar()">ENTRAR NO SISTEMA</button>
       <div class="login-erro" id="login-erro"></div>
-
-      <div class="login-footer">
-        © 2026 <span>Instituto Primazia</span> · Todos os direitos reservados
-      </div>
-
+      <div class="login-footer">© 2026 <span>Instituto Primazia</span> · Todos os direitos reservados</div>
     </div>
   </div>
 </div>
 
-<!-- ════ DASHBOARD ════ -->
+<!-- DASHBOARD -->
 <div id="view-dashboard" class="view">
   <div class="page-header">
     <div>
       <div class="page-title">Projetos <span>PCCS</span></div>
       <p style="color:var(--text2);font-size:0.85rem;margin-top:0.3rem">Gerencie todos os planos de cargo, carreira e salário</p>
     </div>
-    <button class="btn btn-gold" onclick="abrirModalEmpresa()">+ Nova Empresa</button>
+    <button class="btn btn-gold" id="btn-nova-empresa" onclick="abrirModalEmpresa()">+ Nova Empresa</button>
   </div>
   <div class="stats-row">
     <div class="stat-card"><div class="num" id="stat-total">0</div><div class="lbl">Empresas</div></div>
@@ -404,15 +281,40 @@ header.show { display:flex; }
   <div class="empresas-grid" id="empresas-grid"></div>
 </div>
 
-<!-- ════ FASES ════ -->
+<!-- FASES -->
 <div id="view-fases" class="view">
-  <button class="back-btn" onclick="voltarDashboard()">← Voltar aos projetos</button>
+  <button class="back-btn" onclick="mostrarView('view-dashboard')">← Voltar aos projetos</button>
   <div class="empresa-header" id="empresa-header-info"></div>
   <div class="progresso-geral" id="progresso-geral"></div>
   <div class="fases-list" id="fases-list"></div>
 </div>
 
-<!-- ════ MODAL ════ -->
+<!-- USUÁRIOS -->
+<div id="view-usuarios" class="view">
+  <button class="back-btn" onclick="mostrarView('view-dashboard')">← Voltar ao dashboard</button>
+  <div class="page-header">
+    <div>
+      <div class="page-title">👥 Gerenciar <span>Usuários</span></div>
+      <p style="color:var(--text2);font-size:0.85rem;margin-top:0.3rem">Máximo de 15 usuários · Apenas administradores podem gerenciar</p>
+    </div>
+    <button class="btn btn-gold" onclick="abrirModalNovoUsuario()">+ Novo Usuário</button>
+  </div>
+  <div style="background:var(--navy);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
+    <table class="user-table">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>E-mail</th>
+          <th>Perfil</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="users-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL NOVA EMPRESA -->
 <div class="modal-overlay" id="modal-empresa">
   <div class="modal">
     <h2>🏢 Nova Empresa</h2>
@@ -421,108 +323,258 @@ header.show { display:flex; }
     <div class="form-group"><label>Responsável na Empresa</label><input class="inp-m" type="text" id="emp-responsavel" placeholder="Nome do contato"></div>
     <div class="form-group"><label>Emoji / Ícone</label><input class="inp-m" type="text" id="emp-emoji" placeholder="🏢" maxlength="4"></div>
     <div class="modal-btns">
-      <button class="btn btn-outline" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-outline" onclick="fecharModal('modal-empresa')">Cancelar</button>
       <button class="btn btn-gold" onclick="salvarEmpresa()">Criar Projeto</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ALTERAR SENHA -->
+<div class="modal-overlay" id="modal-senha">
+  <div class="modal">
+    <h2>🔐 Alterar Minha Senha</h2>
+    <div class="form-group">
+      <label>Senha Atual</label>
+      <div class="inp-wrap">
+        <input class="inp-m" type="password" id="senha-atual" placeholder="••••••••">
+        <button class="eye-btn" type="button" onclick="toggleOlho('senha-atual',this)">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Nova Senha</label>
+      <div class="inp-wrap">
+        <input class="inp-m" type="password" id="senha-nova" placeholder="••••••••">
+        <button class="eye-btn" type="button" onclick="toggleOlho('senha-nova',this)">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Confirmar Nova Senha</label>
+      <div class="inp-wrap">
+        <input class="inp-m" type="password" id="senha-confirma" placeholder="••••••••">
+        <button class="eye-btn" type="button" onclick="toggleOlho('senha-confirma',this)">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg>
+        </button>
+      </div>
+    </div>
+    <p id="senha-erro" style="color:var(--danger);font-size:0.82rem;min-height:1.1rem"></p>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="fecharModal('modal-senha')">Cancelar</button>
+      <button class="btn btn-gold" onclick="salvarNovaSenha()">Salvar Senha</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOVO USUÁRIO -->
+<div class="modal-overlay" id="modal-usuario">
+  <div class="modal">
+    <h2 id="modal-user-title">👤 Novo Usuário</h2>
+    <div class="form-group"><label>Nome Completo *</label><input class="inp-m" type="text" id="user-nome" placeholder="Ex: Karine Silva"></div>
+    <div class="form-group"><label>E-mail *</label><input class="inp-m" type="email" id="user-email" placeholder="karine@institutoprimazia.com.br"></div>
+    <div class="form-group">
+      <label>Perfil de Acesso *</label>
+      <select class="select-m" id="user-role">
+        <option value="admin">👑 Administrador — acesso total</option>
+        <option value="editor" selected>✏️ Editor — cadastra e edita</option>
+        <option value="visualizador">👁️ Visualizador — somente leitura</option>
+      </select>
+    </div>
+    <div class="form-group" id="campo-senha-usuario">
+      <label>Senha *</label>
+      <div class="inp-wrap">
+        <input class="inp-m" type="password" id="user-senha" placeholder="Mínimo 6 caracteres">
+        <button class="eye-btn" type="button" onclick="toggleOlho('user-senha',this)">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg>
+        </button>
+      </div>
+    </div>
+    <p id="user-erro" style="color:var(--danger);font-size:0.82rem;min-height:1.1rem"></p>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="fecharModal('modal-usuario')">Cancelar</button>
+      <button class="btn btn-gold" onclick="salvarUsuario()">Salvar Usuário</button>
     </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<!-- ════ FIREBASE ════ -->
 <script src="firebase-config.js"></script>
 <script>
-// ── TOGGLE SENHA (olho) ─────────────────────────────────────────
-let senhaVisivel = false;
-function toggleSenha() {
-  senhaVisivel = !senhaVisivel;
-  const inp = document.getElementById('login-senha');
-  const ico = document.getElementById('eye-icon');
-  inp.type = senhaVisivel ? 'text' : 'password';
-  // troca ícone
-  ico.innerHTML = senhaVisivel
-    ? `<path stroke-linecap="round" stroke-linejoin="round"
-        d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0c0 2-4 7-9 7S3 14 3 12s4-7 9-7 9 5 9 7z"/>`
-    : `<path stroke-linecap="round" stroke-linejoin="round"
-        d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/>`;
-}
-
-// ── FASES PADRÃO ───────────────────────────────────────────────
-const FASES = [
-  {id:'fase1',nome:'Levantamento e Diagnóstico',descricao:'Coleta de dados e análise da situação atual',
-   atividades:['Levantamento de colaboradores','Identificar inconsistências salariais','Alinhamento com liderança']},
-  {id:'fase2',nome:'Descrição de Cargos',descricao:'Mapeamento e descrição de todos os cargos',
-   atividades:['Listar todos os cargos','Elaborar descrições de função','Validar com gestores']},
-  {id:'fase3',nome:'Avaliação de Cargos',descricao:'Pontuação e hierarquização dos cargos',
-   atividades:['Definir método de avaliação','Aplicar pontuação','Criar tabela de hierarquia']},
-  {id:'fase4',nome:'Estrutura Salarial',descricao:'Definição das faixas e tabelas salariais',
-   atividades:['Pesquisa de mercado','Definir faixas salariais','Elaborar política de remuneração']},
-  {id:'fase5',nome:'Implantação',descricao:'Implementação e comunicação do PCCS',
-   atividades:['Aprovação da diretoria','Comunicar aos colaboradores','Monitorar implantação']}
+// ══ FASES ══
+const FASES=[
+  {id:'fase1',nome:'Levantamento e Diagnóstico',descricao:'Coleta de dados e análise da situação atual',atividades:['Levantamento de colaboradores','Identificar inconsistências salariais','Alinhamento com liderança']},
+  {id:'fase2',nome:'Descrição de Cargos',descricao:'Mapeamento e descrição de todos os cargos',atividades:['Listar todos os cargos','Elaborar descrições de função','Validar com gestores']},
+  {id:'fase3',nome:'Avaliação de Cargos',descricao:'Pontuação e hierarquização dos cargos',atividades:['Definir método de avaliação','Aplicar pontuação','Criar tabela de hierarquia']},
+  {id:'fase4',nome:'Estrutura Salarial',descricao:'Definição das faixas e tabelas salariais',atividades:['Pesquisa de mercado','Definir faixas salariais','Elaborar política de remuneração']},
+  {id:'fase5',nome:'Implantação',descricao:'Implementação e comunicação do PCCS',atividades:['Aprovação da diretoria','Comunicar aos colaboradores','Monitorar implantação']}
 ];
 
-let empresas=[], empresaAtual=null, faseAberta=null;
+// ══ GERENCIAMENTO DE USUÁRIOS ══
+const USERS_KEY = 'pccs360_users';
+const SESSION_KEY = 'pccs360_session';
 
-// ── LOGIN ──────────────────────────────────────────────────────
+function getUsuarios() {
+  const raw = localStorage.getItem(USERS_KEY);
+  if (raw) return JSON.parse(raw);
+  // Usuário padrão inicial
+  const padrao = [{
+    id: 'admin_001',
+    nome: 'Ana Kátia',
+    email: 'anakatia@institutoprimazia.com.br',
+    senha: 'Ana@028079',
+    role: 'admin',
+    ativo: true
+  }];
+  localStorage.setItem(USERS_KEY, JSON.stringify(padrao));
+  return padrao;
+}
+
+function salvarUsuarios(lista) {
+  localStorage.setItem(USERS_KEY, JSON.stringify(lista));
+}
+
+function getSessao() {
+  const raw = sessionStorage.getItem(SESSION_KEY);
+  return raw ? JSON.parse(raw) : null;
+}
+
+function setSessao(usuario) {
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(usuario));
+}
+
+// ══ ESTADO ══
+let empresas=[], empresaAtual=null, faseAberta=null;
+let usuarioAtual=null, editandoUserId=null;
+
+// ══ OLH0 (eye toggle) ══
+function toggleOlho(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  const visivel = inp.type === 'text';
+  inp.type = visivel ? 'password' : 'text';
+  btn.innerHTML = visivel
+    ? `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg>`
+    : `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0c0 2-4 7-9 7S3 14 3 12s4-7 9-7 9 5 9 7z"/></svg>`;
+}
+
+// ══ LOGIN ══
 function entrar() {
-  const email = document.getElementById('login-email').value.trim();
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
   const senha = document.getElementById('login-senha').value;
   const erro  = document.getElementById('login-erro');
   erro.textContent = '';
   if (!email||!senha) { erro.textContent='⚠️ Preencha e-mail e senha.'; return; }
 
-  // Login direto sem Firebase Auth
-  const USUARIO = 'anakatia@institutoprimazia.com.br';
-  const SENHA   = 'Ana@028079';
+  const usuarios = getUsuarios();
+  const user = usuarios.find(u => u.email.toLowerCase()===email && u.senha===senha && u.ativo!==false);
 
-  if (email === USUARIO && senha === SENHA) {
-    mostrarDashboard('Ana Kátia');
+  if (user) {
+    setSessao(user);
+    mostrarDashboard(user);
   } else {
     erro.textContent = '❌ E-mail ou senha incorretos.';
   }
 }
 
 function logout() {
-  localStorage.removeItem('pcs_email_ultimo');
-  if (typeof auth!=='undefined') auth.signOut();
+  sessionStorage.removeItem(SESSION_KEY);
   document.getElementById('main-header').classList.remove('show');
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-login').classList.add('active');
+  document.getElementById('login-senha').value='';
+  document.getElementById('login-erro').textContent='';
 }
 
-function mostrarDashboard(nome) {
-  if (nome) document.getElementById('header-user-name').textContent = nome;
+function mostrarDashboard(user) {
+  usuarioAtual = user;
+  const iniciais = user.nome.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('avatar-btn').textContent = iniciais;
+  document.getElementById('header-user-name').textContent = user.nome;
+  document.getElementById('header-user-role').textContent = roleLabel(user.role);
+  document.getElementById('dd-nome').textContent = user.nome;
+  document.getElementById('dd-email').textContent = user.email;
+
+  // Mostrar menu usuários só para admin
+  document.getElementById('menu-usuarios').style.display = user.role==='admin' ? 'flex' : 'none';
+  // Botão nova empresa só para admin e editor
+  const btnNova = document.getElementById('btn-nova-empresa');
+  if (btnNova) btnNova.style.display = user.role==='visualizador' ? 'none' : '';
+
   document.getElementById('main-header').classList.add('show');
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.getElementById('view-login').classList.remove('active');
-  document.getElementById('view-dashboard').classList.add('active');
+  mostrarView('view-dashboard');
   carregarEmpresas();
 }
 
+function roleLabel(role) {
+  return {admin:'👑 Administrador', editor:'✏️ Editor', visualizador:'👁️ Visualizador'}[role]||role;
+}
+
+function podeEditar() { return usuarioAtual && (usuarioAtual.role==='admin'||usuarioAtual.role==='editor'); }
+function podeExcluir() { return usuarioAtual && usuarioAtual.role==='admin'; }
+function podeAdmin()   { return usuarioAtual && usuarioAtual.role==='admin'; }
+
+// ══ MENU ══
+function toggleMenu() {
+  document.getElementById('user-dropdown').classList.toggle('open');
+}
+
+// ══ VIEWS ══
 function mostrarView(id) {
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-login').classList.remove('active');
   document.getElementById(id).classList.add('active');
+  document.getElementById('user-dropdown').classList.remove('open');
+  if (id==='view-usuarios') renderUsuarios();
 }
 
-// ── EMPRESAS ──────────────────────────────────────────────────
+// ══ ALTERAR SENHA ══
+function abrirModalSenha() {
+  document.getElementById('user-dropdown').classList.remove('open');
+  ['senha-atual','senha-nova','senha-confirma'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('senha-erro').textContent='';
+  document.getElementById('modal-senha').classList.add('open');
+}
+
+function salvarNovaSenha() {
+  const atual    = document.getElementById('senha-atual').value;
+  const nova     = document.getElementById('senha-nova').value;
+  const confirma = document.getElementById('senha-confirma').value;
+  const erro     = document.getElementById('senha-erro');
+  erro.textContent='';
+
+  if (atual !== usuarioAtual.senha) { erro.textContent='❌ Senha atual incorreta.'; return; }
+  if (nova.length < 6) { erro.textContent='⚠️ Nova senha precisa ter pelo menos 6 caracteres.'; return; }
+  if (nova !== confirma) { erro.textContent='❌ As senhas não coincidem.'; return; }
+
+  const usuarios = getUsuarios();
+  const idx = usuarios.findIndex(u=>u.id===usuarioAtual.id);
+  if (idx>=0) { usuarios[idx].senha=nova; salvarUsuarios(usuarios); }
+  usuarioAtual.senha = nova;
+  setSessao(usuarioAtual);
+  fecharModal('modal-senha');
+  toast('✅ Senha alterada com sucesso!');
+}
+
+// ══ EMPRESAS ══
 function carregarEmpresas() {
-  if (typeof db==='undefined') return;
-  db.collection('empresas').orderBy('criadoEm','desc').onSnapshot(snap => {
-    empresas = snap.docs.map(d=>({id:d.id,...d.data()}));
+  if(typeof db==='undefined') return;
+  db.collection('empresas').orderBy('criadoEm','desc').onSnapshot(snap=>{
+    empresas=snap.docs.map(d=>({id:d.id,...d.data()}));
     renderEmpresas(); atualizarStats();
   });
 }
 
 function atualizarStats() {
-  document.getElementById('stat-total').textContent = empresas.length;
-  const a = empresas.filter(e=>{const p=calcProg(e);return p>0&&p<100;}).length;
-  document.getElementById('stat-andamento').textContent = a;
-  document.getElementById('stat-concluidos').textContent = empresas.filter(e=>calcProg(e)===100).length;
+  document.getElementById('stat-total').textContent=empresas.length;
+  const a=empresas.filter(e=>{const p=calcProg(e);return p>0&&p<100;}).length;
+  document.getElementById('stat-andamento').textContent=a;
+  document.getElementById('stat-concluidos').textContent=empresas.filter(e=>calcProg(e)===100).length;
 }
 
 function calcProg(emp) {
-  if (!emp.fases) return 0;
+  if(!emp.fases)return 0;
   let t=0,d=0;
   FASES.forEach(f=>{const fd=emp.fases[f.id]||{};f.atividades.forEach((_,i)=>{t++;if(fd.atividades&&fd.atividades[i])d++;});});
   return t?Math.round((d/t)*100):0;
@@ -535,12 +587,14 @@ function faseIdxAtual(emp) {
 
 function renderEmpresas() {
   const grid=document.getElementById('empresas-grid'); grid.innerHTML='';
-  const add=document.createElement('div'); add.className='add-card'; add.onclick=abrirModalEmpresa;
-  add.innerHTML='<div class="add-icon">＋</div><span>Nova Empresa</span><small style="color:var(--text2);font-size:0.78rem">Iniciar novo projeto PCCS</small>';
-  grid.appendChild(add);
+  if (podeEditar()) {
+    const add=document.createElement('div');add.className='add-card';add.onclick=abrirModalEmpresa;
+    add.innerHTML='<div class="add-icon">＋</div><span>Nova Empresa</span><small style="color:var(--text2);font-size:0.78rem">Iniciar novo projeto PCCS</small>';
+    grid.appendChild(add);
+  }
   empresas.forEach(emp=>{
-    const prog=calcProg(emp), fi=faseIdxAtual(emp);
-    const card=document.createElement('div'); card.className='empresa-card'; card.onclick=()=>abrirFases(emp.id);
+    const prog=calcProg(emp),fi=faseIdxAtual(emp);
+    const card=document.createElement('div');card.className='empresa-card';card.onclick=()=>abrirFases(emp.id);
     const dots=FASES.map((f,i)=>{const fd=emp.fases&&emp.fases[f.id];const cls=fd&&fd.status==='concluida'?'done':i===fi?'active':'';return`<div class="fase-dot ${cls}"></div>`;}).join('');
     const dt=emp.criadoEm?new Date(emp.criadoEm.seconds*1000).toLocaleDateString('pt-BR'):'';
     card.innerHTML=`<div class="empresa-icon">${emp.emoji||'🏢'}</div><div class="empresa-nome">${emp.nome}</div><div class="empresa-setor">${emp.setor||'Sem setor definido'}</div><div class="empresa-progress-bar"><div class="empresa-progress-fill" style="width:${prog}%"></div></div><div class="empresa-progress-info"><span>Progresso</span><strong>${prog}%</strong></div><div class="fases-mini">${dots}</div>${dt?`<div class="empresa-data">Iniciado em ${dt}</div>`:''}`;
@@ -548,25 +602,32 @@ function renderEmpresas() {
   });
 }
 
-// ── MODAL ─────────────────────────────────────────────────────
-function abrirModalEmpresa(){['emp-nome','emp-setor','emp-responsavel','emp-emoji'].forEach(id=>document.getElementById(id).value='');document.getElementById('modal-empresa').classList.add('open');}
-function fecharModal(){document.getElementById('modal-empresa').classList.remove('open');}
+function abrirModalEmpresa(){
+  if(!podeEditar()){toast('⚠️ Sem permissão para esta ação.');return;}
+  ['emp-nome','emp-setor','emp-responsavel','emp-emoji'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('modal-empresa').classList.add('open');
+}
+
 async function salvarEmpresa(){
   const nome=document.getElementById('emp-nome').value.trim();
   if(!nome){toast('⚠️ Digite o nome da empresa');return;}
   const dados={nome,setor:document.getElementById('emp-setor').value.trim(),responsavel:document.getElementById('emp-responsavel').value.trim(),emoji:document.getElementById('emp-emoji').value.trim()||'🏢',fases:{},criadoEm:firebase.firestore.FieldValue.serverTimestamp()};
   FASES.forEach(f=>{dados.fases[f.id]={status:'pendente',atividades:{}};});
-  try{await db.collection('empresas').add(dados);fecharModal();toast('✅ Empresa criada!');}
+  try{await db.collection('empresas').add(dados);fecharModal('modal-empresa');toast('✅ Empresa criada!');}
   catch(e){toast('❌ Erro ao salvar');}
 }
 
-// ── FASES ─────────────────────────────────────────────────────
+// ══ FASES ══
 function abrirFases(id){empresaAtual=empresas.find(e=>e.id===id);if(!empresaAtual)return;faseAberta=null;renderFases();mostrarView('view-fases');setupListener(id);}
-function voltarDashboard(){mostrarView('view-dashboard');}
 
 function renderFases(){
   const emp=empresaAtual,prog=calcProg(emp);
-  document.getElementById('empresa-header-info').innerHTML=`<div class="empresa-icon" style="width:56px;height:56px;font-size:1.6rem">${emp.emoji||'🏢'}</div><div class="empresa-header-info"><h2>${emp.nome}</h2><p>${emp.setor||''} ${emp.responsavel?'· Resp: '+emp.responsavel:''}</p></div><div class="empresa-header-actions"><button class="btn btn-danger" onclick="excluirEmpresa('${emp.id}')">🗑 Excluir</button></div>`;
+  document.getElementById('empresa-header-info').innerHTML=`
+    <div class="empresa-icon" style="width:56px;height:56px;font-size:1.6rem">${emp.emoji||'🏢'}</div>
+    <div class="empresa-header-info"><h2>${emp.nome}</h2><p>${emp.setor||''} ${emp.responsavel?'· Resp: '+emp.responsavel:''}</p></div>
+    <div class="empresa-header-actions">
+      ${podeExcluir()?`<button class="btn btn-danger btn-sm" onclick="excluirEmpresa('${emp.id}')">🗑 Excluir</button>`:''}
+    </div>`;
   document.getElementById('progresso-geral').innerHTML=`<div><div class="lbl">Progresso geral do PCCS</div></div><div class="bar"><div class="bar-bg"><div class="bar-fill" style="width:${prog}%"></div></div></div><div class="pct">${prog}%</div>`;
   const list=document.getElementById('fases-list');list.innerHTML='';
   FASES.forEach((f,idx)=>{
@@ -575,22 +636,165 @@ function renderFases(){
     const card=document.createElement('div');card.className=`fase-card ${st==='concluida'?'concluida':st==='andamento'?'ativa':''}`;
     const stl={pendente:'Pendente',andamento:'Em andamento',concluida:'Concluída'}[st];
     const stc={pendente:'status-pendente',andamento:'status-andamento',concluida:'status-concluida'}[st];
-    const avs=f.atividades.map((atv,i)=>{const done=fd.atividades&&fd.atividades[i];return`<div class="atividade-item ${done?'done':''}" onclick="toggleAtv('${f.id}',${i})"><div class="atividade-check"></div><span>${atv}</span></div>`;}).join('');
-    card.innerHTML=`<div class="fase-header" onclick="toggleFase('${f.id}')"><div class="fase-num">${idx+1}</div><div class="fase-info"><h3>${f.nome}</h3><p>${f.descricao}</p></div><div class="fase-status ${stc}">${stl}</div></div><div class="fase-body ${isOpen?'open':''}" id="fb-${f.id}"><div class="fase-divider"></div><div class="atividades-list">${avs}</div><div class="fase-actions">${st!=='andamento'?`<button class="btn btn-outline" style="font-size:0.82rem;padding:0.6rem 1rem" onclick="mudarSt('${f.id}','andamento')">▶ Iniciar</button>`:''}${st!=='concluida'?`<button class="btn btn-gold" style="font-size:0.82rem;padding:0.6rem 1rem" onclick="mudarSt('${f.id}','concluida')">✓ Concluir</button>`:''}${st==='concluida'?`<button class="btn btn-outline" style="font-size:0.82rem;padding:0.6rem 1rem" onclick="mudarSt('${f.id}','andamento')">↩ Reabrir</button>`:''}</div></div>`;
+    const avs=f.atividades.map((atv,i)=>{
+      const done=fd.atividades&&fd.atividades[i];
+      const cls=!podeEditar()?'no-perm':'';
+      return`<div class="atividade-item ${done?'done':''} ${cls}" onclick="${podeEditar()?`toggleAtv('${f.id}',${i})`:''}"><div class="atividade-check"></div><span>${atv}</span></div>`;
+    }).join('');
+    const acoes=podeEditar()?`
+      ${st!=='andamento'?`<button class="btn btn-outline btn-sm" onclick="mudarSt('${f.id}','andamento')">▶ Iniciar</button>`:''}
+      ${st!=='concluida'?`<button class="btn btn-gold btn-sm" onclick="mudarSt('${f.id}','concluida')">✓ Concluir</button>`:''}
+      ${st==='concluida'?`<button class="btn btn-outline btn-sm" onclick="mudarSt('${f.id}','andamento')">↩ Reabrir</button>`:''}
+    `:'<span style="color:var(--text2);font-size:0.8rem">👁️ Somente visualização</span>';
+    card.innerHTML=`<div class="fase-header" onclick="toggleFase('${f.id}')"><div class="fase-num">${idx+1}</div><div class="fase-info"><h3>${f.nome}</h3><p>${f.descricao}</p></div><div class="fase-status ${stc}">${stl}</div></div><div class="fase-body ${isOpen?'open':''}" id="fb-${f.id}"><div class="fase-divider"></div><div class="atividades-list">${avs}</div><div class="fase-actions">${acoes}</div></div>`;
     list.appendChild(card);
   });
 }
 
 function toggleFase(id){faseAberta=faseAberta===id?null:id;FASES.forEach(f=>{const b=document.getElementById('fb-'+f.id);if(b)b.classList.toggle('open',faseAberta===f.id);});}
-async function toggleAtv(faseId,idx){const fd=empresaAtual.fases&&empresaAtual.fases[faseId]||{atividades:{}};const u={};u[`fases.${faseId}.atividades.${idx}`]=!(fd.atividades&&fd.atividades[idx]);try{await db.collection('empresas').doc(empresaAtual.id).update(u);}catch(e){toast('❌ Erro');}}
-async function mudarSt(faseId,status){const u={};u[`fases.${faseId}.status`]=status;try{await db.collection('empresas').doc(empresaAtual.id).update(u);toast(status==='concluida'?'✅ Fase concluída!':'▶ Fase iniciada!');}catch(e){toast('❌ Erro');}}
-async function excluirEmpresa(id){if(!confirm('Excluir esta empresa?'))return;try{await db.collection('empresas').doc(id).delete();voltarDashboard();toast('🗑 Empresa excluída');}catch(e){toast('❌ Erro');}}
+
+async function toggleAtv(faseId,idx){
+  if(!podeEditar()){toast('⚠️ Sem permissão para editar.');return;}
+  const fd=empresaAtual.fases&&empresaAtual.fases[faseId]||{atividades:{}};
+  const u={};u[`fases.${faseId}.atividades.${idx}`]=!(fd.atividades&&fd.atividades[idx]);
+  try{await db.collection('empresas').doc(empresaAtual.id).update(u);}catch(e){toast('❌ Erro');}
+}
+
+async function mudarSt(faseId,status){
+  if(!podeEditar()){toast('⚠️ Sem permissão.');return;}
+  const u={};u[`fases.${faseId}.status`]=status;
+  try{await db.collection('empresas').doc(empresaAtual.id).update(u);toast(status==='concluida'?'✅ Fase concluída!':'▶ Fase iniciada!');}
+  catch(e){toast('❌ Erro');}
+}
+
+async function excluirEmpresa(id){
+  if(!podeExcluir()){toast('⚠️ Somente administradores podem excluir.');return;}
+  if(!confirm('Excluir esta empresa? Todos os dados serão perdidos.'))return;
+  try{await db.collection('empresas').doc(id).delete();mostrarView('view-dashboard');toast('🗑 Empresa excluída');}
+  catch(e){toast('❌ Erro');}
+}
+
+function setupListener(id){
+  if(typeof db==='undefined')return;
+  db.collection('empresas').doc(id).onSnapshot(snap=>{
+    if(!snap.exists)return;
+    empresaAtual={id:snap.id,...snap.data()};
+    const idx=empresas.findIndex(e=>e.id===id);if(idx>=0)empresas[idx]=empresaAtual;
+    if(document.getElementById('view-fases').classList.contains('active'))renderFases();
+  });
+}
+
+// ══ GERENCIAR USUÁRIOS ══
+function renderUsuarios() {
+  if(!podeAdmin()){mostrarView('view-dashboard');return;}
+  const usuarios = getUsuarios();
+  const tbody = document.getElementById('users-tbody');
+  tbody.innerHTML='';
+  usuarios.forEach(u=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><strong>${u.nome}</strong></td>
+      <td style="color:var(--text2)">${u.email}</td>
+      <td><span class="role-badge role-${u.role}">${{admin:'👑 Admin',editor:'✏️ Editor',visualizador:'👁️ Visualizador'}[u.role]}</span></td>
+      <td>
+        <div class="user-actions">
+          <button class="btn btn-outline btn-sm" onclick="editarUsuario('${u.id}')">✏️ Editar</button>
+          ${u.id!=='admin_001'?`<button class="btn btn-danger btn-sm" onclick="excluirUsuario('${u.id}')">🗑</button>`:'<span style="font-size:0.75rem;color:var(--text2)">Admin principal</span>'}
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function abrirModalNovoUsuario(){
+  if(!podeAdmin()){toast('⚠️ Somente administradores podem cadastrar usuários.');return;}
+  const usuarios=getUsuarios();
+  if(usuarios.length>=15){toast('⚠️ Limite de 15 usuários atingido.');return;}
+  editandoUserId=null;
+  document.getElementById('modal-user-title').textContent='👤 Novo Usuário';
+  ['user-nome','user-email','user-senha'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('user-role').value='editor';
+  document.getElementById('campo-senha-usuario').style.display='block';
+  document.getElementById('user-erro').textContent='';
+  document.getElementById('modal-usuario').classList.add('open');
+}
+
+function editarUsuario(id){
+  if(!podeAdmin())return;
+  const u=getUsuarios().find(u=>u.id===id);if(!u)return;
+  editandoUserId=id;
+  document.getElementById('modal-user-title').textContent='✏️ Editar Usuário';
+  document.getElementById('user-nome').value=u.nome;
+  document.getElementById('user-email').value=u.email;
+  document.getElementById('user-role').value=u.role;
+  document.getElementById('user-senha').value='';
+  document.getElementById('campo-senha-usuario').style.display='block';
+  document.getElementById('user-erro').textContent='';
+  document.getElementById('modal-usuario').classList.add('open');
+}
+
+function salvarUsuario(){
+  const nome=document.getElementById('user-nome').value.trim();
+  const email=document.getElementById('user-email').value.trim().toLowerCase();
+  const role=document.getElementById('user-role').value;
+  const senha=document.getElementById('user-senha').value;
+  const erro=document.getElementById('user-erro');
+  erro.textContent='';
+
+  if(!nome||!email){erro.textContent='⚠️ Nome e e-mail são obrigatórios.';return;}
+  if(!editandoUserId&&senha.length<6){erro.textContent='⚠️ Senha precisa ter pelo menos 6 caracteres.';return;}
+
+  const usuarios=getUsuarios();
+  const jaExiste=usuarios.find(u=>u.email===email&&u.id!==editandoUserId);
+  if(jaExiste){erro.textContent='❌ E-mail já cadastrado.';return;}
+
+  if(editandoUserId){
+    const idx=usuarios.findIndex(u=>u.id===editandoUserId);
+    if(idx>=0){
+      usuarios[idx].nome=nome;
+      usuarios[idx].email=email;
+      usuarios[idx].role=role;
+      if(senha.length>=6)usuarios[idx].senha=senha;
+    }
+    toast('✅ Usuário atualizado!');
+  } else {
+    usuarios.push({id:'u_'+Date.now(),nome,email,senha,role,ativo:true});
+    toast('✅ Usuário criado!');
+  }
+  salvarUsuarios(usuarios);
+  fecharModal('modal-usuario');
+  renderUsuarios();
+}
+
+function excluirUsuario(id){
+  if(!podeAdmin())return;
+  if(!confirm('Excluir este usuário?'))return;
+  const usuarios=getUsuarios().filter(u=>u.id!==id);
+  salvarUsuarios(usuarios);
+  renderUsuarios();
+  toast('🗑 Usuário excluído');
+}
+
+// ══ UTILITÁRIOS ══
+function fecharModal(id){document.getElementById(id).classList.remove('open');}
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
-function setupListener(id){if(typeof db==='undefined')return;db.collection('empresas').doc(id).onSnapshot(snap=>{if(!snap.exists)return;empresaAtual={id:snap.id,...snap.data()};const idx=empresas.findIndex(e=>e.id===id);if(idx>=0)empresas[idx]=empresaAtual;if(document.getElementById('view-fases').classList.contains('active'))renderFases();});}
 
-document.getElementById('modal-empresa').addEventListener('click',function(e){if(e.target===this)fecharModal();});
+// Fechar modais clicando fora
+['modal-empresa','modal-senha','modal-usuario'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){if(e.target===this)fecharModal(id);});
+});
 
-// Auth observer desativado — login direto ativo
+// Fechar dropdown clicando fora
+document.addEventListener('click',function(e){
+  const dd=document.getElementById('user-dropdown');
+  if(dd&&!dd.contains(e.target)&&!document.getElementById('avatar-btn').contains(e.target)){
+    dd.classList.remove('open');
+  }
+});
+
+// Verificar sessão ao carregar
+const sessao=getSessao();
+if(sessao){mostrarDashboard(sessao);}
 </script>
 </body>
 </html>
