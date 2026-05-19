@@ -397,7 +397,7 @@ body{background:var(--navy3);color:var(--text);font-family:'DM Sans',sans-serif;
 <!-- MODAIS -->
 <div class="mo" id="mo-empresa">
   <div class="mbox">
-    <h2>🏢 Nova Empresa</h2>
+    <h2>Nova Empresa</h2>
     <div class="fg"><label>Nome da Empresa *</label><input class="inp" type="text" id="e-nome" placeholder="Ex: SM Madeiras"></div>
     <div class="fg"><label>Setor / Segmento</label><input class="inp" type="text" id="e-setor" placeholder="Ex: Madeireira, Saúde, Educação..."></div>
     <div class="fg"><label>Líder Responsável do Setor</label><input class="inp" type="text" id="e-lider" placeholder="Nome do líder responsável"></div>
@@ -412,7 +412,7 @@ body{background:var(--navy3);color:var(--text);font-family:'DM Sans',sans-serif;
 
 <div class="mo" id="mo-senha">
   <div class="mbox">
-    <h2>🔐 Alterar Minha Senha</h2>
+    <h2>Alterar Minha Senha</h2>
     <div class="fg"><label>Senha Atual</label><div class="inpw"><input class="inp" type="password" id="s-atual" placeholder="••••••••"><button class="eyeb" onclick="toggleOlho('s-atual',this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg></button></div></div>
     <div class="fg"><label>Nova Senha</label><div class="inpw"><input class="inp" type="password" id="s-nova" placeholder="••••••••"><button class="eyeb" onclick="toggleOlho('s-nova',this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg></button></div></div>
     <div class="fg"><label>Confirmar Nova Senha</label><div class="inpw"><input class="inp" type="password" id="s-conf" placeholder="••••••••"><button class="eyeb" onclick="toggleOlho('s-conf',this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg></button></div></div>
@@ -811,8 +811,8 @@ async function salvarEmpresa(){
     setor:document.getElementById('e-setor').value.trim(),
     lider:document.getElementById('e-lider').value.trim(),
     responsavel:document.getElementById('e-resp').value.trim(),
-    dataInicio:document.getElementById('e-data-inicio').value||document.getElementById('e-inicio')?.value||'',
-    dataFim:document.getElementById('e-data-fim').value||document.getElementById('e-fim')?.value||'',
+    dataInicio:document.getElementById('e-inicio')?.value||'',
+    dataFim:document.getElementById('e-fim')?.value||'',
     fases:{},
     criadoEm:ts
   };
