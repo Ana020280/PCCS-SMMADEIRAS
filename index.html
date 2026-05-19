@@ -5,397 +5,433 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PCCS 360 — Instituto Primazia</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <style>
-:root {
-  --navy:#1a2744; --navy2:#243558; --navy3:#0f1824;
-  --gold:#c9a84c; --gold2:#e2c97e; --gold-dim:rgba(201,168,76,0.13);
-  --white:#ffffff; --text:#f0ece0; --text2:#8a9bb5;
-  --danger:#e05c5c; --success:#4caf7d; --warn:#f0a500;
-  --border:rgba(201,168,76,0.22); --r:12px;
+:root{
+  --navy:#1a2744;--navy2:#243558;--navy3:#0f1824;--navy4:#162033;
+  --gold:#c9a84c;--gold2:#e2c97e;--gold-dim:rgba(201,168,76,0.13);
+  --white:#fff;--text:#f0ece0;--text2:#8a9bb5;
+  --green:#4caf7d;--danger:#e05c5c;--warn:#f0a500;
+  --border:rgba(201,168,76,0.18);--r:12px;
+  --sidebar:240px;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--navy3);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
 
-/* LOGIN */
-#view-login{min-height:100vh;display:none;align-items:stretch;}
-#view-login.active{display:flex;}
-.login-left{flex:1.1;background:linear-gradient(145deg,var(--navy) 0%,var(--navy2) 60%,#1e3060 100%);display:flex;align-items:center;justify-content:center;padding:3rem 2.5rem;position:relative;overflow:hidden;border-right:1px solid #e4ddd0;}
-.login-left::before{content:'';position:absolute;top:0;left:0;width:140px;height:140px;border-top:4px solid var(--gold);border-left:4px solid var(--gold);opacity:0.2;pointer-events:none;}
-.login-left::after{content:'';position:absolute;bottom:0;right:0;width:140px;height:140px;border-bottom:4px solid var(--gold);border-right:4px solid var(--gold);opacity:0.2;}
-.logo-wrap{position:relative;z-index:1;text-align:center;max-width:500px;width:100%;display:flex;flex-direction:column;align-items:center;gap:1.5rem;}
-.logo-wrap img{width:100%;max-width:460px;filter:drop-shadow(0 12px 32px rgba(26,39,68,0.2));animation:floatIn 0.8s ease both;}
-.logo-wrap .tagline{font-family:'Syne',sans-serif;font-weight:600;font-size:0.75rem;letter-spacing:0.22em;color:#c9a84c;text-transform:uppercase;padding:0.5rem 1.5rem;border:1px solid rgba(201,168,76,0.45);border-radius:99px;background:rgba(201,168,76,0.07);}
-.login-right{flex:0.9;background:var(--navy3);display:flex;align-items:center;justify-content:center;padding:3rem 2.5rem;}
-.login-box{width:100%;max-width:370px;animation:floatIn 0.9s 0.1s ease both;}
-@keyframes floatIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.login-brand{margin-bottom:2.5rem;}
-.login-brand h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;color:var(--white);margin-bottom:0.4rem;}
-.login-brand h2 span{color:var(--gold);}
-.login-brand p{color:var(--text2);font-size:0.88rem;line-height:1.5;}
-.login-brand .divider{width:40px;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px;margin-top:1rem;}
-.field-label{display:block;font-size:0.72rem;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:0.5rem;}
-.field-wrap{position:relative;margin-bottom:1.2rem;}
-.field-wrap input{width:100%;padding:0.9rem 3rem 0.9rem 1rem;background:var(--navy2);border:1.5px solid var(--border);border-radius:var(--r);color:var(--white);font-family:'DM Sans',sans-serif;font-size:0.95rem;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
-.field-wrap input::placeholder{color:var(--text2);}
-.field-wrap input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,0.1);}
-.eye-btn{position:absolute;right:0.9rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);display:flex;align-items:center;padding:0.2rem;transition:color 0.2s;}
-.eye-btn:hover{color:var(--gold);}
-.eye-btn svg{width:18px;height:18px;}
-.btn-entrar{width:100%;padding:1rem;background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 100%);color:var(--navy);font-family:'Syne',sans-serif;font-weight:800;font-size:0.95rem;letter-spacing:0.06em;border:none;border-radius:var(--r);cursor:pointer;transition:all 0.2s;margin-top:0.5rem;box-shadow:0 4px 16px rgba(201,168,76,0.2);}
-.btn-entrar:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(201,168,76,0.35);}
-.login-erro{color:var(--danger);font-size:0.82rem;margin-top:0.9rem;min-height:1.1rem;text-align:center;}
-.login-footer{margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(201,168,76,0.12);text-align:center;color:var(--text2);font-size:0.75rem;}
-.login-footer span{color:var(--gold);}
+/* ══ LOGIN ══ */
+#screen-login{min-height:100vh;display:flex;align-items:stretch;}
+.ll{flex:1.1;background:linear-gradient(145deg,var(--navy) 0%,var(--navy2) 60%,#1e3060 100%);display:flex;align-items:center;justify-content:center;padding:3rem;position:relative;overflow:hidden;}
+.ll::before{content:'';position:absolute;top:0;left:0;width:130px;height:130px;border-top:4px solid var(--gold);border-left:4px solid var(--gold);opacity:0.2;}
+.ll::after{content:'';position:absolute;bottom:0;right:0;width:130px;height:130px;border-bottom:4px solid var(--gold);border-right:4px solid var(--gold);opacity:0.2;}
+.ll img{width:100%;max-width:420px;filter:drop-shadow(0 12px 32px rgba(0,0,0,0.3));animation:fi 0.8s ease both;}
+@keyframes fi{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.lr{flex:0.9;background:var(--navy3);display:flex;align-items:center;justify-content:center;padding:3rem 2.5rem;}
+.lbox{width:100%;max-width:370px;}
+.lbox h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;color:var(--white);margin-bottom:0.3rem;}
+.lbox h2 span{color:var(--gold);}
+.lbox p{color:var(--text2);font-size:0.88rem;margin-bottom:2.5rem;line-height:1.5;}
+.ldiv{width:40px;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px;margin-bottom:2.5rem;}
+.flbl{display:block;font-size:0.72rem;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:0.5rem;}
+.fw{position:relative;margin-bottom:1.2rem;}
+.fw input{width:100%;padding:0.9rem 3rem 0.9rem 1rem;background:var(--navy2);border:1.5px solid var(--border);border-radius:var(--r);color:var(--white);font-family:'DM Sans',sans-serif;font-size:0.95rem;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+.fw input::placeholder{color:var(--text2);}
+.fw input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,0.1);}
+.eyeb{position:absolute;right:0.9rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);display:flex;align-items:center;transition:color 0.2s;}
+.eyeb:hover{color:var(--gold);}
+.eyeb svg{width:18px;height:18px;}
+.btnlogin{width:100%;padding:1rem;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);font-family:'Syne',sans-serif;font-weight:800;font-size:0.95rem;letter-spacing:0.06em;border:none;border-radius:var(--r);cursor:pointer;transition:all 0.2s;box-shadow:0 4px 16px rgba(201,168,76,0.2);}
+.btnlogin:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(201,168,76,0.35);}
+.lerro{color:var(--danger);font-size:0.82rem;margin-top:0.9rem;min-height:1.1rem;text-align:center;}
+.lfooter{margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(201,168,76,0.12);text-align:center;color:var(--text2);font-size:0.75rem;}
+.lfooter span{color:var(--gold);}
 
-/* HEADER */
-header{background:var(--navy);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:none;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
-header.show{display:flex;}
-.logo-header{display:flex;align-items:center;gap:0.8rem;font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:var(--gold);}
-.logo-header img{height:34px;object-fit:contain;}
-.logo-header small{color:var(--text2);font-weight:400;font-size:0.72rem;display:block;}
-.header-right{display:flex;align-items:center;gap:1rem;position:relative;}
-.hdr-name{font-size:0.85rem;color:var(--gold2);font-family:'Syne',sans-serif;font-weight:600;}
-.hdr-role{font-size:0.7rem;color:var(--text2);background:var(--navy2);padding:0.15rem 0.5rem;border-radius:99px;border:1px solid var(--border);}
-.avatar{width:36px;height:36px;border-radius:50%;background:var(--gold-dim);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;color:var(--gold);font-size:0.82rem;cursor:pointer;user-select:none;}
+/* ══ APP LAYOUT ══ */
+#screen-app{display:none;min-height:100vh;}
+#screen-app.show{display:flex;}
 
-/* DROPDOWN MENU */
-.user-dropdown{position:absolute;right:0;top:calc(100% + 0.5rem);background:var(--navy);border:1px solid var(--border);border-radius:var(--r);padding:0.5rem;min-width:200px;z-index:300;box-shadow:0 8px 24px rgba(0,0,0,0.4);display:none;}
-.user-dropdown.open{display:block;}
-.udrop-header{padding:0.6rem 0.8rem;font-size:0.78rem;color:var(--text2);border-bottom:1px solid var(--border);margin-bottom:0.3rem;}
-.udrop-header strong{display:block;color:var(--gold2);font-family:'Syne',sans-serif;}
-.udrop-item{padding:0.6rem 0.8rem;border-radius:8px;cursor:pointer;font-size:0.85rem;transition:background 0.15s;display:flex;align-items:center;gap:0.6rem;color:var(--text);}
-.udrop-item:hover{background:var(--navy2);}
-.udrop-item.danger{color:var(--danger);}
-.udrop-divider{height:1px;background:var(--border);margin:0.3rem 0;}
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);background:var(--navy);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:transform 0.3s;}
+.sb-logo{padding:1.2rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.8rem;}
+.sb-logo img{height:30px;object-fit:contain;}
+.sb-logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--gold);}
+.sb-logo-text small{display:block;font-size:0.65rem;color:var(--text2);font-weight:400;}
+.sb-nav{flex:1;overflow-y:auto;padding:0.8rem 0;}
+.sb-section{font-size:0.65rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.15em;padding:0.8rem 1.2rem 0.3rem;}
+.sb-item{display:flex;align-items:center;gap:0.7rem;padding:0.65rem 1.2rem;cursor:pointer;transition:all 0.2s;font-size:0.85rem;color:var(--text2);border-left:3px solid transparent;margin:0.1rem 0;}
+.sb-item:hover{background:var(--gold-dim);color:var(--text);}
+.sb-item.active{background:var(--gold-dim);color:var(--gold);border-left-color:var(--gold);}
+.sb-item .icon{font-size:1rem;width:20px;text-align:center;}
+.sb-user{padding:1rem 1.2rem;border-top:1px solid var(--border);}
+.sb-user-info{display:flex;align-items:center;gap:0.8rem;}
+.sb-avatar{width:34px;height:34px;border-radius:50%;background:var(--gold-dim);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;color:var(--gold);font-size:0.78rem;flex-shrink:0;}
+.sb-user-name{font-size:0.82rem;font-weight:600;color:var(--text);}
+.sb-user-role{font-size:0.68rem;color:var(--text2);}
+.sb-user-actions{display:flex;gap:0.5rem;margin-top:0.7rem;}
+.sb-btn{flex:1;padding:0.4rem;background:var(--navy2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:0.72rem;color:var(--text2);text-align:center;transition:all 0.15s;}
+.sb-btn:hover{border-color:var(--gold);color:var(--gold);}
+.sb-btn.danger:hover{border-color:var(--danger);color:var(--danger);}
 
-/* VIEWS */
-.view{display:none;padding:2rem;max-width:1100px;margin:0 auto;}
-.view.active{display:block;}
+/* MAIN */
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:var(--navy);border-bottom:1px solid var(--border);padding:0 2rem;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.topbar-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:var(--text);}
+.topbar-title span{color:var(--gold);}
+.topbar-right{display:flex;align-items:center;gap:0.8rem;}
+.badge-role{font-size:0.7rem;padding:0.2rem 0.6rem;border-radius:99px;font-family:'Syne',sans-serif;font-weight:700;}
+.badge-admin{background:rgba(201,168,76,0.15);color:var(--gold);border:1px solid rgba(201,168,76,0.3);}
+.badge-editor{background:rgba(76,175,125,0.12);color:var(--green);border:1px solid rgba(76,175,125,0.3);}
+.badge-visualizador{background:rgba(138,155,181,0.12);color:var(--text2);border:1px solid var(--border);}
 
-/* DASHBOARD */
-.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;}
-.page-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;}
-.page-title span{color:var(--gold);}
-.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:2rem;}
-.stat-card{background:var(--navy);border:1px solid var(--border);border-radius:var(--r);padding:1.2rem;text-align:center;}
-.stat-card .num{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;color:var(--gold);}
-.stat-card .lbl{color:var(--text2);font-size:0.75rem;margin-top:0.2rem;text-transform:uppercase;letter-spacing:0.08em;}
-.empresas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1.2rem;}
-.empresa-card{background:var(--navy);border:1px solid var(--border);border-radius:16px;padding:1.5rem;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;}
-.empresa-card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 8px 30px rgba(201,168,76,0.1);}
-.empresa-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));opacity:0;transition:opacity 0.25s;}
-.empresa-card:hover::before{opacity:1;}
-.empresa-icon{width:48px;height:48px;border-radius:12px;background:var(--gold-dim);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1rem;}
-.empresa-nome{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:0.3rem;}
-.empresa-setor{color:var(--text2);font-size:0.8rem;margin-bottom:1rem;}
-.empresa-progress-bar{height:4px;background:var(--navy2);border-radius:99px;margin-bottom:0.5rem;overflow:hidden;}
-.empresa-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px;transition:width 0.5s;}
-.empresa-progress-info{display:flex;justify-content:space-between;font-size:0.78rem;color:var(--text2);}
-.empresa-progress-info strong{color:var(--gold);}
-.fases-mini{display:flex;gap:4px;margin-top:1rem;}
-.fase-dot{flex:1;height:6px;border-radius:99px;background:var(--navy2);}
-.fase-dot.done{background:var(--gold);}
-.fase-dot.active{background:var(--gold2);opacity:0.6;}
-.empresa-data{color:var(--text2);font-size:0.75rem;margin-top:0.8rem;}
-.add-card{background:transparent;border:2px dashed var(--border);border-radius:16px;padding:1.5rem;cursor:pointer;transition:all 0.25s;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;gap:0.8rem;color:var(--text2);}
+/* PAGES */
+.page{display:none;padding:2rem;animation:fi 0.3s ease;}
+.page.active{display:block;}
+
+/* CARDS */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:2rem;}
+.card{background:var(--navy);border:1px solid var(--border);border-radius:var(--r);padding:1.2rem;transition:all 0.2s;}
+.card:hover{border-color:rgba(201,168,76,0.4);transform:translateY(-2px);}
+.card-num{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;line-height:1;}
+.card-lbl{font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-top:0.4rem;}
+.card-icon{font-size:1.4rem;margin-bottom:0.5rem;}
+.card.gold .card-num{color:var(--gold);}
+.card.green .card-num{color:var(--green);}
+.card.red .card-num{color:var(--danger);}
+.card.blue .card-num{color:#5b9bd5;}
+.card.warn .card-num{color:var(--warn);}
+
+/* SECTION HEADER */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:0.8rem;}
+.sec-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;}
+.sec-title span{color:var(--gold);}
+
+/* EMPRESAS GRID */
+.emp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.2rem;}
+.emp-card{background:var(--navy);border:1px solid var(--border);border-radius:16px;padding:1.4rem;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;}
+.emp-card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 8px 30px rgba(201,168,76,0.1);}
+.emp-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));opacity:0;transition:0.25s;}
+.emp-card:hover::before{opacity:1;}
+.emp-top{display:flex;align-items:center;gap:0.8rem;margin-bottom:1rem;}
+.emp-ico{width:44px;height:44px;border-radius:10px;background:var(--gold-dim);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+.emp-nome{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;}
+.emp-setor{font-size:0.75rem;color:var(--text2);margin-top:0.1rem;}
+.emp-etapa-badge{margin-left:auto;font-size:0.68rem;font-family:'Syne',sans-serif;font-weight:700;padding:0.25rem 0.7rem;border-radius:99px;text-transform:uppercase;white-space:nowrap;}
+.etapa-0{background:rgba(138,155,181,0.15);color:var(--text2);}
+.etapa-1{background:rgba(91,155,213,0.15);color:#5b9bd5;}
+.etapa-2{background:rgba(201,168,76,0.15);color:var(--gold);}
+.etapa-3{background:rgba(240,165,0,0.15);color:var(--warn);}
+.etapa-4{background:rgba(76,175,125,0.15);color:var(--green);}
+
+/* PROGRESS */
+.prog-bar{height:5px;background:var(--navy2);border-radius:99px;overflow:hidden;margin:0.8rem 0 0.4rem;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px;transition:width 0.5s;}
+.prog-info{display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text2);}
+.prog-info strong{color:var(--gold);}
+
+/* FASES MINI */
+.fases-mini{display:flex;gap:3px;margin-top:0.8rem;}
+.fd{flex:1;height:5px;border-radius:99px;background:var(--navy2);position:relative;}
+.fd.done{background:var(--gold);}
+.fd.active{background:var(--gold2);opacity:0.7;}
+.fd[title]:hover::after{content:attr(title);position:absolute;bottom:120%;left:50%;transform:translateX(-50%);background:var(--navy);border:1px solid var(--border);padding:0.3rem 0.6rem;border-radius:6px;font-size:0.68rem;white-space:nowrap;color:var(--text);z-index:10;}
+
+/* ADD CARD */
+.add-card{background:transparent;border:2px dashed var(--border);border-radius:16px;padding:1.4rem;cursor:pointer;transition:all 0.25s;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:160px;gap:0.7rem;color:var(--text2);}
 .add-card:hover{border-color:var(--gold);color:var(--gold);}
-.add-card .add-icon{width:48px;height:48px;border-radius:12px;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;font-size:1.5rem;}
-.add-card span{font-family:'Syne',sans-serif;font-weight:600;font-size:0.9rem;}
+.add-ico{width:44px;height:44px;border-radius:10px;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;font-size:1.3rem;}
 
-/* BTN */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.8rem 1.6rem;border-radius:var(--r);font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;border:none;transition:all 0.2s;}
-.btn-gold{background:var(--gold);color:var(--navy);}
-.btn-gold:hover{background:var(--gold2);transform:translateY(-1px);}
-.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2);}
-.btn-outline:hover{border-color:var(--gold);color:var(--gold);}
-.btn-danger{background:rgba(224,92,92,0.12);border:1px solid rgba(224,92,92,0.3);color:var(--danger);}
-.btn-sm{padding:0.4rem 0.9rem;font-size:0.78rem;}
+/* EMPRESA DETALHE */
+.detalhe-top{display:flex;align-items:center;gap:1.2rem;background:var(--navy);border:1px solid var(--border);border-radius:16px;padding:1.4rem 1.8rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.detalhe-info{flex:1;}
+.detalhe-info h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;}
+.detalhe-info p{color:var(--text2);font-size:0.85rem;margin-top:0.2rem;}
+.detalhe-acoes{display:flex;gap:0.6rem;flex-wrap:wrap;}
+.prog-geral{background:var(--navy);border:1px solid var(--border);border-radius:var(--r);padding:1.2rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;}
+.pg-bar{flex:1;min-width:150px;}
+.pg-bg{height:8px;background:var(--navy2);border-radius:99px;overflow:hidden;}
+.pg-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px;transition:width 0.5s;}
+.pg-pct{font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;color:var(--gold);}
+.pg-lbl{color:var(--text2);font-size:0.78rem;}
+.fases-lista{display:flex;flex-direction:column;gap:0.8rem;}
+.fc{background:var(--navy);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color 0.25s;}
+.fc.ativa{border-color:var(--gold);}
+.fc.concluida{border-color:rgba(76,175,125,0.4);}
+.fc-hdr{padding:1rem 1.3rem;display:flex;align-items:center;gap:0.9rem;cursor:pointer;}
+.fc-num{width:34px;height:34px;border-radius:50%;background:var(--navy2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:0.82rem;color:var(--text2);flex-shrink:0;}
+.fc.ativa .fc-num{border-color:var(--gold);color:var(--gold);background:var(--gold-dim);}
+.fc.concluida .fc-num{border-color:var(--green);color:var(--green);background:rgba(76,175,125,0.1);}
+.fc-info{flex:1;}
+.fc-info h3{font-family:'Syne',sans-serif;font-weight:700;font-size:0.95rem;}
+.fc-info p{color:var(--text2);font-size:0.75rem;margin-top:0.15rem;}
+.fc-st{font-size:0.7rem;font-family:'Syne',sans-serif;font-weight:700;padding:0.25rem 0.7rem;border-radius:99px;text-transform:uppercase;letter-spacing:0.06em;}
+.st-p{background:var(--navy2);color:var(--text2);}
+.st-a{background:rgba(201,168,76,0.15);color:var(--gold);}
+.st-c{background:rgba(76,175,125,0.15);color:var(--green);}
+.fc-body{padding:0 1.3rem;max-height:0;overflow:hidden;transition:max-height 0.35s ease,padding 0.35s;}
+.fc-body.open{max-height:600px;padding:0 1.3rem 1.3rem;}
+.fc-div{height:1px;background:var(--border);margin-bottom:1rem;}
+.atv-list{display:flex;flex-direction:column;gap:0.5rem;}
+.atv-item{display:flex;align-items:center;gap:0.7rem;padding:0.65rem 0.9rem;background:var(--navy2);border-radius:var(--r);cursor:pointer;transition:background 0.2s;}
+.atv-item:hover{background:#243558;}
+.atv-chk{width:19px;height:19px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.atv-item.done .atv-chk{background:var(--green);border-color:var(--green);}
+.atv-item.done .atv-chk::after{content:'✓';color:#fff;font-size:0.65rem;font-weight:700;}
+.atv-item.done span{text-decoration:line-through;color:var(--text2);}
+.atv-item span{flex:1;font-size:0.87rem;}
+.fc-acoes{display:flex;gap:0.6rem;margin-top:1rem;flex-wrap:wrap;}
 
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem;}
-.modal-overlay.open{display:flex;}
-.modal{background:var(--navy);border:1px solid var(--border);border-radius:20px;padding:2rem;width:100%;max-width:480px;animation:slideUp 0.25s ease;max-height:90vh;overflow-y:auto;}
-@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.modal h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;margin-bottom:1.5rem;color:var(--gold);}
-.form-group{margin-bottom:1rem;}
-.form-group label{display:block;font-size:0.78rem;color:var(--text2);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.08em;}
-.inp-m{width:100%;padding:0.85rem 1rem;background:var(--navy2);border:1.5px solid var(--border);border-radius:var(--r);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.95rem;outline:none;transition:border-color 0.2s;}
-.inp-m:focus{border-color:var(--gold);}
-.inp-m::placeholder{color:var(--text2);}
-.inp-wrap{position:relative;}
-.inp-wrap .inp-m{padding-right:3rem;}
-.inp-wrap .eye-btn{position:absolute;right:0.9rem;top:50%;transform:translateY(-50%);}
-.select-m{width:100%;padding:0.85rem 1rem;background:var(--navy2);border:1.5px solid var(--border);border-radius:var(--r);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.95rem;outline:none;cursor:pointer;}
-.select-m:focus{border-color:var(--gold);}
-.modal-btns{display:flex;gap:0.8rem;margin-top:1.5rem;}
-.modal-btns .btn{flex:1;}
-
-/* FASES */
-.back-btn{display:inline-flex;align-items:center;gap:0.5rem;color:var(--text2);cursor:pointer;margin-bottom:1.5rem;font-size:0.88rem;transition:color 0.2s;background:none;border:none;}
-.back-btn:hover{color:var(--gold);}
-.empresa-header{background:var(--navy);border:1px solid var(--border);border-radius:16px;padding:1.5rem 2rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;}
-.empresa-header-info{flex:1;}
-.empresa-header-info h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;}
-.empresa-header-info p{color:var(--text2);font-size:0.85rem;margin-top:0.2rem;}
-.empresa-header-actions{display:flex;gap:0.7rem;}
-.fases-list{display:flex;flex-direction:column;gap:1rem;}
-.fase-card{background:var(--navy);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:border-color 0.25s;}
-.fase-card.ativa{border-color:var(--gold);}
-.fase-card.concluida{border-color:rgba(76,175,125,0.4);}
-.fase-header{padding:1.2rem 1.5rem;display:flex;align-items:center;gap:1rem;cursor:pointer;}
-.fase-num{width:36px;height:36px;border-radius:50%;background:var(--navy2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:0.85rem;color:var(--text2);flex-shrink:0;}
-.fase-card.ativa .fase-num{border-color:var(--gold);color:var(--gold);background:var(--gold-dim);}
-.fase-card.concluida .fase-num{border-color:var(--success);color:var(--success);background:rgba(76,175,125,0.1);}
-.fase-info{flex:1;}
-.fase-info h3{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;}
-.fase-info p{color:var(--text2);font-size:0.8rem;margin-top:0.2rem;}
-.fase-status{font-size:0.73rem;font-family:'Syne',sans-serif;font-weight:700;padding:0.3rem 0.8rem;border-radius:99px;text-transform:uppercase;letter-spacing:0.08em;}
-.status-pendente{background:var(--navy2);color:var(--text2);}
-.status-andamento{background:rgba(201,168,76,0.15);color:var(--gold);}
-.status-concluida{background:rgba(76,175,125,0.15);color:var(--success);}
-.fase-body{padding:0 1.5rem;max-height:0;overflow:hidden;transition:max-height 0.35s ease,padding 0.35s;}
-.fase-body.open{max-height:600px;padding:0 1.5rem 1.5rem;}
-.fase-divider{height:1px;background:var(--border);margin-bottom:1.2rem;}
-.atividades-list{display:flex;flex-direction:column;gap:0.6rem;}
-.atividade-item{display:flex;align-items:center;gap:0.8rem;padding:0.7rem 1rem;background:var(--navy2);border-radius:var(--r);cursor:pointer;transition:background 0.2s;}
-.atividade-item:hover{background:#243558;}
-.atividade-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
-.atividade-item.done .atividade-check{background:var(--success);border-color:var(--success);}
-.atividade-item.done .atividade-check::after{content:'✓';color:#fff;font-size:0.7rem;font-weight:700;}
-.atividade-item.done span{text-decoration:line-through;color:var(--text2);}
-.atividade-item span{flex:1;font-size:0.9rem;}
-.fase-actions{display:flex;gap:0.7rem;margin-top:1.2rem;flex-wrap:wrap;}
-.progresso-geral{background:var(--navy);border:1px solid var(--border);border-radius:16px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;}
-.progresso-geral .bar{flex:1;min-width:150px;}
-.progresso-geral .bar-bg{height:8px;background:var(--navy2);border-radius:99px;overflow:hidden;}
-.progresso-geral .bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px;transition:width 0.5s;}
-.progresso-geral .pct{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--gold);white-space:nowrap;}
-.progresso-geral .lbl{color:var(--text2);font-size:0.8rem;}
+/* CHARTS */
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.2rem;margin-bottom:2rem;}
+.chart-card{background:var(--navy);border:1px solid var(--border);border-radius:16px;padding:1.4rem;}
+.chart-title{font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;margin-bottom:1.2rem;color:var(--text);}
+.chart-title span{color:var(--gold);}
 
 /* USUÁRIOS */
-.user-table{width:100%;border-collapse:collapse;margin-top:1rem;}
-.user-table th{text-align:left;padding:0.7rem 1rem;font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid var(--border);}
-.user-table td{padding:0.8rem 1rem;border-bottom:1px solid rgba(201,168,76,0.08);font-size:0.88rem;vertical-align:middle;}
-.user-table tr:last-child td{border-bottom:none;}
-.role-badge{display:inline-flex;align-items:center;padding:0.25rem 0.7rem;border-radius:99px;font-size:0.72rem;font-family:'Syne',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;}
-.role-admin{background:rgba(201,168,76,0.15);color:var(--gold);border:1px solid rgba(201,168,76,0.3);}
-.role-editor{background:rgba(76,175,125,0.12);color:var(--success);border:1px solid rgba(76,175,125,0.3);}
-.role-visualizador{background:rgba(138,155,181,0.15);color:var(--text2);border:1px solid rgba(138,155,181,0.3);}
-.user-actions{display:flex;gap:0.4rem;}
+.utbl{width:100%;border-collapse:collapse;}
+.utbl th{text-align:left;padding:0.65rem 1rem;font-size:0.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid var(--border);}
+.utbl td{padding:0.75rem 1rem;border-bottom:1px solid rgba(201,168,76,0.06);font-size:0.85rem;vertical-align:middle;}
+.utbl tr:last-child td{border-bottom:none;}
+.rbadge{display:inline-flex;align-items:center;padding:0.2rem 0.65rem;border-radius:99px;font-size:0.7rem;font-family:'Syne',sans-serif;font-weight:700;text-transform:uppercase;}
+.r-admin{background:rgba(201,168,76,0.15);color:var(--gold);border:1px solid rgba(201,168,76,0.25);}
+.r-editor{background:rgba(76,175,125,0.12);color:var(--green);border:1px solid rgba(76,175,125,0.25);}
+.r-viz{background:rgba(138,155,181,0.12);color:var(--text2);border:1px solid var(--border);}
+
+/* BTN */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:0.4rem;padding:0.7rem 1.4rem;border-radius:var(--r);font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;border:none;transition:all 0.2s;}
+.btn-g{background:var(--gold);color:var(--navy);}
+.btn-g:hover{background:var(--gold2);transform:translateY(-1px);}
+.btn-o{background:transparent;border:1px solid var(--border);color:var(--text2);}
+.btn-o:hover{border-color:var(--gold);color:var(--gold);}
+.btn-d{background:rgba(224,92,92,0.12);border:1px solid rgba(224,92,92,0.25);color:var(--danger);}
+.btn-sm{padding:0.35rem 0.8rem;font-size:0.75rem;}
+
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:300;display:none;align-items:center;justify-content:center;padding:1rem;}
+.mo.open{display:flex;}
+.mbox{background:var(--navy);border:1px solid var(--border);border-radius:20px;padding:2rem;width:100%;max-width:460px;animation:fi 0.25s ease;max-height:90vh;overflow-y:auto;}
+.mbox h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;margin-bottom:1.5rem;color:var(--gold);}
+.fg{margin-bottom:1rem;}
+.fg label{display:block;font-size:0.75rem;color:var(--text2);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.08em;}
+.inp{width:100%;padding:0.82rem 1rem;background:var(--navy2);border:1.5px solid var(--border);border-radius:var(--r);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.93rem;outline:none;transition:border-color 0.2s;}
+.inp:focus{border-color:var(--gold);}
+.inp::placeholder{color:var(--text2);}
+.inpw{position:relative;}
+.inpw .inp{padding-right:3rem;}
+.inpw .eyeb{position:absolute;right:0.9rem;top:50%;transform:translateY(-50%);}
+.sel{width:100%;padding:0.82rem 1rem;background:var(--navy2);border:1.5px solid var(--border);border-radius:var(--r);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.93rem;outline:none;}
+.sel:focus{border-color:var(--gold);}
+.mbtns{display:flex;gap:0.7rem;margin-top:1.5rem;}
+.mbtns .btn{flex:1;}
+.merro{color:var(--danger);font-size:0.8rem;min-height:1rem;margin-top:0.2rem;}
 
 /* TOAST */
-.toast{position:fixed;bottom:2rem;right:2rem;background:var(--navy);border:1px solid var(--gold);border-radius:var(--r);padding:0.9rem 1.4rem;color:var(--text);font-size:0.88rem;z-index:999;transform:translateY(100px);transition:transform 0.3s;pointer-events:none;}
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--navy);border:1px solid var(--gold);border-radius:var(--r);padding:0.85rem 1.3rem;color:var(--text);font-size:0.85rem;z-index:9999;transform:translateY(100px);transition:transform 0.3s;pointer-events:none;}
 .toast.show{transform:translateY(0);}
 
-/* BLOQUEIO PERMISSÃO */
-.no-perm{opacity:0.4;pointer-events:none;cursor:not-allowed;}
+/* BACK BTN */
+.back{display:inline-flex;align-items:center;gap:0.4rem;color:var(--text2);cursor:pointer;margin-bottom:1.3rem;font-size:0.85rem;background:none;border:none;transition:color 0.2s;}
+.back:hover{color:var(--gold);}
 
-@media(max-width:700px){
-  #view-login{flex-direction:column;}
-  .login-left{flex:none;padding:2.5rem 1.5rem;}
-  .logo-wrap img{max-width:220px;}
-  .login-right{padding:2rem 1.5rem;}
-  header{padding:0 1rem;}
-  .view{padding:1rem;}
-  .user-table{font-size:0.78rem;}
+/* PERM BLOCK */
+.no-perm{opacity:0.4;pointer-events:none;}
+
+@media(max-width:768px){
+  :root{--sidebar:0px;}
+  .sidebar{transform:translateX(-240px);width:240px;}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;}
+  #screen-login{flex-direction:column;}
+  .ll{flex:none;padding:2rem 1.5rem;}
+  .ll img{max-width:200px;}
+  .lr{padding:2rem 1.5rem;}
 }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<header id="main-header">
-  <div class="logo-header">
-    <img src="logo-pccs360.png" alt="PCCS 360" onerror="this.style.display='none'">
-    <div>PCCS 360<small>Instituto Primazia</small></div>
+<!-- ══ LOGIN ══ -->
+<div id="screen-login">
+  <div class="ll">
+    <img src="logo-pccs360.png" alt="PCCS 360" onerror="this.src='';this.style.display='none'">
   </div>
-  <div class="header-right">
-    <div>
-      <div class="hdr-name" id="header-user-name"></div>
-      <div class="hdr-role" id="header-user-role"></div>
-    </div>
-    <div class="avatar" id="avatar-btn" onclick="toggleMenu()">AK</div>
-    <div class="user-dropdown" id="user-dropdown">
-      <div class="udrop-header">
-        <strong id="dd-nome"></strong>
-        <span id="dd-email" style="font-size:0.75rem"></span>
+  <div class="lr">
+    <div class="lbox">
+      <h2>Bem-vindo ao <span>PCCS 360</span></h2>
+      <p>Sistema de Gestão de Plano de Cargos,<br>Carreiras e Salários · Instituto Primazia</p>
+      <div class="ldiv"></div>
+      <label class="flbl">E-mail</label>
+      <div class="fw"><input type="email" id="l-email" placeholder="seu@institutoprimazia.com.br"></div>
+      <label class="flbl">Senha</label>
+      <div class="fw">
+        <input type="password" id="l-senha" placeholder="••••••••" onkeydown="if(event.key==='Enter')entrar()">
+        <button class="eyeb" onclick="toggleOlho('l-senha',this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg></button>
       </div>
-      <div class="udrop-item" onclick="abrirModalSenha()">🔐 Alterar minha senha</div>
-      <div class="udrop-item" id="menu-usuarios" onclick="mostrarView('view-usuarios')" style="display:none">👥 Gerenciar usuários</div>
-      <div class="udrop-divider"></div>
-      <div class="udrop-item danger" onclick="logout()">↩ Sair do sistema</div>
-    </div>
-  </div>
-</header>
-
-<!-- LOGIN -->
-<div id="view-login" class="active">
-  <div class="login-left">
-    <div class="logo-wrap">
-      <img src="logo-pccs360.png" alt="PCCS 360">
-      <div class="tagline">Estrutura · Valorização · Estratégia · Visão 360°</div>
-    </div>
-  </div>
-  <div class="login-right">
-    <div class="login-box">
-      <div class="login-brand">
-        <h2>Bem-vindo ao <span>PCCS 360</span></h2>
-        <p>Sistema de Gestão de Plano de Cargos,<br>Carreiras e Salários · Instituto Primazia</p>
-        <div class="divider"></div>
-      </div>
-      <label class="field-label">E-mail</label>
-      <div class="field-wrap">
-        <input type="email" id="login-email" placeholder="seu@institutoprimazia.com.br">
-      </div>
-      <label class="field-label">Senha</label>
-      <div class="field-wrap">
-        <input type="password" id="login-senha" placeholder="••••••••" onkeydown="if(event.key==='Enter')entrar()">
-        <button class="eye-btn" type="button" onclick="toggleOlho('login-senha',this)">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg>
-        </button>
-      </div>
-      <button class="btn-entrar" onclick="entrar()">ENTRAR NO SISTEMA</button>
-      <div class="login-erro" id="login-erro"></div>
-      <div class="login-footer">© 2026 <span>Instituto Primazia</span> · Todos os direitos reservados</div>
+      <button class="btnlogin" onclick="entrar()">ENTRAR NO SISTEMA</button>
+      <div class="lerro" id="l-erro"></div>
+      <div class="lfooter">© 2026 <span>Instituto Primazia</span></div>
     </div>
   </div>
 </div>
 
-<!-- DASHBOARD -->
-<div id="view-dashboard" class="view">
-  <div class="page-header">
-    <div>
-      <div class="page-title">Projetos <span>PCCS</span></div>
-      <p style="color:var(--text2);font-size:0.85rem;margin-top:0.3rem">Gerencie todos os planos de cargo, carreira e salário</p>
+<!-- ══ APP ══ -->
+<div id="screen-app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <img src="logo-pccs360.png" alt="PCCS 360" onerror="this.style.display='none'">
+      <div class="sb-logo-text">PCCS 360<small>Instituto Primazia</small></div>
     </div>
-    <button class="btn btn-gold" id="btn-nova-empresa" onclick="abrirModalEmpresa()">+ Nova Empresa</button>
-  </div>
-  <div class="stats-row">
-    <div class="stat-card"><div class="num" id="stat-total">0</div><div class="lbl">Empresas</div></div>
-    <div class="stat-card"><div class="num" id="stat-andamento">0</div><div class="lbl">Em Andamento</div></div>
-    <div class="stat-card"><div class="num" id="stat-concluidos">0</div><div class="lbl">Concluídos</div></div>
-  </div>
-  <div class="empresas-grid" id="empresas-grid"></div>
-</div>
-
-<!-- FASES -->
-<div id="view-fases" class="view">
-  <button class="back-btn" onclick="mostrarView('view-dashboard')">← Voltar aos projetos</button>
-  <div class="empresa-header" id="empresa-header-info"></div>
-  <div class="progresso-geral" id="progresso-geral"></div>
-  <div class="fases-list" id="fases-list"></div>
-</div>
-
-<!-- USUÁRIOS -->
-<div id="view-usuarios" class="view">
-  <button class="back-btn" onclick="mostrarView('view-dashboard')">← Voltar ao dashboard</button>
-  <div class="page-header">
-    <div>
-      <div class="page-title">👥 Gerenciar <span>Usuários</span></div>
-      <p style="color:var(--text2);font-size:0.85rem;margin-top:0.3rem">Máximo de 15 usuários · Apenas administradores podem gerenciar</p>
+    <nav class="sb-nav">
+      <div class="sb-section">Principal</div>
+      <div class="sb-item active" onclick="irPara('pg-dashboard')" data-page="pg-dashboard"><span class="icon">📊</span>Dashboard Geral</div>
+      <div class="sb-item" onclick="irPara('pg-empresas')" data-page="pg-empresas"><span class="icon">🏢</span>Empresas</div>
+      <div class="sb-section">Operacional</div>
+      <div class="sb-item" onclick="irPara('pg-cargos')" data-page="pg-cargos"><span class="icon">📋</span>Cargos</div>
+      <div class="sb-item" onclick="irPara('pg-trilhas')" data-page="pg-trilhas"><span class="icon">🛤️</span>Trilhas de Carreira</div>
+      <div class="sb-item" onclick="irPara('pg-salarios')" data-page="pg-salarios"><span class="icon">💰</span>Tabelas Salariais</div>
+      <div class="sb-item" onclick="irPara('pg-diagnostico')" data-page="pg-diagnostico"><span class="icon">🔍</span>Diagnóstico</div>
+      <div class="sb-section">Gestão</div>
+      <div class="sb-item" onclick="irPara('pg-implantacao')" data-page="pg-implantacao"><span class="icon">🚀</span>Implantação</div>
+      <div class="sb-item" onclick="irPara('pg-governanca')" data-page="pg-governanca"><span class="icon">🛡️</span>Governança</div>
+      <div class="sb-item" onclick="irPara('pg-relatorios')" data-page="pg-relatorios"><span class="icon">📄</span>Relatórios</div>
+      <div class="sb-section" id="sb-admin-section" style="display:none">Administração</div>
+      <div class="sb-item" onclick="irPara('pg-usuarios')" data-page="pg-usuarios" id="sb-usuarios" style="display:none"><span class="icon">👥</span>Usuários</div>
+    </nav>
+    <div class="sb-user">
+      <div class="sb-user-info">
+        <div class="sb-avatar" id="sb-av">AK</div>
+        <div>
+          <div class="sb-user-name" id="sb-nome">Ana Kátia</div>
+          <div class="sb-user-role" id="sb-role">Administrador</div>
+        </div>
+      </div>
+      <div class="sb-user-actions">
+        <div class="sb-btn" onclick="abrirModalSenha()">🔐 Senha</div>
+        <div class="sb-btn danger" onclick="logout()">↩ Sair</div>
+      </div>
     </div>
-    <button class="btn btn-gold" onclick="abrirModalNovoUsuario()">+ Novo Usuário</button>
-  </div>
-  <div style="background:var(--navy);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
-    <table class="user-table">
-      <thead>
-        <tr>
-          <th>Nome</th>
-          <th>E-mail</th>
-          <th>Perfil</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="users-tbody"></tbody>
-    </table>
-  </div>
-</div>
+  </aside>
 
-<!-- MODAL NOVA EMPRESA -->
-<div class="modal-overlay" id="modal-empresa">
-  <div class="modal">
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Dashboard <span>Geral</span></div>
+      <div class="topbar-right">
+        <span class="badge-role badge-admin" id="topbar-role">👑 Admin</span>
+      </div>
+    </div>
+
+    <!-- DASHBOARD GERAL -->
+    <div class="page active" id="pg-dashboard">
+      <div class="cards-grid">
+        <div class="card gold"><div class="card-icon">🏢</div><div class="card-num" id="c-total">0</div><div class="card-lbl">Empresas</div></div>
+        <div class="card blue"><div class="card-icon">⚡</div><div class="card-num" id="c-andamento">0</div><div class="card-lbl">Em andamento</div></div>
+        <div class="card green"><div class="card-icon">✅</div><div class="card-num" id="c-concluidos">0</div><div class="card-lbl">Concluídos</div></div>
+        <div class="card warn"><div class="card-icon">⏳</div><div class="card-num" id="c-pendentes">0</div><div class="card-lbl">Pendentes</div></div>
+        <div class="card gold"><div class="card-icon">📊</div><div class="card-num" id="c-media">0%</div><div class="card-lbl">Média progresso</div></div>
+      </div>
+
+      <!-- GRÁFICOS -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">Status das <span>Empresas</span></div>
+          <canvas id="chart-status" height="200"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Evolução por <span>Fase PCCS</span></div>
+          <canvas id="chart-fases" height="200"></canvas>
+        </div>
+      </div>
+
+      <!-- LISTA RÁPIDA -->
+      <div class="sec-hdr">
+        <div class="sec-title">Visão Rápida — <span>Todas as Empresas</span></div>
+      </div>
+      <div id="lista-rapida"></div>
+    </div>
+
+    <!-- EMPRESAS -->
+    <div class="page" id="pg-empresas">
+      <div class="sec-hdr">
+        <div class="sec-title">Projetos <span>PCCS</span></div>
+        <button class="btn btn-g" id="btn-nova-emp" onclick="abrirModalEmpresa()">+ Nova Empresa</button>
+      </div>
+      <div class="emp-grid" id="emp-grid"></div>
+    </div>
+
+    <!-- DETALHE EMPRESA -->
+    <div class="page" id="pg-detalhe">
+      <button class="back" onclick="irPara('pg-empresas')">← Voltar às empresas</button>
+      <div id="detalhe-top"></div>
+      <div class="prog-geral" id="prog-geral"></div>
+      <div class="fases-lista" id="fases-lista"></div>
+    </div>
+
+    <!-- USUÁRIOS -->
+    <div class="page" id="pg-usuarios">
+      <div class="sec-hdr">
+        <div class="sec-title">👥 Gerenciar <span>Usuários</span></div>
+        <button class="btn btn-g" onclick="abrirModalNovoUsuario()">+ Novo Usuário</button>
+      </div>
+      <p style="color:var(--text2);font-size:0.82rem;margin-bottom:1.2rem">Máximo 15 usuários · Apenas administradores podem gerenciar</p>
+      <div style="background:var(--navy);border:1px solid var(--border);border-radius:16px;overflow:auto;">
+        <table class="utbl"><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Ações</th></tr></thead><tbody id="utbody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- PÁGINAS EM BREVE -->
+    <div class="page" id="pg-cargos"><div style="text-align:center;padding:4rem;color:var(--text2)"><div style="font-size:3rem;margin-bottom:1rem">📋</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.3rem;color:var(--gold)">Cargos</div><p style="margin-top:0.5rem">Em desenvolvimento</p></div></div>
+    <div class="page" id="pg-trilhas"><div style="text-align:center;padding:4rem;color:var(--text2)"><div style="font-size:3rem;margin-bottom:1rem">🛤️</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.3rem;color:var(--gold)">Trilhas de Carreira</div><p style="margin-top:0.5rem">Em desenvolvimento</p></div></div>
+    <div class="page" id="pg-salarios"><div style="text-align:center;padding:4rem;color:var(--text2)"><div style="font-size:3rem;margin-bottom:1rem">💰</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.3rem;color:var(--gold)">Tabelas Salariais</div><p style="margin-top:0.5rem">Em desenvolvimento</p></div></div>
+    <div class="page" id="pg-diagnostico"><div style="text-align:center;padding:4rem;color:var(--text2)"><div style="font-size:3rem;margin-bottom:1rem">🔍</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.3rem;color:var(--gold)">Diagnóstico Organizacional</div><p style="margin-top:0.5rem">Em desenvolvimento</p></div></div>
+    <div class="page" id="pg-implantacao"><div style="text-align:center;padding:4rem;color:var(--text2)"><div style="font-size:3rem;margin-bottom:1rem">🚀</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.3rem;color:var(--gold)">Implantação</div><p style="margin-top:0.5rem">Em desenvolvimento</p></div></div>
+    <div class="page" id="pg-governanca"><div style="text-align:center;padding:4rem;color:var(--text2)"><div style="font-size:3rem;margin-bottom:1rem">🛡️</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.3rem;color:var(--gold)">Governança</div><p style="margin-top:0.5rem">Em desenvolvimento</p></div></div>
+    <div class="page" id="pg-relatorios"><div style="text-align:center;padding:4rem;color:var(--text2)"><div style="font-size:3rem;margin-bottom:1rem">📄</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.3rem;color:var(--gold)">Relatórios</div><p style="margin-top:0.5rem">Em desenvolvimento</p></div></div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- MODAIS -->
+<div class="mo" id="mo-empresa">
+  <div class="mbox">
     <h2>🏢 Nova Empresa</h2>
-    <div class="form-group"><label>Nome da Empresa *</label><input class="inp-m" type="text" id="emp-nome" placeholder="Ex: SM Madeiras"></div>
-    <div class="form-group"><label>Setor / Segmento</label><input class="inp-m" type="text" id="emp-setor" placeholder="Ex: Madeireira, Saúde..."></div>
-    <div class="form-group"><label>Responsável na Empresa</label><input class="inp-m" type="text" id="emp-responsavel" placeholder="Nome do contato"></div>
-    <div class="form-group"><label>Emoji / Ícone</label><input class="inp-m" type="text" id="emp-emoji" placeholder="🏢" maxlength="4"></div>
-    <div class="modal-btns">
-      <button class="btn btn-outline" onclick="fecharModal('modal-empresa')">Cancelar</button>
-      <button class="btn btn-gold" onclick="salvarEmpresa()">Criar Projeto</button>
-    </div>
+    <div class="fg"><label>Nome *</label><input class="inp" type="text" id="e-nome" placeholder="Ex: SM Madeiras"></div>
+    <div class="fg"><label>Setor</label><input class="inp" type="text" id="e-setor" placeholder="Ex: Madeireira, Saúde..."></div>
+    <div class="fg"><label>Responsável</label><input class="inp" type="text" id="e-resp" placeholder="Nome do contato"></div>
+    <div class="fg"><label>Emoji</label><input class="inp" type="text" id="e-emoji" placeholder="🏢" maxlength="4"></div>
+    <div class="mbtns"><button class="btn btn-o" onclick="fecharModal('mo-empresa')">Cancelar</button><button class="btn btn-g" onclick="salvarEmpresa()">Criar</button></div>
   </div>
 </div>
 
-<!-- MODAL ALTERAR SENHA -->
-<div class="modal-overlay" id="modal-senha">
-  <div class="modal">
+<div class="mo" id="mo-senha">
+  <div class="mbox">
     <h2>🔐 Alterar Minha Senha</h2>
-    <div class="form-group">
-      <label>Senha Atual</label>
-      <div class="inp-wrap">
-        <input class="inp-m" type="password" id="senha-atual" placeholder="••••••••">
-        <button class="eye-btn" type="button" onclick="toggleOlho('senha-atual',this)">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg>
-        </button>
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Nova Senha</label>
-      <div class="inp-wrap">
-        <input class="inp-m" type="password" id="senha-nova" placeholder="••••••••">
-        <button class="eye-btn" type="button" onclick="toggleOlho('senha-nova',this)">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg>
-        </button>
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Confirmar Nova Senha</label>
-      <div class="inp-wrap">
-        <input class="inp-m" type="password" id="senha-confirma" placeholder="••••••••">
-        <button class="eye-btn" type="button" onclick="toggleOlho('senha-confirma',this)">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg>
-        </button>
-      </div>
-    </div>
-    <p id="senha-erro" style="color:var(--danger);font-size:0.82rem;min-height:1.1rem"></p>
-    <div class="modal-btns">
-      <button class="btn btn-outline" onclick="fecharModal('modal-senha')">Cancelar</button>
-      <button class="btn btn-gold" onclick="salvarNovaSenha()">Salvar Senha</button>
-    </div>
+    <div class="fg"><label>Senha Atual</label><div class="inpw"><input class="inp" type="password" id="s-atual" placeholder="••••••••"><button class="eyeb" onclick="toggleOlho('s-atual',this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg></button></div></div>
+    <div class="fg"><label>Nova Senha</label><div class="inpw"><input class="inp" type="password" id="s-nova" placeholder="••••••••"><button class="eyeb" onclick="toggleOlho('s-nova',this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg></button></div></div>
+    <div class="fg"><label>Confirmar Nova Senha</label><div class="inpw"><input class="inp" type="password" id="s-conf" placeholder="••••••••"><button class="eyeb" onclick="toggleOlho('s-conf',this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg></button></div></div>
+    <div class="merro" id="s-erro"></div>
+    <div class="mbtns"><button class="btn btn-o" onclick="fecharModal('mo-senha')">Cancelar</button><button class="btn btn-g" onclick="salvarNovaSenha()">Salvar</button></div>
   </div>
 </div>
 
-<!-- MODAL NOVO USUÁRIO -->
-<div class="modal-overlay" id="modal-usuario">
-  <div class="modal">
-    <h2 id="modal-user-title">👤 Novo Usuário</h2>
-    <div class="form-group"><label>Nome Completo *</label><input class="inp-m" type="text" id="user-nome" placeholder="Ex: Karine Silva"></div>
-    <div class="form-group"><label>E-mail *</label><input class="inp-m" type="email" id="user-email" placeholder="karine@institutoprimazia.com.br"></div>
-    <div class="form-group">
-      <label>Perfil de Acesso *</label>
-      <select class="select-m" id="user-role">
+<div class="mo" id="mo-usuario">
+  <div class="mbox">
+    <h2 id="mu-title">👤 Novo Usuário</h2>
+    <div class="fg"><label>Nome Completo *</label><input class="inp" type="text" id="u-nome" placeholder="Ex: Karine Silva"></div>
+    <div class="fg"><label>E-mail *</label><input class="inp" type="email" id="u-email" placeholder="karine@institutoprimazia.com.br"></div>
+    <div class="fg"><label>Perfil de Acesso *</label>
+      <select class="sel" id="u-role">
         <option value="admin">👑 Administrador — acesso total</option>
         <option value="editor" selected>✏️ Editor — cadastra e edita</option>
         <option value="visualizador">👁️ Visualizador — somente leitura</option>
       </select>
     </div>
-    <div class="form-group" id="campo-senha-usuario">
-      <label>Senha *</label>
-      <div class="inp-wrap">
-        <input class="inp-m" type="password" id="user-senha" placeholder="Mínimo 6 caracteres">
-        <button class="eye-btn" type="button" onclick="toggleOlho('user-senha',this)">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg>
-        </button>
-      </div>
-    </div>
-    <p id="user-erro" style="color:var(--danger);font-size:0.82rem;min-height:1.1rem"></p>
-    <div class="modal-btns">
-      <button class="btn btn-outline" onclick="fecharModal('modal-usuario')">Cancelar</button>
-      <button class="btn btn-gold" onclick="salvarUsuario()">Salvar Usuário</button>
-    </div>
+    <div class="fg" id="u-senha-campo"><label>Senha *</label><div class="inpw"><input class="inp" type="password" id="u-senha" placeholder="Mínimo 6 caracteres"><button class="eyeb" onclick="toggleOlho('u-senha',this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg></button></div></div>
+    <div class="merro" id="u-erro"></div>
+    <div class="mbtns"><button class="btn btn-o" onclick="fecharModal('mo-usuario')">Cancelar</button><button class="btn btn-g" onclick="salvarUsuario()">Salvar</button></div>
   </div>
 </div>
 
@@ -412,389 +448,361 @@ const FASES=[
   {id:'fase5',nome:'Implantação',descricao:'Implementação e comunicação do PCCS',atividades:['Aprovação da diretoria','Comunicar aos colaboradores','Monitorar implantação']}
 ];
 
-// ══ GERENCIAMENTO DE USUÁRIOS ══
-const USERS_KEY = 'pccs360_users';
-const SESSION_KEY = 'pccs360_session';
+const ETAPA_LABELS=['Não iniciado','Diagnóstico','Em construção','Em validação','Concluído'];
+const ETAPA_CORES=['etapa-0','etapa-1','etapa-2','etapa-3','etapa-4'];
 
-function getUsuarios() {
-  const raw = localStorage.getItem(USERS_KEY);
-  if (raw) return JSON.parse(raw);
-  // Usuário padrão inicial
-  const padrao = [{
-    id: 'admin_001',
-    nome: 'Ana Kátia',
-    email: 'anakatia@institutoprimazia.com.br',
-    senha: 'Ana@028079',
-    role: 'admin',
-    ativo: true
-  }];
-  localStorage.setItem(USERS_KEY, JSON.stringify(padrao));
-  return padrao;
+// ══ USERS ══
+const UK='pccs360_users', SK='pccs360_session';
+function getUsers(){
+  const r=localStorage.getItem(UK);
+  if(r)return JSON.parse(r);
+  const d=[{id:'admin_001',nome:'Ana Kátia',email:'anakatia@institutoprimazia.com.br',senha:'Ana@028079',role:'admin',ativo:true}];
+  localStorage.setItem(UK,JSON.stringify(d));return d;
 }
+function saveUsers(u){localStorage.setItem(UK,JSON.stringify(u));}
+function getSessao(){const r=sessionStorage.getItem(SK);return r?JSON.parse(r):null;}
+function setSessao(u){sessionStorage.setItem(SK,JSON.stringify(u));}
 
-function salvarUsuarios(lista) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(lista));
-}
+let usuarioAtual=null, empresas=[], empAtual=null, faseAberta=null, editUID=null;
+let chartStatus=null, chartFases=null;
 
-function getSessao() {
-  const raw = sessionStorage.getItem(SESSION_KEY);
-  return raw ? JSON.parse(raw) : null;
-}
-
-function setSessao(usuario) {
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify(usuario));
-}
-
-// ══ ESTADO ══
-let empresas=[], empresaAtual=null, faseAberta=null;
-let usuarioAtual=null, editandoUserId=null;
-
-// ══ OLH0 (eye toggle) ══
-function toggleOlho(inputId, btn) {
-  const inp = document.getElementById(inputId);
-  const visivel = inp.type === 'text';
-  inp.type = visivel ? 'password' : 'text';
-  btn.innerHTML = visivel
-    ? `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg>`
-    : `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0c0 2-4 7-9 7S3 14 3 12s4-7 9-7 9 5 9 7z"/></svg>`;
+// ══ EYE ══
+function toggleOlho(id,btn){
+  const inp=document.getElementById(id);
+  const v=inp.type==='text';inp.type=v?'password':'text';
+  btn.innerHTML=v
+    ?`<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-9-5-9-7s3.477-7 9-7a9.97 9.97 0 016.633 2.502M6.1 6.1l11.8 11.8M9.879 9.879A3 3 0 0014.12 14.12"/></svg>`
+    :`<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0c0 2-4 7-9 7S3 14 3 12s4-7 9-7 9 5 9 7z"/></svg>`;
 }
 
 // ══ LOGIN ══
-function entrar() {
-  const email = document.getElementById('login-email').value.trim().toLowerCase();
-  const senha = document.getElementById('login-senha').value;
-  const erro  = document.getElementById('login-erro');
-  erro.textContent = '';
-  if (!email||!senha) { erro.textContent='⚠️ Preencha e-mail e senha.'; return; }
+function entrar(){
+  const email=document.getElementById('l-email').value.trim().toLowerCase();
+  const senha=document.getElementById('l-senha').value;
+  const erro=document.getElementById('l-erro');erro.textContent='';
+  if(!email||!senha){erro.textContent='⚠️ Preencha e-mail e senha.';return;}
+  const u=getUsers().find(u=>u.email.toLowerCase()===email&&u.senha===senha&&u.ativo!==false);
+  if(u){setSessao(u);iniciarApp(u);}
+  else{erro.textContent='❌ E-mail ou senha incorretos.';}
+}
 
-  const usuarios = getUsuarios();
-  const user = usuarios.find(u => u.email.toLowerCase()===email && u.senha===senha && u.ativo!==false);
+function logout(){
+  sessionStorage.removeItem(SK);
+  document.getElementById('screen-app').classList.remove('show');
+  document.getElementById('screen-login').style.display='flex';
+  document.getElementById('l-senha').value='';
+  document.getElementById('l-erro').textContent='';
+}
 
-  if (user) {
-    setSessao(user);
-    mostrarDashboard(user);
-  } else {
-    erro.textContent = '❌ E-mail ou senha incorretos.';
+function iniciarApp(u){
+  usuarioAtual=u;
+  document.getElementById('screen-login').style.display='none';
+  document.getElementById('screen-app').classList.add('show');
+  const ini=u.nome.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('sb-av').textContent=ini;
+  document.getElementById('sb-nome').textContent=u.nome;
+  document.getElementById('sb-role').textContent={admin:'👑 Administrador',editor:'✏️ Editor',visualizador:'👁️ Visualizador'}[u.role];
+  document.getElementById('topbar-role').textContent={admin:'👑 Admin',editor:'✏️ Editor',visualizador:'👁️ Visualizador'}[u.role];
+  document.getElementById('topbar-role').className='badge-role badge-'+u.role;
+  if(u.role==='admin'){
+    document.getElementById('sb-admin-section').style.display='block';
+    document.getElementById('sb-usuarios').style.display='flex';
   }
-}
-
-function logout() {
-  sessionStorage.removeItem(SESSION_KEY);
-  document.getElementById('main-header').classList.remove('show');
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.getElementById('view-login').classList.add('active');
-  document.getElementById('login-senha').value='';
-  document.getElementById('login-erro').textContent='';
-}
-
-function mostrarDashboard(user) {
-  usuarioAtual = user;
-  const iniciais = user.nome.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
-  document.getElementById('avatar-btn').textContent = iniciais;
-  document.getElementById('header-user-name').textContent = user.nome;
-  document.getElementById('header-user-role').textContent = roleLabel(user.role);
-  document.getElementById('dd-nome').textContent = user.nome;
-  document.getElementById('dd-email').textContent = user.email;
-
-  // Mostrar menu usuários só para admin
-  document.getElementById('menu-usuarios').style.display = user.role==='admin' ? 'flex' : 'none';
-  // Botão nova empresa só para admin e editor
-  const btnNova = document.getElementById('btn-nova-empresa');
-  if (btnNova) btnNova.style.display = user.role==='visualizador' ? 'none' : '';
-
-  document.getElementById('main-header').classList.add('show');
-  mostrarView('view-dashboard');
+  if(u.role!=='visualizador'&&u.role!=='editor'||u.role==='admin'){
+    const b=document.getElementById('btn-nova-emp');if(b)b.style.display='';
+  } else {
+    const b=document.getElementById('btn-nova-emp');if(b)b.style.display='none';
+  }
   carregarEmpresas();
 }
 
-function roleLabel(role) {
-  return {admin:'👑 Administrador', editor:'✏️ Editor', visualizador:'👁️ Visualizador'}[role]||role;
-}
-
-function podeEditar() { return usuarioAtual && (usuarioAtual.role==='admin'||usuarioAtual.role==='editor'); }
-function podeExcluir() { return usuarioAtual && usuarioAtual.role==='admin'; }
-function podeAdmin()   { return usuarioAtual && usuarioAtual.role==='admin'; }
-
-// ══ MENU ══
-function toggleMenu() {
-  document.getElementById('user-dropdown').classList.toggle('open');
-}
-
-// ══ VIEWS ══
-function mostrarView(id) {
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.getElementById('view-login').classList.remove('active');
+// ══ NAVEGAÇÃO ══
+function irPara(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  document.getElementById('user-dropdown').classList.remove('open');
-  if (id==='view-usuarios') renderUsuarios();
+  document.querySelectorAll('.sb-item').forEach(i=>{
+    i.classList.toggle('active',i.dataset.page===id);
+  });
+  const titles={
+    'pg-dashboard':'Dashboard <span>Geral</span>',
+    'pg-empresas':'Projetos <span>PCCS</span>',
+    'pg-detalhe':'Empresa <span>Detalhada</span>',
+    'pg-usuarios':'Gerenciar <span>Usuários</span>',
+    'pg-cargos':'<span>Cargos</span>',
+    'pg-trilhas':'Trilhas de <span>Carreira</span>',
+    'pg-salarios':'Tabelas <span>Salariais</span>',
+    'pg-diagnostico':'<span>Diagnóstico</span>',
+    'pg-implantacao':'<span>Implantação</span>',
+    'pg-governanca':'<span>Governança</span>',
+    'pg-relatorios':'<span>Relatórios</span>'
+  };
+  document.getElementById('topbar-title').innerHTML=titles[id]||id;
 }
 
-// ══ ALTERAR SENHA ══
-function abrirModalSenha() {
-  document.getElementById('user-dropdown').classList.remove('open');
-  ['senha-atual','senha-nova','senha-confirma'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('senha-erro').textContent='';
-  document.getElementById('modal-senha').classList.add('open');
-}
-
-function salvarNovaSenha() {
-  const atual    = document.getElementById('senha-atual').value;
-  const nova     = document.getElementById('senha-nova').value;
-  const confirma = document.getElementById('senha-confirma').value;
-  const erro     = document.getElementById('senha-erro');
-  erro.textContent='';
-
-  if (atual !== usuarioAtual.senha) { erro.textContent='❌ Senha atual incorreta.'; return; }
-  if (nova.length < 6) { erro.textContent='⚠️ Nova senha precisa ter pelo menos 6 caracteres.'; return; }
-  if (nova !== confirma) { erro.textContent='❌ As senhas não coincidem.'; return; }
-
-  const usuarios = getUsuarios();
-  const idx = usuarios.findIndex(u=>u.id===usuarioAtual.id);
-  if (idx>=0) { usuarios[idx].senha=nova; salvarUsuarios(usuarios); }
-  usuarioAtual.senha = nova;
-  setSessao(usuarioAtual);
-  fecharModal('modal-senha');
-  toast('✅ Senha alterada com sucesso!');
-}
-
-// ══ EMPRESAS ══
-function carregarEmpresas() {
-  if(typeof db==='undefined') return;
+// ══ EMPRESAS FIREBASE ══
+function carregarEmpresas(){
+  if(typeof db==='undefined')return;
   db.collection('empresas').orderBy('criadoEm','desc').onSnapshot(snap=>{
     empresas=snap.docs.map(d=>({id:d.id,...d.data()}));
-    renderEmpresas(); atualizarStats();
+    renderDashboard();renderEmpresas();
   });
 }
 
-function atualizarStats() {
-  document.getElementById('stat-total').textContent=empresas.length;
-  const a=empresas.filter(e=>{const p=calcProg(e);return p>0&&p<100;}).length;
-  document.getElementById('stat-andamento').textContent=a;
-  document.getElementById('stat-concluidos').textContent=empresas.filter(e=>calcProg(e)===100).length;
-}
-
-function calcProg(emp) {
-  if(!emp.fases)return 0;
-  let t=0,d=0;
+function calcProg(emp){
+  if(!emp.fases)return 0;let t=0,d=0;
   FASES.forEach(f=>{const fd=emp.fases[f.id]||{};f.atividades.forEach((_,i)=>{t++;if(fd.atividades&&fd.atividades[i])d++;});});
   return t?Math.round((d/t)*100):0;
 }
 
-function faseIdxAtual(emp) {
+function getEtapa(emp){
+  const p=calcProg(emp);
+  if(p===0)return 0;if(p<30)return 1;if(p<70)return 2;if(p<100)return 3;return 4;
+}
+
+function faseIdxAtual(emp){
   for(let i=0;i<FASES.length;i++){const f=emp.fases&&emp.fases[FASES[i].id];if(!f||f.status!=='concluida')return i;}
   return FASES.length-1;
 }
 
-function renderEmpresas() {
-  const grid=document.getElementById('empresas-grid'); grid.innerHTML='';
-  if (podeEditar()) {
+// ══ DASHBOARD ══
+function renderDashboard(){
+  const total=empresas.length;
+  const andamento=empresas.filter(e=>{const p=calcProg(e);return p>0&&p<100;}).length;
+  const concluidos=empresas.filter(e=>calcProg(e)===100).length;
+  const pendentes=empresas.filter(e=>calcProg(e)===0).length;
+  const media=total?Math.round(empresas.reduce((a,e)=>a+calcProg(e),0)/total):0;
+
+  document.getElementById('c-total').textContent=total;
+  document.getElementById('c-andamento').textContent=andamento;
+  document.getElementById('c-concluidos').textContent=concluidos;
+  document.getElementById('c-pendentes').textContent=pendentes;
+  document.getElementById('c-media').textContent=media+'%';
+
+  // Gráfico status donut
+  const ctxS=document.getElementById('chart-status').getContext('2d');
+  if(chartStatus)chartStatus.destroy();
+  chartStatus=new Chart(ctxS,{
+    type:'doughnut',
+    data:{
+      labels:['Não iniciado','Em diagnóstico','Em construção','Em validação','Concluído'],
+      datasets:[{data:[pendentes,empresas.filter(e=>getEtapa(e)===1).length,empresas.filter(e=>getEtapa(e)===2).length,empresas.filter(e=>getEtapa(e)===3).length,concluidos],backgroundColor:['#243558','#5b9bd5','#c9a84c','#f0a500','#4caf7d'],borderWidth:0}]
+    },
+    options:{responsive:true,plugins:{legend:{labels:{color:'#8a9bb5',font:{size:11}},position:'bottom'}}}
+  });
+
+  // Gráfico fases barras
+  const ctxF=document.getElementById('chart-fases').getContext('2d');
+  if(chartFases)chartFases.destroy();
+  const faseCounts=FASES.map(f=>{
+    return empresas.filter(emp=>{const fd=emp.fases&&emp.fases[f.id];return fd&&fd.status==='concluida';}).length;
+  });
+  chartFases=new Chart(ctxF,{
+    type:'bar',
+    data:{
+      labels:FASES.map(f=>f.nome.split(' ').slice(0,2).join(' ')),
+      datasets:[{label:'Concluídas',data:faseCounts,backgroundColor:'rgba(201,168,76,0.7)',borderRadius:6}]
+    },
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8a9bb5',font:{size:10}}},y:{ticks:{color:'#8a9bb5',stepSize:1},grid:{color:'rgba(201,168,76,0.05)'}}}}
+  });
+
+  // Lista rápida
+  const lr=document.getElementById('lista-rapida');
+  if(!empresas.length){lr.innerHTML='<p style="color:var(--text2);text-align:center;padding:2rem">Nenhuma empresa cadastrada ainda.</p>';return;}
+  lr.innerHTML=`
+    <div style="background:var(--navy);border:1px solid var(--border);border-radius:16px;overflow:auto;">
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr>
+          <th style="padding:0.7rem 1rem;text-align:left;font-size:0.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid var(--border)">Empresa</th>
+          <th style="padding:0.7rem 1rem;text-align:left;font-size:0.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid var(--border)">Etapa Atual</th>
+          <th style="padding:0.7rem 1rem;text-align:left;font-size:0.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid var(--border)">Progresso</th>
+          <th style="padding:0.7rem 1rem;text-align:left;font-size:0.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid var(--border)">Status</th>
+          <th style="padding:0.7rem 1rem;border-bottom:1px solid var(--border)"></th>
+        </tr></thead>
+        <tbody>
+        ${empresas.map(emp=>{
+          const prog=calcProg(emp);
+          const etapa=getEtapa(emp);
+          const faseAtual=FASES[faseIdxAtual(emp)];
+          const fd=emp.fases&&emp.fases[faseAtual?.id];
+          const stAtual=fd?.status||'pendente';
+          const stLabel={pendente:'Pendente',andamento:'Em andamento',concluida:'Concluída'}[stAtual];
+          const stCls={pendente:'st-p',andamento:'st-a',concluida:'st-c'}[stAtual];
+          return`<tr style="border-bottom:1px solid rgba(201,168,76,0.06)">
+            <td style="padding:0.8rem 1rem"><strong>${emp.emoji||'🏢'} ${emp.nome}</strong><br><span style="font-size:0.73rem;color:var(--text2)">${emp.setor||''}</span></td>
+            <td style="padding:0.8rem 1rem"><span style="font-size:0.8rem;color:var(--text2)">${faseAtual?.nome||'—'}</span></td>
+            <td style="padding:0.8rem 1rem;min-width:120px">
+              <div style="height:4px;background:var(--navy2);border-radius:99px;overflow:hidden;margin-bottom:0.3rem"><div style="height:100%;width:${prog}%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px"></div></div>
+              <span style="font-size:0.75rem;color:var(--gold);font-weight:700">${prog}%</span>
+            </td>
+            <td style="padding:0.8rem 1rem"><span class="fc-st ${stCls}">${stLabel}</span></td>
+            <td style="padding:0.8rem 1rem"><button class="btn btn-o btn-sm" onclick="abrirDetalhe('${emp.id}')">Ver →</button></td>
+          </tr>`;
+        }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ══ RENDER EMPRESAS ══
+function renderEmpresas(){
+  const grid=document.getElementById('emp-grid');grid.innerHTML='';
+  if(podeEditar()){
     const add=document.createElement('div');add.className='add-card';add.onclick=abrirModalEmpresa;
-    add.innerHTML='<div class="add-icon">＋</div><span>Nova Empresa</span><small style="color:var(--text2);font-size:0.78rem">Iniciar novo projeto PCCS</small>';
+    add.innerHTML='<div class="add-ico">＋</div><span style="font-family:\'Syne\',sans-serif;font-weight:600;font-size:0.9rem">Nova Empresa</span><small style="color:var(--text2);font-size:0.75rem">Iniciar novo projeto PCCS</small>';
     grid.appendChild(add);
   }
   empresas.forEach(emp=>{
-    const prog=calcProg(emp),fi=faseIdxAtual(emp);
-    const card=document.createElement('div');card.className='empresa-card';card.onclick=()=>abrirFases(emp.id);
-    const dots=FASES.map((f,i)=>{const fd=emp.fases&&emp.fases[f.id];const cls=fd&&fd.status==='concluida'?'done':i===fi?'active':'';return`<div class="fase-dot ${cls}"></div>`;}).join('');
-    const dt=emp.criadoEm?new Date(emp.criadoEm.seconds*1000).toLocaleDateString('pt-BR'):'';
-    card.innerHTML=`<div class="empresa-icon">${emp.emoji||'🏢'}</div><div class="empresa-nome">${emp.nome}</div><div class="empresa-setor">${emp.setor||'Sem setor definido'}</div><div class="empresa-progress-bar"><div class="empresa-progress-fill" style="width:${prog}%"></div></div><div class="empresa-progress-info"><span>Progresso</span><strong>${prog}%</strong></div><div class="fases-mini">${dots}</div>${dt?`<div class="empresa-data">Iniciado em ${dt}</div>`:''}`;
+    const prog=calcProg(emp),fi=faseIdxAtual(emp),etapa=getEtapa(emp);
+    const card=document.createElement('div');card.className='emp-card';card.onclick=()=>abrirDetalhe(emp.id);
+    const dots=FASES.map((f,i)=>{const fd=emp.fases&&emp.fases[f.id];const cls=fd&&fd.status==='concluida'?'done':i===fi?'active':'';return`<div class="fd ${cls}" title="${f.nome}"></div>`;}).join('');
+    card.innerHTML=`
+      <div class="emp-top">
+        <div class="emp-ico">${emp.emoji||'🏢'}</div>
+        <div><div class="emp-nome">${emp.nome}</div><div class="emp-setor">${emp.setor||'Sem setor'}</div></div>
+        <span class="emp-etapa-badge ${ETAPA_CORES[etapa]}">${ETAPA_LABELS[etapa]}</span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${prog}%"></div></div>
+      <div class="prog-info"><span>Fase atual: <strong>${FASES[fi]?.nome.split(' ').slice(0,2).join(' ')}</strong></span><strong>${prog}%</strong></div>
+      <div class="fases-mini">${dots}</div>`;
     grid.appendChild(card);
   });
 }
 
-function abrirModalEmpresa(){
-  if(!podeEditar()){toast('⚠️ Sem permissão para esta ação.');return;}
-  ['emp-nome','emp-setor','emp-responsavel','emp-emoji'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('modal-empresa').classList.add('open');
+// ══ DETALHE ══
+function abrirDetalhe(id){
+  empAtual=empresas.find(e=>e.id===id);if(!empAtual)return;
+  faseAberta=null;renderDetalhe();irPara('pg-detalhe');
+  setupListener(id);
 }
 
-async function salvarEmpresa(){
-  const nome=document.getElementById('emp-nome').value.trim();
-  if(!nome){toast('⚠️ Digite o nome da empresa');return;}
-  const dados={nome,setor:document.getElementById('emp-setor').value.trim(),responsavel:document.getElementById('emp-responsavel').value.trim(),emoji:document.getElementById('emp-emoji').value.trim()||'🏢',fases:{},criadoEm:firebase.firestore.FieldValue.serverTimestamp()};
-  FASES.forEach(f=>{dados.fases[f.id]={status:'pendente',atividades:{}};});
-  try{await db.collection('empresas').add(dados);fecharModal('modal-empresa');toast('✅ Empresa criada!');}
-  catch(e){toast('❌ Erro ao salvar');}
-}
-
-// ══ FASES ══
-function abrirFases(id){empresaAtual=empresas.find(e=>e.id===id);if(!empresaAtual)return;faseAberta=null;renderFases();mostrarView('view-fases');setupListener(id);}
-
-function renderFases(){
-  const emp=empresaAtual,prog=calcProg(emp);
-  document.getElementById('empresa-header-info').innerHTML=`
-    <div class="empresa-icon" style="width:56px;height:56px;font-size:1.6rem">${emp.emoji||'🏢'}</div>
-    <div class="empresa-header-info"><h2>${emp.nome}</h2><p>${emp.setor||''} ${emp.responsavel?'· Resp: '+emp.responsavel:''}</p></div>
-    <div class="empresa-header-actions">
-      ${podeExcluir()?`<button class="btn btn-danger btn-sm" onclick="excluirEmpresa('${emp.id}')">🗑 Excluir</button>`:''}
+function renderDetalhe(){
+  const emp=empAtual,prog=calcProg(emp);
+  document.getElementById('detalhe-top').innerHTML=`
+    <div class="detalhe-top">
+      <div style="width:52px;height:52px;border-radius:12px;background:var(--gold-dim);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.5rem">${emp.emoji||'🏢'}</div>
+      <div class="detalhe-info"><h2>${emp.nome}</h2><p>${emp.setor||''} ${emp.responsavel?'· Resp: '+emp.responsavel:''}</p></div>
+      <div class="detalhe-acoes">
+        ${podeExcluir()?`<button class="btn btn-d btn-sm" onclick="excluirEmpresa('${emp.id}')">🗑 Excluir</button>`:''}
+      </div>
     </div>`;
-  document.getElementById('progresso-geral').innerHTML=`<div><div class="lbl">Progresso geral do PCCS</div></div><div class="bar"><div class="bar-bg"><div class="bar-fill" style="width:${prog}%"></div></div></div><div class="pct">${prog}%</div>`;
-  const list=document.getElementById('fases-list');list.innerHTML='';
+  document.getElementById('prog-geral').innerHTML=`
+    <div><div class="pg-lbl">Progresso geral</div></div>
+    <div class="pg-bar"><div class="pg-bg"><div class="pg-fill" style="width:${prog}%"></div></div></div>
+    <div class="pg-pct">${prog}%</div>`;
+  const lista=document.getElementById('fases-lista');lista.innerHTML='';
   FASES.forEach((f,idx)=>{
     const fd=emp.fases&&emp.fases[f.id]||{status:'pendente',atividades:{}};
     const st=fd.status||'pendente',isOpen=faseAberta===f.id;
-    const card=document.createElement('div');card.className=`fase-card ${st==='concluida'?'concluida':st==='andamento'?'ativa':''}`;
+    const card=document.createElement('div');card.className=`fc ${st==='concluida'?'concluida':st==='andamento'?'ativa':''}`;
     const stl={pendente:'Pendente',andamento:'Em andamento',concluida:'Concluída'}[st];
-    const stc={pendente:'status-pendente',andamento:'status-andamento',concluida:'status-concluida'}[st];
+    const stc={pendente:'st-p',andamento:'st-a',concluida:'st-c'}[st];
     const avs=f.atividades.map((atv,i)=>{
       const done=fd.atividades&&fd.atividades[i];
       const cls=!podeEditar()?'no-perm':'';
-      return`<div class="atividade-item ${done?'done':''} ${cls}" onclick="${podeEditar()?`toggleAtv('${f.id}',${i})`:''}"><div class="atividade-check"></div><span>${atv}</span></div>`;
+      return`<div class="atv-item ${done?'done':''} ${cls}" onclick="${podeEditar()?`toggleAtv('${f.id}',${i})`:''}"><div class="atv-chk"></div><span>${atv}</span></div>`;
     }).join('');
     const acoes=podeEditar()?`
-      ${st!=='andamento'?`<button class="btn btn-outline btn-sm" onclick="mudarSt('${f.id}','andamento')">▶ Iniciar</button>`:''}
-      ${st!=='concluida'?`<button class="btn btn-gold btn-sm" onclick="mudarSt('${f.id}','concluida')">✓ Concluir</button>`:''}
-      ${st==='concluida'?`<button class="btn btn-outline btn-sm" onclick="mudarSt('${f.id}','andamento')">↩ Reabrir</button>`:''}
-    `:'<span style="color:var(--text2);font-size:0.8rem">👁️ Somente visualização</span>';
-    card.innerHTML=`<div class="fase-header" onclick="toggleFase('${f.id}')"><div class="fase-num">${idx+1}</div><div class="fase-info"><h3>${f.nome}</h3><p>${f.descricao}</p></div><div class="fase-status ${stc}">${stl}</div></div><div class="fase-body ${isOpen?'open':''}" id="fb-${f.id}"><div class="fase-divider"></div><div class="atividades-list">${avs}</div><div class="fase-actions">${acoes}</div></div>`;
-    list.appendChild(card);
+      ${st!=='andamento'?`<button class="btn btn-o btn-sm" onclick="mudarSt('${f.id}','andamento')">▶ Iniciar</button>`:''}
+      ${st!=='concluida'?`<button class="btn btn-g btn-sm" onclick="mudarSt('${f.id}','concluida')">✓ Concluir</button>`:''}
+      ${st==='concluida'?`<button class="btn btn-o btn-sm" onclick="mudarSt('${f.id}','andamento')">↩ Reabrir</button>`:''}
+    `:`<span style="color:var(--text2);font-size:0.78rem">👁️ Somente visualização</span>`;
+    card.innerHTML=`<div class="fc-hdr" onclick="toggleFase('${f.id}')"><div class="fc-num">${idx+1}</div><div class="fc-info"><h3>${f.nome}</h3><p>${f.descricao}</p></div><div class="fc-st ${stc}">${stl}</div></div><div class="fc-body ${isOpen?'open':''}" id="fb-${f.id}"><div class="fc-div"></div><div class="atv-list">${avs}</div><div class="fc-acoes">${acoes}</div></div>`;
+    lista.appendChild(card);
   });
 }
 
 function toggleFase(id){faseAberta=faseAberta===id?null:id;FASES.forEach(f=>{const b=document.getElementById('fb-'+f.id);if(b)b.classList.toggle('open',faseAberta===f.id);});}
+async function toggleAtv(faseId,idx){if(!podeEditar()){toast('⚠️ Sem permissão.');return;}const fd=empAtual.fases&&empAtual.fases[faseId]||{atividades:{}};const u={};u[`fases.${faseId}.atividades.${idx}`]=!(fd.atividades&&fd.atividades[idx]);try{await db.collection('empresas').doc(empAtual.id).update(u);}catch(e){toast('❌ Erro');}}
+async function mudarSt(faseId,st){if(!podeEditar()){toast('⚠️ Sem permissão.');return;}const u={};u[`fases.${faseId}.status`]=st;try{await db.collection('empresas').doc(empAtual.id).update(u);toast(st==='concluida'?'✅ Fase concluída!':'▶ Fase iniciada!');}catch(e){toast('❌ Erro');}}
+async function excluirEmpresa(id){if(!podeExcluir()){toast('⚠️ Somente administradores.');return;}if(!confirm('Excluir esta empresa?'))return;try{await db.collection('empresas').doc(id).delete();irPara('pg-empresas');toast('🗑 Empresa excluída');}catch(e){toast('❌ Erro');}}
+function setupListener(id){if(typeof db==='undefined')return;db.collection('empresas').doc(id).onSnapshot(snap=>{if(!snap.exists)return;empAtual={id:snap.id,...snap.data()};const idx=empresas.findIndex(e=>e.id===id);if(idx>=0)empresas[idx]=empAtual;if(document.getElementById('pg-detalhe').classList.contains('active'))renderDetalhe();});}
 
-async function toggleAtv(faseId,idx){
-  if(!podeEditar()){toast('⚠️ Sem permissão para editar.');return;}
-  const fd=empresaAtual.fases&&empresaAtual.fases[faseId]||{atividades:{}};
-  const u={};u[`fases.${faseId}.atividades.${idx}`]=!(fd.atividades&&fd.atividades[idx]);
-  try{await db.collection('empresas').doc(empresaAtual.id).update(u);}catch(e){toast('❌ Erro');}
+// ══ EMPRESA MODAL ══
+function abrirModalEmpresa(){if(!podeEditar()){toast('⚠️ Sem permissão.');return;}['e-nome','e-setor','e-resp','e-emoji'].forEach(id=>document.getElementById(id).value='');document.getElementById('mo-empresa').classList.add('open');}
+async function salvarEmpresa(){
+  const nome=document.getElementById('e-nome').value.trim();if(!nome){toast('⚠️ Digite o nome');return;}
+  const dados={nome,setor:document.getElementById('e-setor').value.trim(),responsavel:document.getElementById('e-resp').value.trim(),emoji:document.getElementById('e-emoji').value.trim()||'🏢',fases:{},criadoEm:firebase.firestore.FieldValue.serverTimestamp()};
+  FASES.forEach(f=>{dados.fases[f.id]={status:'pendente',atividades:{}};});
+  try{await db.collection('empresas').add(dados);fecharModal('mo-empresa');toast('✅ Empresa criada!');}catch(e){toast('❌ Erro ao salvar');}
 }
 
-async function mudarSt(faseId,status){
-  if(!podeEditar()){toast('⚠️ Sem permissão.');return;}
-  const u={};u[`fases.${faseId}.status`]=status;
-  try{await db.collection('empresas').doc(empresaAtual.id).update(u);toast(status==='concluida'?'✅ Fase concluída!':'▶ Fase iniciada!');}
-  catch(e){toast('❌ Erro');}
+// ══ SENHA ══
+function abrirModalSenha(){['s-atual','s-nova','s-conf'].forEach(id=>document.getElementById(id).value='');document.getElementById('s-erro').textContent='';document.getElementById('mo-senha').classList.add('open');}
+function salvarNovaSenha(){
+  const atual=document.getElementById('s-atual').value,nova=document.getElementById('s-nova').value,conf=document.getElementById('s-conf').value,erro=document.getElementById('s-erro');
+  erro.textContent='';
+  if(atual!==usuarioAtual.senha){erro.textContent='❌ Senha atual incorreta.';return;}
+  if(nova.length<6){erro.textContent='⚠️ Mínimo 6 caracteres.';return;}
+  if(nova!==conf){erro.textContent='❌ Senhas não coincidem.';return;}
+  const users=getUsers();const idx=users.findIndex(u=>u.id===usuarioAtual.id);
+  if(idx>=0){users[idx].senha=nova;saveUsers(users);}
+  usuarioAtual.senha=nova;setSessao(usuarioAtual);
+  fecharModal('mo-senha');toast('✅ Senha alterada!');
 }
 
-async function excluirEmpresa(id){
-  if(!podeExcluir()){toast('⚠️ Somente administradores podem excluir.');return;}
-  if(!confirm('Excluir esta empresa? Todos os dados serão perdidos.'))return;
-  try{await db.collection('empresas').doc(id).delete();mostrarView('view-dashboard');toast('🗑 Empresa excluída');}
-  catch(e){toast('❌ Erro');}
-}
-
-function setupListener(id){
-  if(typeof db==='undefined')return;
-  db.collection('empresas').doc(id).onSnapshot(snap=>{
-    if(!snap.exists)return;
-    empresaAtual={id:snap.id,...snap.data()};
-    const idx=empresas.findIndex(e=>e.id===id);if(idx>=0)empresas[idx]=empresaAtual;
-    if(document.getElementById('view-fases').classList.contains('active'))renderFases();
-  });
-}
-
-// ══ GERENCIAR USUÁRIOS ══
-function renderUsuarios() {
-  if(!podeAdmin()){mostrarView('view-dashboard');return;}
-  const usuarios = getUsuarios();
-  const tbody = document.getElementById('users-tbody');
-  tbody.innerHTML='';
-  usuarios.forEach(u=>{
+// ══ USUÁRIOS ══
+function renderUsuarios(){
+  if(!podeAdmin()){irPara('pg-dashboard');return;}
+  const users=getUsers(),tbody=document.getElementById('utbody');tbody.innerHTML='';
+  users.forEach(u=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td><strong>${u.nome}</strong></td>
-      <td style="color:var(--text2)">${u.email}</td>
-      <td><span class="role-badge role-${u.role}">${{admin:'👑 Admin',editor:'✏️ Editor',visualizador:'👁️ Visualizador'}[u.role]}</span></td>
-      <td>
-        <div class="user-actions">
-          <button class="btn btn-outline btn-sm" onclick="editarUsuario('${u.id}')">✏️ Editar</button>
-          ${u.id!=='admin_001'?`<button class="btn btn-danger btn-sm" onclick="excluirUsuario('${u.id}')">🗑</button>`:'<span style="font-size:0.75rem;color:var(--text2)">Admin principal</span>'}
-        </div>
-      </td>`;
+    tr.innerHTML=`<td><strong>${u.nome}</strong></td><td style="color:var(--text2)">${u.email}</td><td><span class="rbadge ${{admin:'r-admin',editor:'r-editor',visualizador:'r-viz'}[u.role]}">${{admin:'👑 Admin',editor:'✏️ Editor',visualizador:'👁️ Visualizador'}[u.role]}</span></td><td><div style="display:flex;gap:0.4rem"><button class="btn btn-o btn-sm" onclick="editarUsuario('${u.id}')">✏️ Editar</button>${u.id!=='admin_001'?`<button class="btn btn-d btn-sm" onclick="excluirUsuario('${u.id}')">🗑</button>`:'<span style="font-size:0.72rem;color:var(--text2)">Principal</span>'}</div></td>`;
     tbody.appendChild(tr);
   });
 }
 
 function abrirModalNovoUsuario(){
-  if(!podeAdmin()){toast('⚠️ Somente administradores podem cadastrar usuários.');return;}
-  const usuarios=getUsuarios();
-  if(usuarios.length>=15){toast('⚠️ Limite de 15 usuários atingido.');return;}
-  editandoUserId=null;
-  document.getElementById('modal-user-title').textContent='👤 Novo Usuário';
-  ['user-nome','user-email','user-senha'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('user-role').value='editor';
-  document.getElementById('campo-senha-usuario').style.display='block';
-  document.getElementById('user-erro').textContent='';
-  document.getElementById('modal-usuario').classList.add('open');
+  if(!podeAdmin()){toast('⚠️ Somente administradores.');return;}
+  if(getUsers().length>=15){toast('⚠️ Limite de 15 usuários atingido.');return;}
+  editUID=null;document.getElementById('mu-title').textContent='👤 Novo Usuário';
+  ['u-nome','u-email','u-senha'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('u-role').value='editor';document.getElementById('u-erro').textContent='';
+  document.getElementById('u-senha-campo').style.display='block';
+  document.getElementById('mo-usuario').classList.add('open');
 }
 
 function editarUsuario(id){
-  if(!podeAdmin())return;
-  const u=getUsuarios().find(u=>u.id===id);if(!u)return;
-  editandoUserId=id;
-  document.getElementById('modal-user-title').textContent='✏️ Editar Usuário';
-  document.getElementById('user-nome').value=u.nome;
-  document.getElementById('user-email').value=u.email;
-  document.getElementById('user-role').value=u.role;
-  document.getElementById('user-senha').value='';
-  document.getElementById('campo-senha-usuario').style.display='block';
-  document.getElementById('user-erro').textContent='';
-  document.getElementById('modal-usuario').classList.add('open');
+  if(!podeAdmin())return;const u=getUsers().find(u=>u.id===id);if(!u)return;
+  editUID=id;document.getElementById('mu-title').textContent='✏️ Editar Usuário';
+  document.getElementById('u-nome').value=u.nome;document.getElementById('u-email').value=u.email;
+  document.getElementById('u-role').value=u.role;document.getElementById('u-senha').value='';
+  document.getElementById('u-erro').textContent='';document.getElementById('u-senha-campo').style.display='block';
+  document.getElementById('mo-usuario').classList.add('open');
 }
 
 function salvarUsuario(){
-  const nome=document.getElementById('user-nome').value.trim();
-  const email=document.getElementById('user-email').value.trim().toLowerCase();
-  const role=document.getElementById('user-role').value;
-  const senha=document.getElementById('user-senha').value;
-  const erro=document.getElementById('user-erro');
+  const nome=document.getElementById('u-nome').value.trim(),email=document.getElementById('u-email').value.trim().toLowerCase(),role=document.getElementById('u-role').value,senha=document.getElementById('u-senha').value,erro=document.getElementById('u-erro');
   erro.textContent='';
-
-  if(!nome||!email){erro.textContent='⚠️ Nome e e-mail são obrigatórios.';return;}
-  if(!editandoUserId&&senha.length<6){erro.textContent='⚠️ Senha precisa ter pelo menos 6 caracteres.';return;}
-
-  const usuarios=getUsuarios();
-  const jaExiste=usuarios.find(u=>u.email===email&&u.id!==editandoUserId);
-  if(jaExiste){erro.textContent='❌ E-mail já cadastrado.';return;}
-
-  if(editandoUserId){
-    const idx=usuarios.findIndex(u=>u.id===editandoUserId);
-    if(idx>=0){
-      usuarios[idx].nome=nome;
-      usuarios[idx].email=email;
-      usuarios[idx].role=role;
-      if(senha.length>=6)usuarios[idx].senha=senha;
-    }
+  if(!nome||!email){erro.textContent='⚠️ Nome e e-mail obrigatórios.';return;}
+  if(!editUID&&senha.length<6){erro.textContent='⚠️ Senha com mínimo 6 caracteres.';return;}
+  const users=getUsers();
+  if(users.find(u=>u.email===email&&u.id!==editUID)){erro.textContent='❌ E-mail já cadastrado.';return;}
+  if(editUID){
+    const idx=users.findIndex(u=>u.id===editUID);
+    if(idx>=0){users[idx].nome=nome;users[idx].email=email;users[idx].role=role;if(senha.length>=6)users[idx].senha=senha;}
     toast('✅ Usuário atualizado!');
   } else {
-    usuarios.push({id:'u_'+Date.now(),nome,email,senha,role,ativo:true});
+    users.push({id:'u_'+Date.now(),nome,email,senha,role,ativo:true});
     toast('✅ Usuário criado!');
   }
-  salvarUsuarios(usuarios);
-  fecharModal('modal-usuario');
-  renderUsuarios();
+  saveUsers(users);fecharModal('mo-usuario');renderUsuarios();
 }
 
-function excluirUsuario(id){
-  if(!podeAdmin())return;
-  if(!confirm('Excluir este usuário?'))return;
-  const usuarios=getUsuarios().filter(u=>u.id!==id);
-  salvarUsuarios(usuarios);
-  renderUsuarios();
-  toast('🗑 Usuário excluído');
-}
+function excluirUsuario(id){if(!podeAdmin())return;if(!confirm('Excluir usuário?'))return;saveUsers(getUsers().filter(u=>u.id!==id));renderUsuarios();toast('🗑 Usuário excluído');}
 
-// ══ UTILITÁRIOS ══
+// ══ PERMISSÕES ══
+function podeEditar(){return usuarioAtual&&(usuarioAtual.role==='admin'||usuarioAtual.role==='editor');}
+function podeExcluir(){return usuarioAtual&&usuarioAtual.role==='admin';}
+function podeAdmin(){return usuarioAtual&&usuarioAtual.role==='admin';}
+
+// ══ UTILS ══
 function fecharModal(id){document.getElementById(id).classList.remove('open');}
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
+['mo-empresa','mo-senha','mo-usuario'].forEach(id=>{document.getElementById(id).addEventListener('click',function(e){if(e.target===this)fecharModal(id);});});
 
-// Fechar modais clicando fora
-['modal-empresa','modal-senha','modal-usuario'].forEach(id=>{
-  document.getElementById(id).addEventListener('click',function(e){if(e.target===this)fecharModal(id);});
-});
-
-// Fechar dropdown clicando fora
-document.addEventListener('click',function(e){
-  const dd=document.getElementById('user-dropdown');
-  if(dd&&!dd.contains(e.target)&&!document.getElementById('avatar-btn').contains(e.target)){
-    dd.classList.remove('open');
-  }
-});
-
-// Verificar sessão ao carregar
-const sessao=getSessao();
-if(sessao){mostrarDashboard(sessao);}
+// Auto-login se tem sessão
+const s=getSessao();
+if(s){iniciarApp(s);}
 </script>
 </body>
 </html>
