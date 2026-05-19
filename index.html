@@ -398,11 +398,15 @@ body{background:var(--navy3);color:var(--text);font-family:'DM Sans',sans-serif;
 <div class="mo" id="mo-empresa">
   <div class="mbox">
     <h2>🏢 Nova Empresa</h2>
-    <div class="fg"><label>Nome *</label><input class="inp" type="text" id="e-nome" placeholder="Ex: SM Madeiras"></div>
-    <div class="fg"><label>Setor</label><input class="inp" type="text" id="e-setor" placeholder="Ex: Madeireira, Saúde..."></div>
-    <div class="fg"><label>Responsável</label><input class="inp" type="text" id="e-resp" placeholder="Nome do contato"></div>
-    <div class="fg"><label>Emoji</label><input class="inp" type="text" id="e-emoji" placeholder="🏢" maxlength="4"></div>
-    <div class="mbtns"><button class="btn btn-o" onclick="fecharModal('mo-empresa')">Cancelar</button><button class="btn btn-g" onclick="salvarEmpresa()">Criar</button></div>
+    <div class="fg"><label>Nome da Empresa *</label><input class="inp" type="text" id="e-nome" placeholder="Ex: SM Madeiras"></div>
+    <div class="fg"><label>Setor / Segmento</label><input class="inp" type="text" id="e-setor" placeholder="Ex: Madeireira, Saúde, Educação..."></div>
+    <div class="fg"><label>Líder Responsável do Setor</label><input class="inp" type="text" id="e-lider" placeholder="Nome do líder responsável"></div>
+    <div class="fg"><label>Responsável pelas Informações</label><input class="inp" type="text" id="e-resp" placeholder="Quem fornece os dados do PCCS"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+      <div class="fg"><label>📅 Data de Início</label><input class="inp" type="date" id="e-inicio"></div>
+      <div class="fg"><label>📅 Data Final Prevista</label><input class="inp" type="date" id="e-fim"></div>
+    </div>
+    <div class="mbtns"><button class="btn btn-o" onclick="fecharModal('mo-empresa')">Cancelar</button><button class="btn btn-g" onclick="salvarEmpresa()">Criar Projeto</button></div>
   </div>
 </div>
 
@@ -628,7 +632,7 @@ function renderDashboard(){
           const stLabel={pendente:'Pendente',andamento:'Em andamento',concluida:'Concluída'}[stAtual];
           const stCls={pendente:'st-p',andamento:'st-a',concluida:'st-c'}[stAtual];
           return`<tr style="border-bottom:1px solid rgba(201,168,76,0.06)">
-            <td style="padding:0.8rem 1rem"><strong>${emp.emoji||'🏢'} ${emp.nome}</strong><br><span style="font-size:0.73rem;color:var(--text2)">${emp.setor||''}</span></td>
+            <td style="padding:0.8rem 1rem"><strong>${emp.nome}</strong><br><span style="font-size:0.73rem;color:var(--text2)">${emp.setor||''}</span></td>
             <td style="padding:0.8rem 1rem"><span style="font-size:0.8rem;color:var(--text2)">${faseAtual?.nome||'—'}</span></td>
             <td style="padding:0.8rem 1rem;min-width:120px">
               <div style="height:4px;background:var(--navy2);border-radius:99px;overflow:hidden;margin-bottom:0.3rem"><div style="height:100%;width:${prog}%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px"></div></div>
@@ -655,11 +659,21 @@ function renderEmpresas(){
     const prog=calcProg(emp),fi=faseIdxAtual(emp),etapa=getEtapa(emp);
     const card=document.createElement('div');card.className='emp-card';card.onclick=()=>abrirDetalhe(emp.id);
     const dots=FASES.map((f,i)=>{const fd=emp.fases&&emp.fases[f.id];const cls=fd&&fd.status==='concluida'?'done':i===fi?'active':'';return`<div class="fd ${cls}" title="${f.nome}"></div>`;}).join('');
+    const di=emp.dataInicio?new Date(emp.dataInicio).toLocaleDateString('pt-BR'):'—';
+    const df=emp.dataFim?new Date(emp.dataFim).toLocaleDateString('pt-BR'):'—';
+    // calcular dias restantes
+    let diasRestantes='';
+    if(emp.dataFim){const hoje=new Date(),fim=new Date(emp.dataFim+'T00:00:00');const diff=Math.ceil((fim-hoje)/(1000*60*60*24));diasRestantes=diff>0?`<span style="font-size:0.72rem;color:${diff<30?'var(--danger)':'var(--warn)'};margin-left:0.4rem">⏰ ${diff}d restantes</span>`:`<span style="font-size:0.72rem;color:var(--danger);margin-left:0.4rem">⚠️ Prazo expirado</span>`;}
     card.innerHTML=`
       <div class="emp-top">
-        <div class="emp-ico">${emp.emoji||'🏢'}</div>
+        <div class="emp-ico" style="background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.3)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${prog===100?'#4caf7d':prog>0?'#c9a84c':'#8a9bb5'}" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg></div>
         <div><div class="emp-nome">${emp.nome}</div><div class="emp-setor">${emp.setor||'Sem setor'}</div></div>
         <span class="emp-etapa-badge ${ETAPA_CORES[etapa]}">${ETAPA_LABELS[etapa]}</span>
+      </div>
+      ${emp.lider?`<div style="font-size:0.75rem;color:var(--text2);margin-bottom:0.3rem">👤 Líder: <strong style="color:var(--text)">${emp.lider}</strong></div>`:''}
+      <div style="font-size:0.72rem;color:var(--text2);margin-bottom:0.7rem;display:flex;flex-wrap:wrap;gap:0.4rem">
+        ${emp.dataInicio?`<span>📅 Início: <strong style="color:var(--text)">${di}</strong></span>`:''}
+        ${emp.dataFim?`<span>🏁 Prazo: <strong style="color:var(--text)">${df}</strong>${diasRestantes}</span>`:''}
       </div>
       <div class="prog-bar"><div class="prog-fill" style="width:${prog}%"></div></div>
       <div class="prog-info"><span>Fase atual: <strong>${FASES[fi]?.nome.split(' ').slice(0,2).join(' ')}</strong></span><strong>${prog}%</strong></div>
@@ -679,8 +693,10 @@ function renderDetalhe(){
   const emp=empAtual,prog=calcProg(emp);
   document.getElementById('detalhe-top').innerHTML=`
     <div class="detalhe-top">
-      <div style="width:52px;height:52px;border-radius:12px;background:var(--gold-dim);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.5rem">${emp.emoji||'🏢'}</div>
-      <div class="detalhe-info"><h2>${emp.nome}</h2><p>${emp.setor||''} ${emp.responsavel?'· Resp: '+emp.responsavel:''}</p></div>
+      <div style="width:52px;height:52px;border-radius:12px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg></div>
+      <div class="detalhe-info"><h2>${emp.nome}</h2>
+        <p>${emp.setor||''} ${emp.lider?'· Líder: '+emp.lider:''} ${emp.responsavel?'· Resp. Info: '+emp.responsavel:''}</p>
+        ${emp.dataInicio||emp.dataFim?`<p style="margin-top:0.3rem;font-size:0.8rem"><span style="color:var(--gold)">Início:</span> ${emp.dataInicio?new Date(emp.dataInicio).toLocaleDateString('pt-BR'):'—'} &nbsp;|&nbsp; <span style="color:var(--gold)">Prazo:</span> ${emp.dataFim?new Date(emp.dataFim).toLocaleDateString('pt-BR'):'—'}</p>`:''}</div>
       <div class="detalhe-acoes">
         ${podeExcluir()?`<button class="btn btn-d btn-sm" onclick="excluirEmpresa('${emp.id}')">🗑 Excluir</button>`:''}
       </div>
@@ -718,12 +734,31 @@ async function excluirEmpresa(id){if(!podeExcluir()){toast('⚠️ Somente admin
 function setupListener(id){if(typeof db==='undefined')return;db.collection('empresas').doc(id).onSnapshot(snap=>{if(!snap.exists)return;empAtual={id:snap.id,...snap.data()};const idx=empresas.findIndex(e=>e.id===id);if(idx>=0)empresas[idx]=empAtual;if(document.getElementById('pg-detalhe').classList.contains('active'))renderDetalhe();});}
 
 // ══ EMPRESA MODAL ══
-function abrirModalEmpresa(){if(!podeEditar()){toast('⚠️ Sem permissão.');return;}['e-nome','e-setor','e-resp','e-emoji'].forEach(id=>document.getElementById(id).value='');document.getElementById('mo-empresa').classList.add('open');}
+function abrirModalEmpresa(){
+  if(!podeEditar()){toast('⚠️ Sem permissão.');return;}
+  ['e-nome','e-setor','e-lider','e-resp','e-inicio','e-fim'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mo-empresa').classList.add('open');
+}
 async function salvarEmpresa(){
-  const nome=document.getElementById('e-nome').value.trim();if(!nome){toast('⚠️ Digite o nome');return;}
-  const dados={nome,setor:document.getElementById('e-setor').value.trim(),responsavel:document.getElementById('e-resp').value.trim(),emoji:document.getElementById('e-emoji').value.trim()||'🏢',fases:{},criadoEm:firebase.firestore.FieldValue.serverTimestamp()};
+  const nome=document.getElementById('e-nome').value.trim();
+  if(!nome){toast('⚠️ Digite o nome da empresa');return;}
+  const dados={
+    nome,
+    setor:document.getElementById('e-setor').value.trim(),
+    lider:document.getElementById('e-lider').value.trim(),
+    responsavel:document.getElementById('e-resp').value.trim(),
+    dataInicio:document.getElementById('e-inicio').value||'',
+    dataFim:document.getElementById('e-fim').value||'',
+    emoji:'🏢',
+    fases:{},
+    criadoEm:firebase.firestore.FieldValue.serverTimestamp()
+  };
   FASES.forEach(f=>{dados.fases[f.id]={status:'pendente',atividades:{}};});
-  try{await db.collection('empresas').add(dados);fecharModal('mo-empresa');toast('✅ Empresa criada!');}catch(e){toast('❌ Erro ao salvar');}
+  try{
+    await db.collection('empresas').add(dados);
+    fecharModal('mo-empresa');
+    toast('✅ Empresa criada!');
+  }catch(e){toast('❌ Erro ao salvar — verifique conexão');}
 }
 
 // ══ SENHA ══
