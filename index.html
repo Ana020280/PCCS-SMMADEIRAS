@@ -323,7 +323,7 @@ input[type="date"].inp{color-scheme:dark}
 <div class="view on" id="vdash">
   <div class="phdr"><div><h2>Dashboard <em>Geral</em></h2><p>Visão executiva de todos os projetos PCCS</p></div><div class="phdr-r"><button class="btn bg" onclick="openM('memp')">+ Nova Empresa</button></div></div>
   <div class="content">
-    <div class="cgrid" id="dash-stats" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))"></div>
+    <div class="cgrid" id="dash-stats"></div>
     <div class="drow">
       <div class="card"><div class="sec-t">◈ Progresso por Empresa</div><div id="dash-prog"></div></div>
       <div class="card"><div class="sec-t">◉ Status dos Projetos</div>
@@ -342,7 +342,7 @@ input[type="date"].inp{color-scheme:dark}
       </div>
     </div>
     <div class="card"><div class="sec-t">◎ Todos os Projetos</div>
-      <div class="tw"><table><thead><tr><th>Empresa</th><th>Setor</th><th>Consultora</th><th>Início</th><th>Prazo</th><th>Progresso</th><th>Status</th><th>Ações</th></tr></thead><tbody id="dash-tbody"></tbody></table></div>
+      <div class="tw"><table><thead><tr><th>Empresa</th><th>Setor</th><th>Responsável</th><th>Início</th><th>Prazo</th><th>Progresso</th><th>Status</th><th></th></tr></thead><tbody id="dash-tbody"></tbody></table></div>
     </div>
   </div>
 </div>
@@ -378,9 +378,9 @@ input[type="date"].inp{color-scheme:dark}
       <button class="tab on" onclick="tabP('tp0',this)">◈ Visão Geral</button>
       <button class="tab" onclick="tabP('tp1',this)">◉ Fases do PCCS</button>
       <button class="tab" onclick="tabP('tp2',this)">◎ Kanban</button>
-      <button class="tab" onclick="tabP('tp3',this)">◐ Performance</button>
+      <button class="tab" onclick="tabP('tp3',this)">◐ Produtividade</button>
       <button class="tab" onclick="tabP('tp4',this)">◑ Colaboradores</button>
-      
+      <button class="tab" onclick="tabP('tp5',this)">◒ Departamentos</button>
       <button class="tab" onclick="tabP('tp6',this)">◓ Inconsistências</button>
       <button class="tab" onclick="tabP('tp7',this)">◔ IA Organizacional</button>
       <button class="tab" onclick="tabP('tp8',this)">◕ Relatórios de Atendimento</button>
@@ -733,6 +733,11 @@ input[type="date"].inp{color-scheme:dark}
       <div class="fg"><label>Vínculo</label><select class="inp" id="cd-vinc"><option>CLT</option><option>PJ</option><option>Temporário</option><option>Estagiário</option><option>Aprendiz</option><option>Autônomo</option></select></div>
       <div class="fg"><label>Jornada</label><select class="inp" id="cd-jornada"><option value="">Selecionar</option><option>44h semanais</option><option>40h semanais</option><option>12x36</option><option>Turno/Escala</option><option>Horista</option></select></div>
       <div class="fg"><label>Salário Base (R$)</label><input class="inp" type="number" id="cd-sal" step="0.01"></div>
+      <div class="fg"><label>Comissão (R$)</label><input class="inp" type="number" id="cd-comissao" step="0.01" placeholder="Se houver"></div>
+      <div class="fg"><label>Gratificação (R$)</label><input class="inp" type="number" id="cd-gratif" step="0.01" placeholder="Se houver"></div>
+      <div class="fg"><label>Recebe 40% Gratif?</label><select class="inp" id="cd-g40"><option value="">Selecionar</option><option value="Sim">Sim</option><option value="Nao">Nao</option></select></div>
+      <div class="fg"><label>Valores por Fora (R$)</label><input class="inp" type="number" id="cd-vfora" step="0.01" placeholder="Pagamento adicional"></div>
+      <div class="fg"><label>Premiação (R$)</label><input class="inp" type="number" id="cd-premiao" step="0.01" placeholder="Se houver"></div>
       <div class="fg"><label>Benefícios</label><input class="inp" id="cd-bene"></div>
       <div class="fg"><label>Escolaridade</label><select class="inp" id="cd-escol"><option value="">Selecionar</option><option>Fundamental</option><option>Médio</option><option>Técnico</option><option>Superior</option><option>Pós-Graduação</option></select></div>
       <div class="fg"><label>Situação Atual</label><select class="inp" id="cd-sit"><option>Trabalhando</option><option>Férias</option><option>Afastado</option><option>INSS</option><option>Licença maternidade</option><option>Licença médica</option><option>Desligado</option><option>Suspenso</option><option>Acidente de trabalho</option><option>Transferido</option><option>Treinamento</option><option>Outro</option></select></div>
@@ -756,8 +761,6 @@ input[type="date"].inp{color-scheme:dark}
 <div class="toast" id="toast"><span id="t-ico">&#10003;</span><span id="t-msg">Salvo!</span></div>
 
 <script>
-
-
 // PCCS 360 v3.1 — JavaScript Enhanced
 // Changelog, projeto por status, colaborador detalhe, fases melhoradas, tp9
 
@@ -849,22 +852,6 @@ function popConsulSel(){var sel=document.getElementById('emp-consul');if(!sel)re
 function popEmpSels(){var emps=gst('emps')||[];['c-emp','ps-emp','fx-emp','mb-emp','rop-emp'].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.innerHTML='<option value="">-- Selecionar --</option>';emps.forEach(function(e){el.innerHTML+='<option value="'+e.id+'">'+eh(e.nome)+'</option>'})})}
 
 // ═══ CHANGELOG ═══
-function renderChangelog(){
-  var logs=gst('changelog')||[];var tbody=document.getElementById('log-tbody');if(!tbody)return;
-  tbody.innerHTML=logs.length?logs.slice().reverse().map(function(l){
-    var sc={'Implementado':'bg2','Em desenvolvimento':'by','Solicitado':'bb','Pendente':'bk'}[l.status]||'bk';
-    return '<tr><td>'+eh(l.data||'-')+'</td><td><span class="b bb" style="font-size:.68rem">'+eh(l.tipo)+'</span></td><td>'+eh(l.desc)+'</td><td>'+eh(l.resp||'-')+'</td><td><span class="b '+sc+'">'+eh(l.status)+'</span></td><td><button class="btn bd bs" onclick="delLog(\''+l.id+'\')">✕</button></td></tr>'
-  }).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:2rem">Nenhuma alteração registrada.</td></tr>'
-}
-function salvarLog(){
-  var desc=gv('log-desc');if(!desc){toast('Descrição obrigatória.',false);return}
-  var logs=gst('changelog')||[];
-  logs.push({id:'cl'+Date.now(),tipo:gv('log-tipo'),desc:desc,resp:gv('log-resp'),data:gv('log-data')||now(),status:gv('log-status')});
-  sst('changelog',logs);closeM('mlog');
-  ['log-desc','log-resp'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''});
-  renderChangelog();toast('Alteração registrada!')
-}
-function delLog(id){if(!confirm('Excluir registro?'))return;sst('changelog',(gst('changelog')||[]).filter(function(l){return l.id!==id}));renderChangelog()}
 
 // ═══ EMPRESA CRUD ═══
 var empEditId=null;
@@ -896,69 +883,24 @@ function scHtml(v,l,cls){cls=cls||'';return '<div class="sc '+cls+'"><div class=
 function setArc(id,dash,full,off){var e=document.getElementById(id);if(!e)return;e.setAttribute('stroke-dasharray',dash+' '+(full-dash));e.setAttribute('stroke-dashoffset',off||0)}
 function legHtml(c,l,v){return '<div class="li"><div class="ld" style="background:'+c+'"></div>'+l+' ('+v+')</div>'}
 
-
 function renderDash(){
   var emps=gst('emps')||[];
-  var tot=emps.length,and=0,conc=0,nao=0;
-  emps.forEach(function(e){if(e.st==='Em andamento')and++;else if(e.st==='Concluido'||e.st==='Concluído')conc++;else nao++});
+  var tot=emps.length,and=emps.filter(function(e){return e.st==='Em andamento'}).length,conc=emps.filter(function(e){return e.st==='Concluído'}).length,nao=tot-and-conc;
   var pm=tot>0?Math.round(emps.reduce(function(s,e){return s+calcProg(e)},0)/tot):0;
-  var totalAtv=0,doneAtv=0,pendAtv=0,totalColabs=0;var hoje=new Date();
-  emps.forEach(function(e){
-    totalColabs+=(e.colabs||[]).length;
-    (e.fases||[]).forEach(function(f){(f.atividades||[]).forEach(function(a){
-      totalAtv++;
-      if(a.feito||a.st==='Concluido'||a.st==='Concluído')doneAtv++;
-      if(a.st==='Pendente'||(a.prev&&new Date(a.prev)<hoje&&!a.feito))pendAtv++
-    })})
-  });
-  var efGeral=totalAtv>0?Math.round(doneAtv/totalAtv*100):0;
-  document.getElementById('dash-stats').innerHTML=
-    scHtml(tot,'Total de Projetos','')+scHtml(and,'Em Andamento','sy')+scHtml(conc,'Concluidos','sg')+
-    scHtml(nao,'Nao Iniciados','')+scHtml(pm+'%','Progresso Medio','sb2')+
-    scHtml(pendAtv>0?pendAtv:'0','Pendentes',pendAtv>0?'sr':'sg')+
-    scHtml(doneAtv,'Atividades OK','sg')+scHtml(efGeral+'%','Eficiencia','sb2')+scHtml(totalColabs,'Colaboradores','');
+  document.getElementById('dash-stats').innerHTML=scHtml(tot,'Total de Projetos','')+scHtml(and,'Em Andamento','sy')+scHtml(conc,'Concluídos','sg')+scHtml(pm+'%','Progresso Médio','sb2');
   var pe='';
-  if(!emps.length){pe='<div class="empty"><div class="empty-ico">&#9672;</div><p>Nenhum projeto.</p></div>';}
-  else{emps.forEach(function(e){
-    var p=calcProg(e);var ic=detectIncons(e);
-    pe+='<div style="margin-bottom:.8rem">'+
-      '<div style="display:flex;justify-content:space-between;font-size:.79rem;margin-bottom:.25rem">'+
-        '<span style="font-weight:600;cursor:pointer;color:var(--gd)" data-eid="'+e.id+'" onclick="abrirEmp(this.dataset.eid)">'+eh(e.nome)+'</span>'+
-        '<div style="display:flex;gap:.4rem;align-items:center">'+
-          (ic.length?'<span class="b by" style="font-size:.65rem">'+ic.length+' incons.</span>':'')+
-          ((e.colabs||[]).length?'<span class="b bk" style="font-size:.65rem">'+(e.colabs||[]).length+' col.</span>':'')+
-          '<span class="'+stColor(e.st)+'" style="font-size:.65rem">'+e.st+'</span>'+
-        '</div>'+
-      '</div>'+
-      '<div class="pr"><div class="pb"><div class="pf" style="width:'+p+'%"></div></div><span class="pc">'+p+'%</span></div>'+
-    '</div>'
-  })}
+  if(!emps.length)pe='<div class="empty"><div class="empty-ico">◈</div><p>Nenhum projeto. Clique em "+ Nova Empresa".</p></div>';
+  else emps.forEach(function(e){var p=calcProg(e);pe+='<div style="margin-bottom:.7rem"><div style="display:flex;justify-content:space-between;font-size:.79rem;margin-bottom:.25rem"><span>'+eh(e.nome)+'</span><span class="'+stColor(e.st)+'" style="font-size:.65rem">'+e.st+'</span></div><div class="pr"><div class="pb"><div class="pf" style="width:'+p+'%"></div></div><span class="pc">'+p+'%</span></div></div>'});
   document.getElementById('dash-prog').innerHTML=pe;
-  var circ=2*Math.PI*44;
-  var pC=tot>0?conc/tot:0,pA=tot>0?and/tot:0,pN=tot>0?nao/tot:0;
+  var circ=2*Math.PI*44;var pC=tot>0?conc/tot:0,pA=tot>0?and/tot:0,pN=tot>0?nao/tot:0;
   document.getElementById('dc-tot').textContent=tot;
   setArc('dc1',pC*circ,circ,0);setArc('dc2',pA*circ,circ,-(pC*circ));setArc('dc3',pN*circ,circ,-((pC+pA)*circ));
-  document.getElementById('dash-leg').innerHTML=legHtml('#22c55e','Concluidos',conc)+legHtml('#f59e0b','Em Andamento',and)+legHtml('#374151','Nao Iniciados',nao);
-  var rows='';
-  emps.forEach(function(e){
-    var p=calcProg(e);var ic=detectIncons(e);
-    rows+='<tr>'+
-      '<td style="font-weight:600;cursor:pointer;color:var(--gd)" data-eid="'+e.id+'" onclick="abrirEmp(this.dataset.eid)">'+eh(e.nome)+'</td>'+
-      '<td>'+eh(e.setor||'-')+'</td>'+
-      '<td>'+eh(e.consul||e.resp||'-')+'</td>'+
-      '<td>'+(e.ini?fd(e.ini):'-')+'</td>'+
-      '<td>'+(e.fim?fd(e.fim):'-')+'</td>'+
-      '<td><div class="pr"><div class="pb"><div class="pf" style="width:'+p+'%"></div></div><span class="pc">'+p+'%</span></div></td>'+
-      '<td><span class="'+stColor(e.st)+'">'+e.st+'</span></td>'+
-      '<td><div style="display:flex;gap:.3rem">'+
-        '<button class="btn bh bs" data-eid="'+e.id+'" onclick="abrirEmp(this.dataset.eid)">Ver</button>'+
-        '<button class="btn bh bs" data-eid="'+e.id+'" onclick="editEmp(this.dataset.eid)">&#10000;</button>'+
-        (sessao&&sessao.role==='admin'?'<button class="btn bd bs" data-eid="'+e.id+'" onclick="delEmp(this.dataset.eid)">&#10005;</button>':'')+
-      '</div></td>'+
-    '</tr>'
-  });
-  document.getElementById('dash-tbody').innerHTML=rows||'<tr><td colspan="8" style="text-align:center;color:var(--t3);padding:2rem">Nenhum projeto cadastrado.</td></tr>'
+  document.getElementById('dash-leg').innerHTML=legHtml('#22c55e','Concluídos',conc)+legHtml('#f59e0b','Em Andamento',and)+legHtml('#374151','Não Iniciados',nao);
+  var rows='';emps.forEach(function(e){var p=calcProg(e);rows+='<tr><td style="font-weight:600">'+eh(e.nome)+'</td><td>'+eh(e.setor||'-')+'</td><td>'+eh(e.resp||'-')+'</td><td>'+(e.ini?fd(e.ini):'-')+'</td><td>'+(e.fim?fd(e.fim):'-')+'</td><td style="min-width:110px"><div class="pr"><div class="pb"><div class="pf" style="width:'+p+'%"></div></div><span class="pc">'+p+'%</span></div></td><td><span class="'+stColor(e.st)+'">'+e.st+'</span></td><td><div style="display:flex;gap:.3rem"><button class="btn bh bs" onclick="abrirEmp(\''+e.id+'\')">Ver</button><button class="btn bh bs" onclick="editEmp(\''+e.id+'\')">✎</button>'+(sessao&&sessao.role==='admin'?'<button class="btn bd bs" onclick="delEmp(\''+e.id+'\')">✕</button>':'')+' </div></td></tr>'});
+  document.getElementById('dash-tbody').innerHTML=rows||'<tr><td colspan="8" style="text-align:center;color:var(--t3);padding:2rem">Nenhum projeto.</td></tr>'
 }
+
+// ═══ EMPRESAS GRID (com separação por status) ═══
 function renderEmps(){
   var emps=gst('emps')||[];var g=document.getElementById('emp-grid');
   if(!emps.length){g.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-ico">◈</div><p>Nenhum projeto.</p><button class="btn bg" onclick="openM(\'memp\')">+ Criar Primeiro Projeto</button></div>';return}
@@ -1021,66 +963,60 @@ function renderVG(emp){
   var prazoOk=emp.fim?new Date(emp.fim)>=hoje:true;
   var diasR=emp.fim?Math.ceil((new Date(emp.fim)-hoje)/(1000*60*60*24)):null;
   var atv=[];(emp.fases||[]).forEach(function(f){(f.atividades||[]).forEach(function(a){atv.push(a)})});
-  var done=atv.filter(function(a){return a.feito||a.st==='Concluido'||a.st==='Conclu\u00eddo'}).length;
-  var pend=atv.filter(function(a){return a.st==='Pendente'||(a.prev&&new Date(a.prev)<hoje&&!a.feito)}).length;
-  var emAnd=atv.filter(function(a){return a.st==='Em andamento'&&!a.feito}).length;
+  var done=atv.filter(function(a){return a.feito||a.st==='Concluído'}).length;
+  var pendentes=atv.filter(function(a){return !a.feito&&a.st!=='Concluído'}).length;
+  var atrasadas=atv.filter(function(a){return a.st==='Atrasado'||(a.prev&&new Date(a.prev)<hoje&&!a.feito)}).length;
   var ic=detectIncons(emp);
   var fasesConc=(emp.fases||[]).filter(function(f){return calcFaseProg(f)===100}).length;
   var fasesAnd=(emp.fases||[]).filter(function(f){var pp=calcFaseProg(f);return pp>0&&pp<100}).length;
-  var ef=atv.length>0?Math.round(done/atv.length*100):0;
-  var kbAnd=atv.filter(function(a){return!a.feito&&a.st!=='Concluido'&&!(a.prev&&new Date(a.prev)<hoje&&!a.feito)&&a.st!=='Pendente'}).length;
-  var kbConc=atv.filter(function(a){return a.feito||a.st==='Concluido'}).length;
-  var kbPendItems=atv.filter(function(a){return a.st==='Pendente'||(a.prev&&new Date(a.prev)<hoje&&!a.feito)});
-  var cmap={};atv.forEach(function(a){if(!a.resp)return;if(!cmap[a.resp])cmap[a.resp]={n:a.resp,t:0,d:0,p:0};cmap[a.resp].t++;if(a.feito||a.st==='Concluido')cmap[a.resp].d++;if(a.st==='Pendente')cmap[a.resp].p++});
-  var perfCards=Object.values(cmap).sort(function(a,b){return b.t-a.t}).slice(0,4).map(function(p2,i){var ef2=p2.t>0?Math.round(p2.d/p2.t*100):0;var cor=CORES[i%CORES.length];var ini=p2.n.split(' ').map(function(w){return w[0]||''}).join('').substring(0,2).toUpperCase();return '<div style="display:flex;align-items:center;gap:.5rem;padding:.4rem;background:rgba(255,255,255,.02);border-radius:var(--r2);margin-bottom:.3rem"><div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,'+cor+','+cor+'99);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff;flex-shrink:0">'+ini+'</div><div style="flex:1"><div style="font-size:.78rem;font-weight:600">'+eh(p2.n)+'</div><div style="font-size:.68rem;color:var(--t2)">'+p2.d+'/'+p2.t+' concl.</div></div><span class="b '+(ef2>=80?'bg2':ef2>=50?'by':'br')+'" style="font-size:.62rem">'+ef2+'%</span></div>'}).join('');
+
   var meta='';
   if(emp.setor)meta+='<span><strong>'+eh(emp.setor)+'</strong> Setor</span>';
-  if(emp.lider)meta+='<span><strong>'+eh(emp.lider)+'</strong> Lider</span>';
-  if(emp.resp)meta+='<span><strong>'+eh(emp.resp)+'</strong> Responsavel</span>';
+  if(emp.lider)meta+='<span><strong>'+eh(emp.lider)+'</strong> Líder</span>';
+  if(emp.resp)meta+='<span><strong>'+eh(emp.resp)+'</strong> Responsável</span>';
   if(emp.consul)meta+='<span><strong>'+eh(emp.consul)+'</strong> Consultora</span>';
-  if(emp.ini)meta+='<span><strong>'+fd(emp.ini)+'</strong> Inicio</span>';
-  if(emp.fim){var dInfo=diasR!==null?(' ('+Math.abs(diasR)+'d '+(diasR<0?'atrasado':'restantes')+')'):'';meta+='<span><strong style="color:'+(prazoOk?'#fff':'var(--rd)')+'">'+fd(emp.fim)+dInfo+'</strong> Prazo</span>';}
-  var faseProg='';
-  (emp.fases||[]).forEach(function(f,fi){var pp=calcFaseProg(f);var stC=pp===100?'bg2':pp>0?'by':'bk';faseProg+='<div style="margin-bottom:.5rem"><div style="display:flex;justify-content:space-between;align-items:center;font-size:.79rem;margin-bottom:.2rem"><span><strong style="color:var(--gd);margin-right:.3rem">F'+(fi+1)+'</strong>'+eh(f.n)+'</span><div style="display:flex;align-items:center;gap:.3rem"><span class="b b'+stC+'" style="font-size:.62rem">'+(pp===100?'OK':pp>0?'Em Andamento':'Pendente')+'</span><span style="color:var(--gd)">'+pp+'%</span></div></div><div class="pb" style="height:4px"><div class="pf" style="width:'+pp+'%"></div></div></div>'});
-  el.innerHTML='<div class="emp-hdr-info" style="margin-bottom:.8rem"><h3>'+eh(emp.nome)+'</h3><div class="emp-meta">'+meta+'</div><div class="pr" style="margin-top:.8rem"><div class="pb" style="height:8px"><div class="pf" style="width:'+p+'%"></div></div><span class="pc" style="font-size:1rem">'+p+'%</span></div></div>'+
-    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(115px,1fr));gap:.6rem;margin-bottom:1rem">'+
-    '<div class="sc"><div class="sc-n">'+(emp.colabs||[]).length+'</div><div class="sc-l">Colaboradores</div></div>'+
-    '<div class="sc sg"><div class="sc-n">'+fasesConc+'</div><div class="sc-l">Fases OK</div></div>'+
-    '<div class="sc sy"><div class="sc-n">'+fasesAnd+'</div><div class="sc-l">Em Andamento</div></div>'+
-    '<div class="sc sg"><div class="sc-n">'+done+'</div><div class="sc-l">Itens OK</div></div>'+
-    '<div class="sc '+(pend>0?'sr':'sg')+'"><div class="sc-n">'+pend+'</div><div class="sc-l">Pendentes</div></div>'+
-    '<div class="sc sb2"><div class="sc-n">'+ef+'%</div><div class="sc-l">Eficiencia</div></div>'+
-    '<div class="sc '+(ic.length>0?'sy':'sg')+'"><div class="sc-n">'+ic.length+'</div><div class="sc-l">Inconsistencias</div></div>'+
+  if(emp.ini)meta+='<span><strong>'+fd(emp.ini)+'</strong> Início</span>';
+  if(emp.fim){var dInfo=diasR!==null?(' — '+Math.abs(diasR)+'d '+(diasR<0?'atrasado':'restantes')):'';meta+='<span><strong style="color:'+(prazoOk?'#fff':'var(--rd)')+'">'+fd(emp.fim)+dInfo+'</strong> Prazo</span>';}
+
+  var faseProg='';(emp.fases||[]).forEach(function(f,fi){
+    var pp=calcFaseProg(f);
+    var autoStatus=pp===100?'Concluído':pp>0?'Em andamento':f.status||'Não iniciado';
+    var stCls=autoStatus==='Concluído'?'bg2':autoStatus==='Em andamento'?'by':'bk';
+    faseProg+='<div style="margin-bottom:.5rem"><div style="display:flex;justify-content:space-between;align-items:center;font-size:.79rem;margin-bottom:.2rem"><span><strong style="color:var(--gd);margin-right:.4rem">F'+(fi+1)+'</strong>'+eh(f.n)+'</span><div style="display:flex;align-items:center;gap:.4rem"><span class="b b'+stCls+'" style="font-size:.62rem">'+autoStatus+'</span><span style="color:var(--gd);min-width:32px;text-align:right">'+pp+'%</span></div></div><div class="pb" style="height:4px"><div class="pf" style="width:'+pp+'%"></div></div></div>'
+  });
+
+  var kbSummary='';var cols={and:[],conc:[],atrs:[]};
+  atv.forEach(function(a){var s=a.feito||a.st==='Concluído'?'conc':(a.st==='Atrasado'||(a.prev&&new Date(a.prev)<hoje&&!a.feito))?'atrs':'and';cols[s].push(a)});
+  kbSummary='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem">';
+  kbSummary+='<div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.15);border-radius:var(--r2);padding:.6rem;text-align:center"><div style="font-size:1.3rem;font-weight:700;color:var(--yw)">'+cols.and.length+'</div><div style="font-size:.65rem;color:var(--t2);text-transform:uppercase">Em Andamento</div></div>';
+  kbSummary+='<div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.15);border-radius:var(--r2);padding:.6rem;text-align:center"><div style="font-size:1.3rem;font-weight:700;color:var(--gr)">'+cols.conc.length+'</div><div style="font-size:.65rem;color:var(--t2);text-transform:uppercase">Concluídas</div></div>';
+  kbSummary+='<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);border-radius:var(--r2);padding:.6rem;text-align:center"><div style="font-size:1.3rem;font-weight:700;color:var(--rd)">'+cols.atrs.length+'</div><div style="font-size:.65rem;color:var(--t2);text-transform:uppercase">Atrasadas</div></div>';
+  kbSummary+='</div>';
+
+  el.innerHTML=
+    '<div class="emp-hdr-info" style="margin-bottom:.8rem"><h3>'+eh(emp.nome)+'</h3><div class="emp-meta">'+meta+'</div><div class="pr" style="margin-top:.8rem"><div class="pb" style="height:8px"><div class="pf" style="width:'+p+'%"></div></div><span class="pc" style="font-size:1rem">'+p+'%</span></div></div>'+
+    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.6rem;margin-bottom:1rem">'+
+      '<div class="sc"><div class="sc-n">'+(emp.colabs||[]).length+'</div><div class="sc-l">Colaboradores</div></div>'+
+      '<div class="sc sg"><div class="sc-n">'+fasesConc+'</div><div class="sc-l">Fases Concluídas</div></div>'+
+      '<div class="sc sy"><div class="sc-n">'+fasesAnd+'</div><div class="sc-l">Fases em Andamento</div></div>'+
+      '<div class="sc sg"><div class="sc-n">'+done+'</div><div class="sc-l">Atividades OK</div></div>'+
+      '<div class="sc '+(atrasadas>0?'sr':'sg')+'"><div class="sc-n">'+atrasadas+'</div><div class="sc-l">Atrasadas</div></div>'+
+      '<div class="sc '+(ic.length>0?'sy':'sg')+'"><div class="sc-n">'+ic.length+'</div><div class="sc-l">Inconsistências</div></div>'+
     '</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">'+
-    '<div class="card"><div class="sec-t">Progresso por Fase</div>'+faseProg+'</div>'+
-    '<div style="display:flex;flex-direction:column;gap:.8rem">'+
-    '<div class="card"><div class="sec-t">Kanban</div>'+
-    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem">'+
-    '<div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.15);border-radius:var(--r2);padding:.6rem;text-align:center"><div style="font-size:1.3rem;font-weight:700;color:var(--yw)">'+kbAnd+'</div><div style="font-size:.62rem;color:var(--t2)">Andamento</div></div>'+
-    '<div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.15);border-radius:var(--r2);padding:.6rem;text-align:center"><div style="font-size:1.3rem;font-weight:700;color:var(--gr)">'+kbConc+'</div><div style="font-size:.62rem;color:var(--t2)">Concluidos</div></div>'+
-    '<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);border-radius:var(--r2);padding:.6rem;text-align:center"><div style="font-size:1.3rem;font-weight:700;color:var(--rd)">'+kbPendItems.length+'</div><div style="font-size:.62rem;color:var(--t2)">Pendentes</div></div>'+
-    '</div>'+
-    (kbPendItems.length?'<div style="margin-top:.5rem">'+kbPendItems.slice(0,3).map(function(a){return'<div style="font-size:.73rem;color:var(--t2);padding:.18rem 0;border-bottom:1px solid rgba(255,255,255,.04)">&#9642; '+eh(a.n)+'</div>'}).join('')+'</div>':'')+
-    '</div>'+
-    '<div class="card"><div class="sec-t">Performance da Equipe</div>'+
-    (perfCards||'<div style="font-size:.8rem;color:var(--t3)">Defina responsaveis nas atividades.</div>')+
-    '<div style="margin-top:.5rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;border-top:1px solid rgba(255,255,255,.06);padding-top:.5rem">'+
-    '<div style="text-align:center"><div style="font-size:1rem;font-weight:700;color:var(--gr)">'+done+'</div><div style="font-size:.62rem;color:var(--t2)">Feitas</div></div>'+
-    '<div style="text-align:center"><div style="font-size:1rem;font-weight:700;color:var(--yw)">'+emAnd+'</div><div style="font-size:.62rem;color:var(--t2)">Andamento</div></div>'+
-    '<div style="text-align:center"><div style="font-size:1rem;font-weight:700;color:var(--rd)">'+pend+'</div><div style="font-size:.62rem;color:var(--t2)">Pendentes</div></div>'+
-    '</div></div>'+
-    '<div class="card"><div class="sec-t">Acoes Rapidas</div><div style="display:flex;flex-direction:column;gap:.4rem">'+
-    '<button class="btn bh bs" data-tp="tp1" onclick="tabP(this.dataset.tp,null)" style="justify-content:flex-start">Fases do PCCS</button>'+
-    '<button class="btn bh bs" data-tp="tp4" onclick="tabP(this.dataset.tp,null)" style="justify-content:flex-start">Colaboradores ('+(emp.colabs||[]).length+')</button>'+
-    '<button class="btn bh bs" data-tp="tp6" onclick="tabP(this.dataset.tp,null)" style="justify-content:flex-start">Inconsistencias ('+ic.length+')</button>'+
-    '<button class="btn bh bs" data-tp="tp7" onclick="tabP(this.dataset.tp,null)" style="justify-content:flex-start">IA Organizacional</button>'+
-    '<button class="btn bh bs" data-tp="tp8" onclick="tabP(this.dataset.tp,null)" style="justify-content:flex-start">Relatorios de Atendimento</button>'+
-    '<button class="btn bh bs" data-tp="tp9" onclick="tabP(this.dataset.tp,null)" style="justify-content:flex-start">Anexos do Projeto</button>'+
-    '</div></div>'+
-    '</div>'+
+      '<div class="card"><div class="sec-t">◉ Progresso por Fase</div>'+faseProg+'</div>'+
+      '<div><div class="card" style="margin-bottom:.8rem"><div class="sec-t">◎ Resumo Kanban</div>'+kbSummary+'<button class="btn bh bs" style="margin-top:.7rem;width:100%" onclick="document.querySelectorAll(\'#projeto-tabs .tab\')[2].click()">Ver Kanban Completo →</button></div>'+
+      '<div class="card"><div class="sec-t">◐ Ações Rápidas</div><div style="display:flex;flex-direction:column;gap:.4rem">'+
+        '<button class="btn bh bs" onclick="document.querySelectorAll(\'#projeto-tabs .tab\')[1].click()" style="justify-content:flex-start">◉ Ver Fases do PCCS</button>'+
+        '<button class="btn bh bs" onclick="document.querySelectorAll(\'#projeto-tabs .tab\')[3].click()" style="justify-content:flex-start">◐ Performance da Equipe</button>'+
+        '<button class="btn bh bs" onclick="document.querySelectorAll(\'#projeto-tabs .tab\')[4].click()" style="justify-content:flex-start">◑ Colaboradores ('+( emp.colabs||[]).length+')</button>'+
+        '<button class="btn bh bs" onclick="document.querySelectorAll(\'#projeto-tabs .tab\')[6].click()" style="justify-content:flex-start">◓ Inconsistências ('+ic.length+')</button>'+
+        '<button class="btn bh bs" onclick="document.querySelectorAll(\'#projeto-tabs .tab\')[7].click()" style="justify-content:flex-start">◔ IA Organizacional</button>'+
+      '</div></div></div>'+
     '</div>'
 }
+
+// ═══ FASES (MELHORADO COM STATUS POR FASE) ═══
 function renderFases(emp){
   var ehdr=document.getElementById('emp-hdr-info');
   if(ehdr)ehdr.innerHTML='<h3>'+eh(emp.nome)+'</h3><div class="emp-meta"><span><strong>'+eh(emp.setor||'-')+'</strong> Setor</span><span><strong>'+eh(emp.lider||'-')+'</strong> Líder</span><span><strong>'+eh(emp.resp||'-')+'</strong> Responsável</span><span><strong>'+fd(emp.ini||'-')+'</strong> Início</span><span><strong>'+fd(emp.fim||'-')+'</strong> Prazo</span><span><strong>'+calcProg(emp)+'%</strong> Concluído</span></div>';
@@ -1190,21 +1126,6 @@ function salvarAtv(){
 }
 
 // ═══ KANBAN PER-PROJECT ═══
-function renderKanban(emp){
-  var all=[];(emp.fases||[]).forEach(function(f,fi){(f.atividades||[]).forEach(function(a,ai){all.push({fi:fi,ai:ai,f:'F'+(fi+1),n:a.n,resp:a.resp,consul:a.consul,prior:a.prior||'Normal',st:a.st||'Em andamento',pct:a.pct||0,prev:a.prev,feito:a.feito})})});
-  var hoje=new Date();
-  var cols={and:[],apr:[],conc:[],atrs:[]};
-  all.forEach(function(a){var s=a.feito||a.st==='Concluído'?'conc':a.st==='Aguardando aprovação'?'apr':(a.prev&&new Date(a.prev)<hoje&&!a.feito)?'atrs':'and';cols[s].push(a)});
-  var ks=document.getElementById('kb-stats');
-  if(ks)ks.innerHTML=scHtml(all.length,'Total','')+scHtml(cols.and.length,'Em Andamento','sy')+scHtml(cols.apr.length,'Aguardando','sb2')+scHtml(cols.conc.length,'Concluídas','sg')+scHtml(cols.atrs.length,'Atrasadas','sr');
-  var bd=document.getElementById('kb-board');if(!bd)return;
-  var cdef=[{k:'and',l:'Em Andamento',c:'and'},{k:'apr',l:'Aguardando Aprovação',c:'apr'},{k:'conc',l:'Concluído',c:'conc'},{k:'atrs',l:'Atrasado',c:'atrs'}];
-  bd.innerHTML=cdef.map(function(cd){
-    var items=cols[cd.k];
-    var cards=items.map(function(a){var pc=a.prior==='Alta'?'kp-alta':a.prior==='Crítica'?'kp-critica':a.prior==='Baixa'?'kp-baixa':'kp-normal';return '<div class="kb-card" onclick="abrirAtv(\''+emp.id+'\','+a.fi+','+a.ai+')"><h5>'+eh(a.n)+'</h5><div class="kb-meta gd">'+a.f+'</div>'+(a.resp?'<div class="kb-meta">◉ '+eh(a.resp)+'</div>':'')+(a.prev?'<div class="kb-meta">⏰ '+fd(a.prev)+'</div>':'')+'<div class="kb-foot"><span class="kp-pill '+pc+'">'+a.prior+'</span><span class="kb-pct">'+(a.feito||a.st==='Concluído'?100:a.pct||0)+'%</span></div></div>'}).join('');
-    return '<div class="kb-col '+cd.c+'"><div class="kb-hdr"><h4>'+cd.l+'</h4><span class="kb-badge">'+items.length+'</span></div>'+(cards||'<div style="text-align:center;padding:1.5rem;font-size:.75rem;color:var(--t3)">Nenhuma</div>')+'</div>'
-  }).join('')
-}
 
 // ═══ PERFORMANCE PER-PROJECT ═══
 function renderPerf(emp){
@@ -1236,76 +1157,7 @@ function renderColabs(emp){
 
 function filtrarColabs(){if(empAtual)renderColabs(empAtual)}
 
-function salvarColab(){
-  if(!empAtual)return;
-  var n=gv('cl-nome');var err=document.getElementById('colab-err');
-  if(!n){err.textContent='Nome obrigatório.';return}err.textContent='';
-  var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;
-  if(!emps[idx].colabs)emps[idx].colabs=[];
-  emps[idx].colabs.push({nome:cap(n),cpf:gv('cl-cpf'),sexo:gv('cl-sexo'),nasc:gv('cl-nasc'),adm1:gv('cl-adm1'),adm:gv('cl-adm'),cargo:cap(gv('cl-cargo')),real:cap(gv('cl-real')),depto:gv('cl-depto'),cc:gv('cl-cc'),gestor:cap(gv('cl-gestor')),unidade:cap(gv('cl-unidade')),vinc:gv('cl-vinc'),jornada:gv('cl-jornada'),sal:gv('cl-sal'),escol:gv('cl-escol'),bene:gv('cl-bene'),sit:gv('cl-sit')||'Trabalhando',obs:gv('cl-obs'),docs:[],cbo:''});
-  sst('emps',emps);empAtual=emps[idx];closeM('mcolab');renderColabs(empAtual);renderDetStats(empAtual);toast('Colaborador salvo!');
-  ['cl-nome','cl-cpf','cl-nasc','cl-adm1','cl-adm','cl-cargo','cl-real','cl-cc','cl-gestor','cl-unidade','cl-bene','cl-obs'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''})
-}
-
-function delColab(i){if(!empAtual||!confirm('Remover?'))return;var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;emps[idx].colabs.splice(i,1);sst('emps',emps);empAtual=emps[idx];renderColabs(empAtual);renderDetStats(empAtual)}
-
 // ═══ VER CADASTRO DO COLABORADOR ═══
-function verColabDet(i){
-  if(!empAtual)return;
-  var c=(empAtual.colabs||[])[i];if(!c)return;
-  document.getElementById('colab-det-idx').value=i;
-  document.getElementById('colab-det-titulo').textContent='◕ '+eh(c.nome||'Colaborador');
-  colabDetDocs=c.docs||[];
-  var set=function(id,val){var e=document.getElementById(id);if(e)e.value=val||''};
-  set('cd-nome',c.nome);set('cd-cpf',c.cpf);set('cd-nasc',toISO(c.nasc));set('cd-adm1',toISO(c.adm1));set('cd-adm',toISO(c.adm));
-  set('cd-cargo',c.cargo);set('cd-real',c.real);set('cd-cbo',c.cbo);set('cd-cc',c.cc);
-  set('cd-gestor',c.gestor);set('cd-unidade',c.unidade);set('cd-sal',c.sal);set('cd-bene',c.bene);set('cd-obs',c.obs);
-  set('cd-ates',c.ates);set('cd-afas',c.afas);
-  var sels={sexo:'cd-sexo',depto:'cd-depto',vinc:'cd-vinc',jornada:'cd-jornada',escol:'cd-escol',sit:'cd-sit'};
-  Object.keys(sels).forEach(function(k){var e=document.getElementById(sels[k]);if(e)e.value=c[k]||''});
-  renderColabDetDocs();
-  openM('mcolab-det')
-}
-
-function renderColabDetDocs(){
-  var el=document.getElementById('colab-det-docs');if(!el)return;
-  el.innerHTML=colabDetDocs.map(function(d,i){return '<div class="parti-chip">📎 '+eh(d.nome)+'<button onclick="colabDetDocs.splice('+i+',1);renderColabDetDocs()">✕</button></div>'}).join('')
-}
-
-function addColabDocDet(input){
-  Array.from(input.files).forEach(function(f){colabDetDocs.push({nome:f.name,tipo:f.type,tam:f.size,data:now()})});
-  renderColabDetDocs()
-}
-
-function salvarColabDet(){
-  if(!empAtual)return;
-  var i=parseInt(document.getElementById('colab-det-idx').value);
-  var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;
-  var c=emps[idx].colabs[i];if(!c)return;
-  var gv2=function(id){var e=document.getElementById(id);return e?e.value.trim():''};
-  c.nome=cap(gv2('cd-nome'));c.cpf=gv2('cd-cpf');c.sexo=gv2('cd-sexo');c.nasc=gv2('cd-nasc');c.adm1=gv2('cd-adm1');c.adm=gv2('cd-adm');
-  c.cargo=cap(gv2('cd-cargo'));c.real=cap(gv2('cd-real'));c.cbo=gv2('cd-cbo');c.depto=gv2('cd-depto');c.cc=gv2('cd-cc');
-  c.gestor=cap(gv2('cd-gestor'));c.unidade=cap(gv2('cd-unidade'));c.vinc=gv2('cd-vinc');c.jornada=gv2('cd-jornada');
-  c.sal=gv2('cd-sal');c.escol=gv2('cd-escol');c.bene=gv2('cd-bene');c.sit=gv2('cd-sit');c.ates=gv2('cd-ates');c.afas=gv2('cd-afas');
-  c.obs=gv2('cd-obs');c.docs=colabDetDocs.slice();
-  sst('emps',emps);empAtual=emps[idx];closeM('mcolab-det');renderColabs(empAtual);toast('Cadastro atualizado!')
-}
-
-function gerarRelColabPDF(){
-  var i=parseInt(document.getElementById('colab-det-idx').value);
-  var c=(empAtual&&empAtual.colabs)?empAtual.colabs[i]:null;if(!c)return;
-  var w=window.open('','_blank');
-  var s='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+c.nome+'</title><style>body{font-family:Arial,sans-serif;padding:2rem;background:#fff}h1{color:#0d1b2e;border-bottom:2px solid #c9a84c;padding-bottom:.5rem}h2{color:#c9a84c;font-size:.9rem;margin:1rem 0 .3rem}.grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem 2rem}.field{margin-bottom:.5rem}.label{font-size:.7rem;color:#888;text-transform:uppercase;letter-spacing:.05em;display:block}.val{font-size:.9rem;color:#111}</style></head><body>';
-  s+='<h1>PCCS 360 · Ficha do Colaborador</h1>';
-  s+='<h2>Dados Pessoais</h2><div class="grid">';
-  var fields=[['Nome',c.nome],['CPF',c.cpf],['Sexo',c.sexo],['Nascimento',c.nasc?fd(c.nasc):''],['1ª Admissão',c.adm1?fd(c.adm1):''],['Admissão Atual',c.adm?fd(c.adm):'']];
-  fields.forEach(function(f){if(f[1])s+='<div class="field"><span class="label">'+f[0]+'</span><span class="val">'+eh(f[1])+'</span></div>'});
-  s+='</div><h2>Dados Funcionais</h2><div class="grid">';
-  var fields2=[['Cargo CTPS',c.cargo],['Função Real',c.real],['CBO',c.cbo],['Departamento',c.depto],['Centro Custo',c.cc],['Gestor',c.gestor],['Unidade',c.unidade],['Vínculo',c.vinc],['Jornada',c.jornada],['Salário Base',c.sal?fmt(c.sal):''],['Escolaridade',c.escol],['Situação',c.sit],['Benefícios',c.bene]];
-  fields2.forEach(function(f){if(f[1])s+='<div class="field"><span class="label">'+f[0]+'</span><span class="val">'+eh(f[1])+'</span></div>'});
-  s+='</div></body></html>';
-  w.document.write(s);w.document.close();w.print()
-}
 
 function exportColabs(){
   if(!empAtual)return;
@@ -1327,41 +1179,10 @@ function importColabs(input){
 }
 
 // ═══ DEPARTAMENTOS ═══
-function renderDeptos(emp){
-  var t=document.getElementById('deptos-tbody');if(!t)return;
-  var list=emp.deptos||[];
-  t.innerHTML=list.length?list.map(function(d,i){var n=(emp.colabs||[]).filter(function(c){return c.depto===d.nome}).length;return '<tr><td>'+eh(d.nome)+'</td><td>'+eh(d.resp||'-')+'</td><td>'+n+'</td><td><button class="btn bd bs" onclick="delDepto('+i+')">✕</button></td></tr>'}).join(''):'<tr><td colspan="4" style="text-align:center;color:var(--t3);padding:1.5rem">Nenhum departamento.</td></tr>'
-}
-function salvarDepto(){if(!empAtual)return;var n=gv('d-nome');if(!n){toast('Nome obrigatório.',false);return}var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;if(!emps[idx].deptos)emps[idx].deptos=[];emps[idx].deptos.push({nome:cap(n),resp:gv('d-resp')});sst('emps',emps);empAtual=emps[idx];closeM('mdepto');renderDeptos(empAtual);renderDetStats(empAtual);toast('Departamento salvo!');document.getElementById('d-nome').value='';document.getElementById('d-resp').value=''}
-function delDepto(i){if(!empAtual||!confirm('Remover?'))return;var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;emps[idx].deptos.splice(i,1);sst('emps',emps);empAtual=emps[idx];renderDeptos(empAtual);renderDetStats(empAtual)}
 
 // ═══ INCONSISTÊNCIAS ═══
-function detectIncons(emp){
-  var ic=[];var MIN_SAL=1412;
-  (emp.colabs||[]).forEach(function(c,i){
-    if(!c.nome)return;
-    if(!c.cargo&&!c.real)ic.push({i:i,n:c.nome,tipo:'Sem cargo CTPS definido',nivel:'Alto',sug:'Definir cargo — risco trabalhista'});
-    if(!c.sal||parseFloat(c.sal)<MIN_SAL)ic.push({i:i,n:c.nome,tipo:'Salário abaixo do mínimo (R$ '+MIN_SAL.toLocaleString('pt-BR')+')',nivel:'Alto',sug:'Regularizar urgentemente'});
-    if(c.cargo&&c.real&&c.cargo.toLowerCase()!==c.real.toLowerCase()&&Math.abs(c.cargo.length-c.real.length)>8)ic.push({i:i,n:c.nome,tipo:'Função real diverge do cargo CTPS',nivel:'Alto',sug:'Verificar CBO — risco de desvio de função'});
-    if(c.sit==='Desligado')ic.push({i:i,n:c.nome,tipo:'Colaborador desligado no cadastro ativo',nivel:'Médio',sug:'Verificar necessidade de manutenção'});
-    if(!c.depto)ic.push({i:i,n:c.nome,tipo:'Sem departamento vinculado',nivel:'Médio',sug:'Vincular ao departamento do organograma'});
-    if(!c.adm)ic.push({i:i,n:c.nome,tipo:'Data de admissão não informada',nivel:'Médio',sug:'Informar para cálculo de tempo de empresa'});
-    if(!c.cpf)ic.push({i:i,n:c.nome,tipo:'CPF não informado',nivel:'Baixo',sug:'Obter CPF para identificação fiscal'});
-    if(!c.nasc)ic.push({i:i,n:c.nome,tipo:'Data de nascimento não informada',nivel:'Baixo',sug:'Informar para cálculo de faixa etária'});
-  });
-  return ic
-}
-function renderIncons(emp){
-  var el=document.getElementById('incons-list');if(!el)return;
-  var list=detectIncons(emp);
-  el.innerHTML='<div style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:.9rem;margin-bottom:1rem"><div class="sec-t" style="margin-bottom:.6rem">◎ Legenda PCCS</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;font-size:.76rem"><div><span class="b br" style="margin-right:.3rem">Alto</span>Sem cargo → risco trabalhista</div><div><span class="b br" style="margin-right:.3rem">Alto</span>Salário abaixo do mínimo</div><div><span class="b br" style="margin-right:.3rem">Alto</span>Desvio de função</div><div><span class="b by" style="margin-right:.3rem">Médio</span>Sem departamento</div><div><span class="b by" style="margin-right:.3rem">Médio</span>Admissão não informada</div><div><span class="b bk" style="margin-right:.3rem">Baixo</span>CPF/Nascimento ausente</div></div></div>';
-  if(!list.length){el.innerHTML+='<div class="empty"><div class="empty-ico" style="color:var(--gr)">&#10003;</div><p style="color:var(--gr)">Nenhuma inconsistência detectada!</p><p style="font-size:.78rem;color:var(--t3);margin-top:.5rem">Cadastro em conformidade com os requisitos do PCCS.</p></div>';return}
-  var altos=list.filter(function(x){return x.nivel==='Alto'}).length;
-  var medios=list.filter(function(x){return x.nivel==='Médio'}).length;
-  var baixos=list.filter(function(x){return x.nivel==='Baixo'}).length;
-  el.innerHTML+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem"><div style="background:rgba(239,68,68,.1);border-radius:var(--r2);padding:.7rem;text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--rd)">'+altos+'</div><div style="font-size:.72rem;color:var(--t2)">Risco Alto</div></div><div style="background:rgba(245,158,11,.1);border-radius:var(--r2);padding:.7rem;text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--yw)">'+medios+'</div><div style="font-size:.72rem;color:var(--t2)">Risco Médio</div></div><div style="background:rgba(255,255,255,.04);border-radius:var(--r2);padding:.7rem;text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--t2)">'+baixos+'</div><div style="font-size:.72rem;color:var(--t2)">Risco Baixo</div></div></div>';
-  el.innerHTML+=list.map(function(ic){var cls=ic.nivel==='Alto'?'br':ic.nivel==='Médio'?'by':'bk';return'<div style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:.8rem 1rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.8rem"><span class="b '+cls+'">'+ic.nivel+'</span><div style="flex:1"><div style="font-size:.85rem;font-weight:600">'+eh(ic.n)+'</div><div style="font-size:.75rem;color:var(--t2)">'+ic.tipo+'</div></div><div style="font-size:.72rem;color:var(--gd);text-align:right;max-width:150px;flex-shrink:0">'+ic.sug+'</div></div>'}).join('')
-}
+
+// ═══ IA ═══
 function rodarIA(){
   if(!empAtual){toast('Abra um projeto primeiro.',false);return}
   var colabs=empAtual.colabs||[];var ic=detectIncons(empAtual);
@@ -1379,41 +1200,8 @@ function rodarIA(){
   var res=document.getElementById('ia-res');if(res){res.style.display='block';res.querySelector('.ai-out').innerHTML=txt}
   var em=document.getElementById('ia-empty');if(em)em.style.display='none'
 }
-function rodarIACBO(){
-  if(!empAtual){toast('Abra um projeto primeiro.',false);return}
-  var colabs=empAtual.colabs||[];if(!colabs.length){toast('Importe colaboradores primeiro.',false);return}
-  var ad=0,pa=0,ic=0;var det='';
-  colabs.slice(0,15).forEach(function(c){
-    if(!c.cargo&&!c.real){ic++;det+='<p style="color:var(--rd)">🔴 <strong>'+eh(c.nome)+'</strong>: Sem cargo — CBO não verificável.</p>'}
-    else if(c.cargo&&c.real&&c.cargo.toLowerCase()!==c.real.toLowerCase()&&Math.abs(c.cargo.length-c.real.length)>8){pa++;det+='<p style="color:var(--yw)">🟡 <strong>'+eh(c.nome)+'</strong>: "'+eh(c.cargo)+'" ≠ "'+eh(c.real)+'" — Verificar desvio.</p>'}
-    else{ad++;det+='<p style="color:var(--gr)">🟢 <strong>'+eh(c.nome||'-')+'</strong>: Alinhado.</p>'}
-  });
-  if(colabs.length>15)det+='<p style="color:var(--t3)">(Primeiros 15 de '+colabs.length+')</p>';
-  var txt='<p><strong>◉ Análise CBO — '+eh(empAtual.nome)+'</strong></p>';
-  txt+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:.5rem 0"><div style="background:rgba(34,197,94,.1);border-radius:var(--r2);padding:.5rem;text-align:center"><div style="font-size:1.2rem;font-weight:700;color:var(--gr)">'+ad+'</div><div style="font-size:.68rem;color:var(--t2)">Aderentes</div></div><div style="background:rgba(245,158,11,.1);border-radius:var(--r2);padding:.5rem;text-align:center"><div style="font-size:1.2rem;font-weight:700;color:var(--yw)">'+pa+'</div><div style="font-size:.68rem;color:var(--t2)">Divergentes</div></div><div style="background:rgba(239,68,68,.1);border-radius:var(--r2);padding:.5rem;text-align:center"><div style="font-size:1.2rem;font-weight:700;color:var(--rd)">'+ic+'</div><div style="font-size:.68rem;color:var(--t2)">Sem Cargo</div></div></div>'+det;
-  var res=document.getElementById('ia-cbo-res');if(res){res.style.display='block';res.querySelector('.ai-out').innerHTML=txt}
-  var em=document.getElementById('ia-empty');if(em)em.style.display='none'
-}
 
 // ═══ RELATÓRIOS OPERACIONAIS ═══
-function openRop(){
-  if(!empAtual){toast('Abra um projeto primeiro.',false);return}
-  document.getElementById('rop-id').value='';
-  document.getElementById('rop-data').value=new Date().toISOString().split('T')[0];
-  ['rop-titulo','rop-sit','rop-passos'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''});
-  document.getElementById('rop-status').value='Em andamento';
-  var sel=document.getElementById('rop-emp');if(sel){popEmpSels();sel.value=empAtual.id}
-  var users=gst('users')||[];var cs=document.getElementById('rop-consul');if(cs){cs.innerHTML='<option value="">-- Selecionar --</option>';users.forEach(function(u){cs.innerHTML+='<option>'+eh(u.nome)+'</option>'})}
-  openM('mrop')
-}
-function salvarRop(){
-  var empId=document.getElementById('rop-emp').value;var titulo=gv('rop-titulo');
-  if(!empId||!titulo){toast('Empresa e título obrigatórios.',false);return}
-  var rops=gst('rops')||[];var id=document.getElementById('rop-id').value||('r'+Date.now());
-  var rop={id:id,empId:empId,tipo:gv('rop-tipo'),titulo:cap(titulo),status:gv('rop-status'),data:gv('rop-data'),consul:gv('rop-consul'),sit:gv('rop-sit'),passos:gv('rop-passos'),criado:new Date().toISOString()};
-  var idx=rops.findIndex(function(r){return r.id===id});if(idx>=0)rops[idx]=rop;else rops.push(rop);
-  sst('rops',rops);closeM('mrop');toast('Relatório salvo!');if(empAtual)renderRops(empAtual)
-}
 function renderRops(emp){
   if(!emp)return;var el=document.getElementById('rop-list');if(!el)return;
   var rops=(gst('rops')||[]).filter(function(r){return r.empId===emp.id});
@@ -1421,23 +1209,8 @@ function renderRops(emp){
   var stCls={"Em andamento":"by","Aguardando aprovação":"bb","Concluído":"bg2","Cancelado":"br"};
   el.innerHTML=rops.map(function(r){return '<div class="card" style="margin-bottom:.8rem"><div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:.6rem"><div><div style="display:flex;gap:.4rem;margin-bottom:.25rem"><span class="b bk" style="font-size:.65rem">'+eh(r.tipo||'-')+'</span><span class="b '+(stCls[r.status]||'bk')+'" style="font-size:.65rem">'+r.status+'</span></div><h4 style="font-size:.9rem;font-weight:600;margin-bottom:.15rem">'+eh(r.titulo)+'</h4><div style="font-size:.72rem;color:var(--t2)">'+(r.data?fd(r.data):'-')+' · '+eh(r.consul||'-')+'</div>'+(r.sit?'<div style="font-size:.72rem;color:var(--t3);margin-top:.2rem">'+eh(r.sit)+'</div>':'')+'</div><div style="display:flex;gap:.3rem"><button class="btn bd bs" onclick="delRop(\''+r.id+'\')">✕</button></div></div></div>'}).join('')
 }
-function delRop(id){if(!confirm('Excluir relatório?'))return;sst('rops',(gst('rops')||[]).filter(function(r){return r.id!==id}));if(empAtual)renderRops(empAtual);toast('Excluído.')}
 
 // ═══ ANEXOS DO PROJETO ═══
-function renderAnexosProj(emp){
-  var el=document.getElementById('proj-anexos-list');if(!el)return;
-  var list=emp.anexos||[];
-  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-ico">◐</div><p>Nenhum anexo. Adicione arquivos ao projeto.</p></div>';return}
-  el.innerHTML=list.map(function(a,i){return '<div style="display:flex;align-items:center;gap:.8rem;padding:.6rem;background:var(--nv2);border-radius:var(--r2);margin-bottom:.4rem"><span style="font-size:1.2rem">📎</span><div style="flex:1"><div style="font-size:.84rem">'+eh(a.nome)+'</div><div style="font-size:.72rem;color:var(--t3)">'+a.data+' · '+(a.tam?Math.round(a.tam/1024)+'KB':'')+'</div></div><button class="btn bd bs" onclick="delAnexoProj('+i+')">✕</button></div>'}).join('')
-}
-function addAnexoProj(input){
-  if(!empAtual||!input.files.length)return;
-  var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;
-  if(!emps[idx].anexos)emps[idx].anexos=[];
-  Array.from(input.files).forEach(function(f){emps[idx].anexos.push({nome:f.name,tipo:f.type,tam:f.size,data:now()})});
-  sst('emps',emps);empAtual=emps[idx];renderAnexosProj(empAtual);toast('Arquivo(s) adicionado(s)!')
-}
-function delAnexoProj(i){if(!empAtual||!confirm('Remover?'))return;var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;emps[idx].anexos.splice(i,1);sst('emps',emps);empAtual=emps[idx];renderAnexosProj(empAtual)}
 
 // ═══ DASHBOARD ANALÍTICO ═══
 function renderAnal(){
@@ -1454,51 +1227,386 @@ function renderAnal(){
 }
 
 // ═══ MÓDULOS ═══
-function renderCargos(){var cargos=gst('cargos')||[];var emps=gst('emps')||[];var em={};emps.forEach(function(e){em[e.id]=e.nome});document.getElementById('cargos-tbody').innerHTML=cargos.length?cargos.map(function(c,i){return'<tr><td style="font-weight:600">'+eh(c.n)+'</td><td>'+eh(c.cbo||'-')+'</td><td>'+eh(c.fam||'-')+'</td><td>'+eh(c.niv||'-')+'</td><td>'+eh(em[c.emp]||'-')+'</td><td><button class="btn bd bs" onclick="delCargo('+i+')">✕</button></td></tr>'}).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:2rem">Nenhum cargo.</td></tr>'}
-function salvarCargo(){var n=gv('c-nome');if(!n){toast('Nome obrigatório.',false);return}var cargos=gst('cargos')||[];cargos.push({n:n,cbo:gv('c-cbo'),fam:gv('c-fam'),niv:gv('c-niv'),emp:gv('c-emp')});sst('cargos',cargos);closeM('mcargo');renderCargos();toast('Cargo salvo!')}
-function delCargo(i){if(!confirm('Remover?'))return;var c=gst('cargos')||[];c.splice(i,1);sst('cargos',c);renderCargos()}
-function renderPes(){var ps=gst('pes')||[];var emps=gst('emps')||[];var em={};emps.forEach(function(e){em[e.id]=e.nome});document.getElementById('pes-tbody').innerHTML=ps.length?ps.map(function(p){return'<tr><td style="font-weight:600">'+eh(p.cargo)+'</td><td>'+eh(em[p.emp]||'-')+'</td><td>'+fmt(p.p25)+'</td><td style="color:var(--gd)">'+fmt(p.p50)+'</td><td>'+fmt(p.p75)+'</td><td>'+eh(p.fonte||'-')+'</td></tr>'}).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:2rem">Nenhuma pesquisa.</td></tr>'}
-function salvarPes(){var n=gv('ps-cargo');if(!n){toast('Cargo obrigatório.',false);return}var ps=gst('pes')||[];ps.push({cargo:n,emp:gv('ps-emp'),p25:gv('ps-p25'),p50:gv('ps-p50'),p75:gv('ps-p75'),fonte:gv('ps-fonte')});sst('pes',ps);closeM('mpes');renderPes();toast('Pesquisa salva!')}
-function renderEst(){var fx=gst('faixas')||[];document.getElementById('est-tbody').innerHTML=fx.length?fx.map(function(f){var amp=f.min&&f.max?Math.round((f.max/f.min-1)*100)+'%':'-';return'<tr><td style="font-weight:600">'+eh(f.fam)+'</td><td>'+eh(f.niv)+'</td><td>'+fmt(f.min)+'</td><td style="color:var(--gd)">'+fmt(f.mid)+'</td><td>'+fmt(f.max)+'</td><td>'+amp+'</td></tr>'}).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:2rem">Nenhuma faixa.</td></tr>'}
-function salvarFaixa(){var n=gv('fx-fam');if(!n){toast('Família obrigatória.',false);return}var fx=gst('faixas')||[];fx.push({fam:n,niv:gv('fx-niv'),min:gv('fx-min'),mid:gv('fx-mid'),max:gv('fx-max'),emp:gv('fx-emp')});sst('faixas',fx);closeM('mfaixa');renderEst();toast('Faixa salva!')}
-function renderGov(){var mb=gst('membros')||[];var emps=gst('emps')||[];var em={};emps.forEach(function(e){em[e.id]=e.nome});var gr=document.getElementById('gov-reg');if(gr)gr.value=gst('govReg')||'';document.getElementById('gov-tbody').innerHTML=mb.length?mb.map(function(m,i){return'<tr><td style="font-weight:600">'+eh(m.nome)+'</td><td>'+eh(m.cargo||'-')+'</td><td>'+eh(em[m.emp]||'-')+'</td><td><span class="b by">'+eh(m.papel)+'</span></td><td><button class="btn bd bs" onclick="delMembro('+i+')">✕</button></td></tr>'}).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--t3);padding:2rem">Nenhum membro.</td></tr>'}
-function salvarMembro(){var n=gv('mb-nome');if(!n){toast('Nome obrigatório.',false);return}var mb=gst('membros')||[];mb.push({nome:n,cargo:gv('mb-cargo'),emp:gv('mb-emp'),papel:gv('mb-papel')});sst('membros',mb);closeM('mmembro');renderGov();toast('Membro salvo!')}
-function delMembro(i){if(!confirm('Remover?'))return;var m=gst('membros')||[];m.splice(i,1);sst('membros',m);renderGov()}
 
 // ═══ USUÁRIOS ═══
 function renderUsers(){
   var users=gst('users')||[];var can=sessao&&sessao.role==='admin';
   document.getElementById('users-grid').innerHTML=users.map(function(u,i){var cor=u.cor||CORES[i%CORES.length];var ini=u.ini||(u.nome.split(' ').map(function(w){return w[0]||''}).join('').substring(0,2).toUpperCase());var rm={admin:'Administrador',editor:'Editor',visualizador:'Visualizador'};return'<div class="uc"><div class="ua" style="background:linear-gradient(135deg,'+cor+','+cor+'99)">'+ini+'</div><div class="ui" style="flex:1"><h4>'+eh(u.nome)+'</h4><p>'+eh(u.email)+'</p><small>'+eh(u.funcao||rm[u.role]||u.role)+'</small></div>'+(can&&u.id!=='u1'?'<button class="btn bd bs" onclick="delUser(\''+u.id+'\')">✕</button>':'')+'</div>'}).join('')||'<div class="empty"><div class="empty-ico">◖</div><p>Nenhum usuário.</p></div>'
 }
-function salvarUser(){if(!sessao||sessao.role!=='admin'){toast('Sem permissão.',false);return}var users=gst('users')||[];if(users.length>=15){toast('Limite de 15.',false);return}var n=gv('u-nome'),e=gv('u-email'),s=gv('u-senha');var err=document.getElementById('u-err');if(!n||!e||!s){err.textContent='Preencha todos os campos.';return}if(s.length<6){err.textContent='Senha mín. 6 caracteres.';return}if(users.find(function(u){return u.email===e})){err.textContent='E-mail já cadastrado.';return}err.textContent='';var ini=n.split(' ').map(function(w){return w[0]||''}).join('').substring(0,2).toUpperCase();users.push({id:'u'+Date.now(),nome:n,email:e,senha:s,role:gv('u-role'),funcao:gv('u-funcao'),ini:ini,cor:CORES[users.length%CORES.length]});sst('users',users);closeM('muser');['u-nome','u-email','u-senha','u-funcao'].forEach(function(id){var el=document.getElementById(id);if(el)el.value=''});renderUsers();toast('Usuário criado!')}
-function delUser(id){if(!confirm('Excluir usuário?'))return;sst('users',(gst('users')||[]).filter(function(u){return u.id!==id}));renderUsers();toast('Removido.')}
-function alterarSenha(){var cur=gv('s1'),nv=gv('s2'),cf=gv('s3');var err=document.getElementById('s-err');var users=gst('users')||[];var u=users.find(function(x){return x.id===sessao.id});if(!u||u.senha!==cur){err.textContent='Senha atual incorreta.';return}if(nv.length<6){err.textContent='Mínimo 6 caracteres.';return}if(nv!==cf){err.textContent='Senhas não coincidem.';return}err.textContent='';u.senha=nv;sst('users',users);sessao=u;sst('sessao',u);closeM('msenha');['s1','s2','s3'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''});toast('Senha alterada!')}
 
 // ═══ RELATÓRIOS GLOBAIS ═══
-function relGeral(tipo){
-  var emps=gst('emps')||[];
-  if(tipo==='csv'){var h='Empresa,Setor,Status,Progresso,Início,Prazo\n';var csv=h+emps.map(function(e){return'"'+e.nome+'","'+(e.setor||'')+'","'+e.st+'","'+calcProg(e)+'%","'+(e.ini||'')+'","'+(e.fim||'')+'"'}).join('\n');dl('pccs360_projetos.csv',csv,'text/csv');toast('CSV exportado!');}
-  else{var w=window.open('','_blank');var s='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>PCCS 360</title><style>body{font-family:Arial,sans-serif;padding:2rem}h1{color:#0d1b2e;border-bottom:2px solid #c9a84c;padding-bottom:.5rem}table{width:100%;border-collapse:collapse;margin:1rem 0}th{background:#0d1b2e;color:#fff;padding:.5rem 1rem;text-align:left}td{padding:.5rem 1rem;border-bottom:1px solid #eee}</style></head><body><h1>PCCS 360 · Relatório Geral</h1><p>'+new Date().toLocaleDateString('pt-BR')+'</p><table><tr><th>Empresa</th><th>Status</th><th>Progresso</th><th>Prazo</th></tr>';emps.forEach(function(e){s+='<tr><td>'+eh(e.nome)+'</td><td>'+e.st+'</td><td>'+calcProg(e)+'%</td><td>'+(e.fim?fd(e.fim):'-')+'</td></tr>'});s+='</table></body></html>';w.document.write(s);w.document.close();w.print()}
-}
 
 // ═══ BACKUP ═══
 function backup(){var data={users:gst('users'),emps:gst('emps'),cargos:gst('cargos'),pes:gst('pes'),faixas:gst('faixas'),membros:gst('membros'),rops:gst('rops'),changelog:gst('changelog'),dt:new Date().toISOString()};dl('pccs360_backup_'+new Date().toISOString().split('T')[0]+'.json',JSON.stringify(data,null,2),'application/json');toast('Backup exportado!')}
 function restaurar(input){if(!input.files[0])return;var reader=new FileReader();reader.onload=function(e){try{var d=JSON.parse(e.target.result);['emps','users','cargos','pes','faixas','membros','rops','changelog'].forEach(function(k){if(d[k])sst(k,d[k])});toast('Restaurado! Recarregando...');setTimeout(function(){location.reload()},1500)}catch(ex){toast('Arquivo inválido.',false)}};reader.readAsText(input.files[0])}
 
 // ═══ START ═══
-init();
 
+
+// ═══ ALL v3.2 IMPROVEMENTS ═══
+
+// ══ IMPORT HELPERS ══
 function parseD(v){if(!v)return'';v=String(v).trim();if(/^\d{5}$/.test(v)){var d=new Date((parseInt(v)-25569)*86400*1000);return d.toISOString().split('T')[0]}var m=v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(m)return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');m=v.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return v.substring(0,10);return''}
 function parseSal(v){if(!v)return'';var n=parseFloat(String(v).replace(/[R$\s]/g,'').replace(/\./g,'').replace(',','.'));return isNaN(n)?'':n.toFixed(2)}
-function mapCols(headers){var MAP={nome:['nome','name','nome completo','colaborador','funcionario','empregado'],cpf:['cpf','cpf/mf'],cargo:['cargo','cargo ctps','cargo formal'],real:['funcao real','funcao real','funcao','cargo real'],depto:['departamento','setor','area'],cc:['centro de custo','cc'],gestor:['gestor','lider','supervisor'],unidade:['unidade','filial'],vinc:['vinculo','vinculo','contrato'],jornada:['jornada','carga horaria'],sal:['salario','salario','remuneracao','salario base','vencimento'],sit:['situacao','situacao','status'],bene:['beneficios','beneficios'],adm:['admissao','admissao','data admissao'],nasc:['nascimento','data nascimento'],cbo:['cbo']};var r={};headers.forEach(function(h,i){var hl=h.toLowerCase().trim().replace(/['"]/g,'');Object.keys(MAP).forEach(function(field){if(r[field]===undefined)MAP[field].forEach(function(kw){if(hl.includes(kw)||kw.includes(hl))r[field]=i})})});return r}
-function processRows(rows,colMap){var cols=[];var seen={};rows.forEach(function(row){if(!row||!row.length)return;var n=colMap.nome!==undefined?cap((row[colMap.nome]||'').toString().trim()):'';if(!n||n.toLowerCase()==='nome')return;var cpf=(colMap.cpf!==undefined?(row[colMap.cpf]||'').toString().trim():'').replace(/\D/g,'');if(cpf&&seen[cpf])return;if(cpf)seen[cpf]=true;cols.push({nome:n,cpf:cpf?cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'):'',cargo:cap((colMap.cargo!==undefined?(row[colMap.cargo]||'').toString().trim():'')),real:cap((colMap.real!==undefined?(row[colMap.real]||'').toString().trim():'')),depto:cap((colMap.depto!==undefined?(row[colMap.depto]||'').toString().trim():'')),cc:(colMap.cc!==undefined?(row[colMap.cc]||'').toString().trim():''),gestor:cap((colMap.gestor!==undefined?(row[colMap.gestor]||'').toString().trim():'')),unidade:cap((colMap.unidade!==undefined?(row[colMap.unidade]||'').toString().trim():'')),vinc:(colMap.vinc!==undefined?(row[colMap.vinc]||'').toString().trim():'')||'CLT',jornada:(colMap.jornada!==undefined?(row[colMap.jornada]||'').toString().trim():''),sal:parseSal(colMap.sal!==undefined?row[colMap.sal]:''),sit:cap((colMap.sit!==undefined?(row[colMap.sit]||'').toString().trim():'')||'Trabalhando')||'Trabalhando',bene:(colMap.bene!==undefined?(row[colMap.bene]||'').toString().trim():''),adm:parseD(colMap.adm!==undefined?row[colMap.adm]:''),nasc:parseD(colMap.nasc!==undefined?row[colMap.nasc]:''),cbo:(colMap.cbo!==undefined?(row[colMap.cbo]||'').toString().trim():''),docs:[]})});return cols}
-function finalizarImport(rows,colMap){var novos=processRows(rows,colMap);if(!novos.length){toast('Nenhum colaborador encontrado.',false);return}var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;if(!emps[idx].colabs)emps[idx].colabs=[];var ex=emps[idx].colabs;var added=0,skipped=0;novos.forEach(function(n){var dup=ex.find(function(e){return(n.cpf&&e.cpf&&n.cpf===e.cpf)||(n.nome&&e.nome&&n.nome.toLowerCase()===e.nome.toLowerCase())});if(dup)skipped++;else{ex.push(n);added++}});sst('emps',emps);empAtual=emps[idx];renderColabs(empAtual);renderDetStats(empAtual);toast(added+' importados!'+(skipped>0?' ('+skipped+' ignorados)':''))}
+
+function mapCols(headers){
+  var MAP={
+    nome:['nome','name','nome completo','colaborador','funcionario','empregado'],
+    cpf:['cpf','cpf/mf'],
+    cargo:['cargo ctps','cargo formal','cargo','ctps'],
+    real:['funcao real','funcao real','funcao','cargo real','funcao exercida'],
+    depto:['departamento','setor','area','depto'],
+    cc:['centro de custo','centro custo','cc','codigo centro custo','cod centro'],
+    gestor:['gestor imediato','gestor','lider','supervisor'],
+    unidade:['unidade','filial'],
+    vinc:['vinculo','contrato','tipo contrato','regime'],
+    jornada:['jornada','carga horaria','jornada trabalho'],
+    sal:['salario base','salario','remuneracao','vencimento','salario atual'],
+    sit:['situacao','status','situacao atual'],
+    bene:['beneficios'],
+    adm:['data admissao','admissao atual','data admissao atual'],
+    adm1:['data admissao mais antiga','primeira admissao','admissao inicial'],
+    nasc:['nascimento','data nascimento','data nasc'],
+    cbo:['cbo','codigo cbo'],
+    comissao:['comissao'],
+    gratif:['gratificacao'],
+    g40:['recebe 40','40% gratificacao','gratificacao 40'],
+    vfora:['valores pagos por fora','valores por fora','adicional por fora'],
+    premiao:['premiacao','premio']
+  };
+  var r={};
+  headers.forEach(function(h,i){
+    var hl=h.toString().toLowerCase().trim().replace(/['"[\]]/g,'');
+    Object.keys(MAP).forEach(function(field){
+      if(r[field]===undefined)MAP[field].forEach(function(kw){
+        if(hl===kw||hl.indexOf(kw)>=0)r[field]=i
+      })
+    })
+  });
+  return r
+}
+
+function processRows(rows,colMap){
+  var cols=[];var seen={};
+  rows.forEach(function(row){
+    if(!row||!row.length)return;
+    var gc=function(k){return colMap[k]!==undefined?(row[colMap[k]]||'').toString().trim():''};
+    var n=cap(gc('nome'));
+    if(!n||n.toLowerCase()==='nome')return;
+    var cpf=gc('cpf').replace(/\D/g,'');
+    if(cpf&&seen[cpf])return;
+    if(cpf)seen[cpf]=true;
+    cols.push({
+      nome:n,cpf:cpf?cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'):'',
+      cargo:cap(gc('cargo')),real:cap(gc('real')||gc('cargo')),
+      depto:cap(gc('depto')),cc:gc('cc'),gestor:cap(gc('gestor')),unidade:cap(gc('unidade')),
+      vinc:gc('vinc')||'CLT',jornada:gc('jornada'),
+      sal:parseSal(gc('sal')),comissao:parseSal(gc('comissao')),
+      gratif:parseSal(gc('gratif')),g40:gc('g40'),
+      vfora:parseSal(gc('vfora')),premiao:parseSal(gc('premiao')),
+      sit:cap(gc('sit'))||'Trabalhando',bene:gc('bene'),
+      adm:parseD(gc('adm')),adm1:parseD(gc('adm1')||gc('adm')),
+      nasc:parseD(gc('nasc')),cbo:gc('cbo'),docs:[]
+    })
+  });
+  return cols
+}
+
+function finalizarImport(rows,colMap){
+  var novos=processRows(rows,colMap);
+  if(!novos.length){toast('Nenhum colaborador encontrado.',false);return}
+  var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;
+  if(!emps[idx].colabs)emps[idx].colabs=[];
+  var ex=emps[idx].colabs;var added=0,skipped=0;
+  novos.forEach(function(n){
+    var dup=ex.find(function(e){return(n.cpf&&e.cpf&&n.cpf===e.cpf)||(n.nome&&e.nome&&n.nome.toLowerCase()===e.nome.toLowerCase())});
+    if(dup)skipped++;else{ex.push(n);added++}
+  });
+  sst('emps',emps);empAtual=emps[idx];renderColabs(empAtual);renderDetStats(empAtual);
+  toast(added+' importados!'+(skipped?' ('+skipped+' ja existiam)':''))
+}
+
+// ══ BULK COLABS ══
 function selecionarTodos(){var cbs=document.querySelectorAll('.colab-cb');var all=![...cbs].every(function(cb){return cb.checked});cbs.forEach(function(cb){cb.checked=all})}
-function excluirSelecionados(){var cbs=document.querySelectorAll('.colab-cb:checked');if(!cbs.length){toast('Selecione colaboradores.',false);return}if(!confirm('Excluir '+cbs.length+' colaborador(es)?'))return;var indices=[...cbs].map(function(cb){return parseInt(cb.value)}).sort(function(a,b){return b-a});var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;indices.forEach(function(i){emps[idx].colabs.splice(i,1)});sst('emps',emps);empAtual=emps[idx];renderColabs(empAtual);renderDetStats(empAtual);toast(indices.length+' removido(s).')}
-function zerarColabs(){if(!empAtual)return;if(!confirm('Remover TODOS os colaboradores de '+empAtual.nome+'?'))return;var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;emps[idx].colabs=[];sst('emps',emps);empAtual=emps[idx];renderColabs(empAtual);renderDetStats(empAtual);toast('Colaboradores removidos!')}
+function excluirSelecionados(){
+  var cbs=document.querySelectorAll('.colab-cb:checked');
+  if(!cbs.length){toast('Selecione colaboradores.',false);return}
+  if(!confirm('Excluir '+cbs.length+' colaborador(es)?'))return;
+  var indices=[...cbs].map(function(cb){return parseInt(cb.value)}).sort(function(a,b){return b-a});
+  var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;
+  indices.forEach(function(i){emps[idx].colabs.splice(i,1)});
+  sst('emps',emps);empAtual=emps[idx];renderColabs(empAtual);renderDetStats(empAtual);toast(indices.length+' removido(s).')
+}
+function zerarColabs(){
+  if(!empAtual||!confirm('Remover TODOS os colaboradores?'))return;
+  var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;
+  emps[idx].colabs=[];sst('emps',emps);empAtual=emps[idx];renderColabs(empAtual);renderDetStats(empAtual);toast('Zerado!')
+}
 function calcIdade(nasc){if(!nasc)return'';try{var n=new Date(nasc);var a=Math.floor((new Date()-n)/(365.25*24*60*60*1000));return a>0&&a<120?a+'':''}catch(e){return''}}
 
+// ══ COLAB DETAIL ══
+function verColabDet(i){
+  if(!empAtual)return;var c=(empAtual.colabs||[])[i];if(!c)return;
+  var el=document.getElementById('mcolab-det');if(!el)return;
+  document.getElementById('colab-det-idx').value=i;
+  var nd=document.getElementById('colab-det-titulo');if(nd)nd.textContent=c.nome||'Colaborador';
+  var set=function(id,val){var e=document.getElementById(id);if(e)e.value=val||''};
+  set('cd-nome',c.nome);set('cd-cpf',c.cpf);set('cd-nasc',toISO(c.nasc||''));
+  set('cd-adm1',toISO(c.adm1||''));set('cd-adm',toISO(c.adm||''));
+  set('cd-cargo',c.cargo);set('cd-real',c.real||c.cargo);set('cd-cbo',c.cbo);
+  set('cd-cc',c.cc);set('cd-gestor',c.gestor);set('cd-unidade',c.unidade);
+  set('cd-sal',c.sal);set('cd-comissao',c.comissao||'');set('cd-gratif',c.gratif||'');
+  set('cd-g40',c.g40||'');set('cd-vfora',c.vfora||'');set('cd-premiao',c.premiao||'');
+  set('cd-bene',c.bene);set('cd-obs',c.obs||'');set('cd-ates',c.ates||'');set('cd-afas',c.afas||'');
+  ['sexo','depto','vinc','jornada','escol','sit'].forEach(function(k){var e=document.getElementById('cd-'+k);if(e)e.value=c[k]||''});
+  colabDetDocs=c.docs||[];if(typeof renderColabDetDocs==='function')renderColabDetDocs();openM('mcolab-det')
+}
+var colabDetDocs=[];
+function renderColabDetDocs(){var el=document.getElementById('colab-det-docs');if(!el)return;el.innerHTML=colabDetDocs.map(function(d,i){return'<div class="parti-chip">'+eh(d.nome)+(d.url?'<a href="'+d.url+'" download="'+eh(d.nome)+'" target="_blank" style="color:var(--gd)">&#11015;</a>':'')+'<button onclick="colabDetDocs.splice('+i+',1);renderColabDetDocs()">x</button></div>'}).join('')}
+function addColabDocDet(input){Array.from(input.files).forEach(function(f){var rd=new FileReader();rd.onload=function(e){colabDetDocs.push({nome:f.name,tipo:f.type,tam:f.size,data:now(),url:e.target.result});renderColabDetDocs()};if(f.size<5*1024*1024)rd.readAsDataURL(f);else{colabDetDocs.push({nome:f.name,tipo:f.type,tam:f.size,data:now()});renderColabDetDocs()}})}
 
+function salvarColabDet(){
+  if(!empAtual)return;var i=parseInt(document.getElementById('colab-det-idx').value);
+  var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;
+  var c=emps[idx].colabs[i];if(!c)return;
+  var g=function(id){var e=document.getElementById(id);return e?e.value.trim():''};
+  c.nome=cap(g('cd-nome'));c.cpf=g('cd-cpf');c.sexo=g('cd-sexo');
+  c.nasc=g('cd-nasc');c.adm1=g('cd-adm1');c.adm=g('cd-adm');
+  c.cargo=cap(g('cd-cargo'));c.real=cap(g('cd-real')||g('cd-cargo'));
+  c.cbo=g('cd-cbo');c.depto=g('cd-depto');c.cc=g('cd-cc');c.gestor=cap(g('cd-gestor'));
+  c.unidade=cap(g('cd-unidade'));c.vinc=g('cd-vinc');c.jornada=g('cd-jornada');
+  c.sal=g('cd-sal');c.comissao=g('cd-comissao');c.gratif=g('cd-gratif');
+  c.g40=g('cd-g40');c.vfora=g('cd-vfora');c.premiao=g('cd-premiao');
+  c.escol=g('cd-escol');c.bene=g('cd-bene');c.sit=g('cd-sit');
+  c.ates=g('cd-ates');c.afas=g('cd-afas');c.obs=g('cd-obs');c.docs=colabDetDocs.slice();
+  sst('emps',emps);empAtual=emps[idx];closeM('mcolab-det');renderColabs(empAtual);toast('Salvo!')
+}
+
+function gerarRelColabPDF(){
+  var i=parseInt(document.getElementById('colab-det-idx').value);
+  var c=empAtual&&empAtual.colabs?empAtual.colabs[i]:null;if(!c)return;
+  var w=window.open('','_blank');
+  var s='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+c.nome+'</title>';
+  s+='<style>body{font-family:Arial,sans-serif;padding:2rem;color:#111}h1{color:#0d1b2e;border-bottom:2px solid #c9a84c;padding-bottom:.5rem}h2{color:#c9a84c;font-size:.9rem;margin:1rem 0 .3rem}.grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem 2rem}.field{margin-bottom:.5rem}.lbl{font-size:.7rem;color:#888;text-transform:uppercase;display:block}.val{font-size:.9rem}</style>';
+  s+='</head><body><h1>PCCS 360 - Ficha do Colaborador</h1>';
+  s+='<h2>Dados Pessoais</h2><div class="grid">';
+  [['Nome',c.nome],['CPF',c.cpf],['Sexo',c.sexo],['Nascimento',c.nasc?fd(c.nasc):''],['1a Admissao',c.adm1?fd(c.adm1):''],['Admissao',c.adm?fd(c.adm):'']].forEach(function(f){if(f[1])s+='<div class="field"><span class="lbl">'+f[0]+'</span><span class="val">'+eh(f[1])+'</span></div>'});
+  s+='</div><h2>Dados Funcionais</h2><div class="grid">';
+  [['Cargo CTPS',c.cargo],['Funcao Real',c.real],['CBO',c.cbo],['Departamento',c.depto],['Centro Custo',c.cc],['Gestor',c.gestor],['Unidade',c.unidade],['Vinculo',c.vinc],['Jornada',c.jornada],['Situacao',c.sit]].forEach(function(f){if(f[1])s+='<div class="field"><span class="lbl">'+f[0]+'</span><span class="val">'+eh(f[1])+'</span></div>'});
+  s+='</div><h2>Remuneracao</h2><div class="grid">';
+  [['Salario Base',c.sal?'R$ '+parseFloat(c.sal).toLocaleString('pt-BR',{minimumFractionDigits:2}):''],['Comissao',c.comissao?'R$ '+parseFloat(c.comissao).toLocaleString('pt-BR',{minimumFractionDigits:2}):''],['Gratificacao',c.gratif?'R$ '+parseFloat(c.gratif).toLocaleString('pt-BR',{minimumFractionDigits:2}):''],['40% Gratif?',c.g40],['Valores por Fora',c.vfora?'R$ '+parseFloat(c.vfora).toLocaleString('pt-BR',{minimumFractionDigits:2}):''],['Premiacao',c.premiao?'R$ '+parseFloat(c.premiao).toLocaleString('pt-BR',{minimumFractionDigits:2}):''],['Beneficios',c.bene]].forEach(function(f){if(f[1])s+='<div class="field"><span class="lbl">'+f[0]+'</span><span class="val">'+eh(f[1])+'</span></div>'});
+  s+='</div></body></html>';w.document.write(s);w.document.close();w.print()
+}
+
+// ══ KANBAN WITH DRAG AND DROP ══
+function renderKanban(emp){
+  if(!emp)return;var hoje=new Date();
+  var allAtv=[];
+  (emp.fases||[]).forEach(function(f,fi){(f.atividades||[]).forEach(function(a,ai){allAtv.push({a:a,fi:fi,ai:ai})})});
+  function getCol(a){
+    if(a.feito||a.st==='Concluido')return'conc';
+    if(a.st==='Aguardando'||a.st==='Aguardando Aprovacao')return'agr';
+    if(a.st==='Pendente'||(a.prev&&new Date(a.prev)<hoje&&!a.feito))return'atd';
+    return'and'
+  }
+  var cols={and:[],agr:[],atd:[],conc:[]};
+  allAtv.forEach(function(item){cols[getCol(item.a)].push(item)});
+  var sEl=document.getElementById('kb-stats');
+  if(sEl)sEl.innerHTML=
+    '<div class="sc"><div class="sc-n">'+allAtv.length+'</div><div class="sc-l">Total</div></div>'+
+    '<div class="sc sy"><div class="sc-n">'+cols.and.length+'</div><div class="sc-l">Em Andamento</div></div>'+
+    '<div class="sc sb2"><div class="sc-n">'+cols.agr.length+'</div><div class="sc-l">Aguardando</div></div>'+
+    '<div class="sc sr"><div class="sc-n">'+cols.atd.length+'</div><div class="sc-l">Atrasados</div></div>'+
+    '<div class="sc sg"><div class="sc-n">'+cols.conc.length+'</div><div class="sc-l">Concluidos</div></div>';
+  function cardHtml(item){
+    var a=item.a;var fi=item.fi;var ai=item.ai;
+    var isDone=a.feito||a.st==='Concluido';
+    return '<div class="kb-card" draggable="true" data-fi="'+fi+'" data-ai="'+ai+'"'+
+      ' ondragstart="kbDragStart(event,this)">'+
+      '<h5 style="'+(isDone?'text-decoration:line-through;opacity:.6':'')+'">'+
+        (a.n.length>42?a.n.substring(0,42)+'...':a.n)+
+      '</h5>'+
+      '<div class="kb-meta gd">F'+(fi+1)+'</div>'+
+      (a.resp?'<div class="kb-meta">'+eh(a.resp)+'</div>':'')+
+      (a.prev?'<div class="kb-meta" style="color:'+(getCol(a)==='atd'?'var(--rd)':'var(--t3)')+'">'+fd(a.prev)+'</div>':'')+
+    '</div>'
+  }
+  var board=document.getElementById('kb-board');if(!board)return;
+  board.dataset.eid=emp.id;
+  board.style.display='grid';board.style.gridTemplateColumns='repeat(4,1fr)';board.style.gap='.7rem';
+  board.innerHTML=
+    '<div class="kb-col and" data-col="and" ondragover="event.preventDefault()" ondrop="kbDrop(event,this)">'+
+    '<div class="kb-hdr"><h4 style="color:var(--yw)">Em Andamento</h4><span class="kb-badge">'+cols.and.length+'</span></div>'+
+    cols.and.map(cardHtml).join('')+'</div>'+
+    '<div class="kb-col apr" data-col="agr" ondragover="event.preventDefault()" ondrop="kbDrop(event,this)">'+
+    '<div class="kb-hdr"><h4 style="color:#a78bfa">Aguardando</h4><span class="kb-badge">'+cols.agr.length+'</span></div>'+
+    cols.agr.map(cardHtml).join('')+'</div>'+
+    '<div class="kb-col atrs" data-col="atd" ondragover="event.preventDefault()" ondrop="kbDrop(event,this)">'+
+    '<div class="kb-hdr"><h4 style="color:var(--rd)">Atrasado</h4><span class="kb-badge">'+cols.atd.length+'</span></div>'+
+    cols.atd.map(cardHtml).join('')+'</div>'+
+    '<div class="kb-col conc" data-col="conc" ondragover="event.preventDefault()" ondrop="kbDrop(event,this)">'+
+    '<div class="kb-hdr"><h4 style="color:var(--gr)">Concluido</h4><span class="kb-badge">'+cols.conc.length+'</span></div>'+
+    cols.conc.map(cardHtml).join('')+'</div>'
+}
+var kbDragItem=null;
+function kbDragStart(ev,el){kbDragItem=el;ev.dataTransfer.effectAllowed='move';ev.dataTransfer.setData('text/plain',el.dataset.fi+','+el.dataset.ai)}
+function kbDrop(ev,col){
+  ev.preventDefault();
+  var d=ev.dataTransfer.getData('text/plain').split(',');if(d.length<2)return;
+  var fi=parseInt(d[0]),ai=parseInt(d[1]);
+  var board=col.closest('#kb-board');if(!board)return;
+  var eid=board.dataset.eid;
+  var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===eid});if(idx<0)return;
+  var a=emps[idx].fases[fi].atividades[ai];if(!a)return;
+  var tc=col.dataset.col;
+  if(tc==='conc'){a.feito=true;a.st='Concluido';if(!a.conc)a.conc=new Date().toISOString().split('T')[0]}
+  else if(tc==='agr'){a.feito=false;a.st='Aguardando Aprovacao'}
+  else if(tc==='atd'){a.feito=false;a.st='Pendente'}
+  else{a.feito=false;a.st='Em andamento'}
+  emps[idx].fases[fi]=autoFaseStatus(emps[idx].fases[fi]);
+  sst('emps',emps);empAtual=emps[idx];renderKanban(empAtual);renderDetStats(empAtual);toast('Status atualizado!')
+}
+
+// ══ IMPROVED detectIncons ══
+function detectIncons(emp){
+  var ic=[];var MIN_SAL=1412;
+  (emp.colabs||[]).forEach(function(c,i){
+    if(!c.nome)return;
+    if(!c.cargo&&!c.real)ic.push({i:i,n:c.nome,tipo:'Sem cargo CTPS definido',nivel:'Alto',sug:'Regularizar — risco trabalhista'});
+    if(!c.sal||parseFloat(c.sal)<MIN_SAL)ic.push({i:i,n:c.nome,tipo:'Salario abaixo do minimo (R$ '+MIN_SAL.toLocaleString('pt-BR')+')',nivel:'Alto',sug:'Regularizar urgente'});
+    if(c.cargo&&c.real&&c.cargo.toLowerCase()!==c.real.toLowerCase()&&Math.abs(c.cargo.length-c.real.length)>8)ic.push({i:i,n:c.nome,tipo:'Funcao real diverge do cargo CTPS',nivel:'Alto',sug:'Verificar CBO — desvio de funcao'});
+    if(c.sit==='Desligado')ic.push({i:i,n:c.nome,tipo:'Colaborador desligado no cadastro ativo',nivel:'Medio',sug:'Verificar necessidade'});
+    if(!c.depto)ic.push({i:i,n:c.nome,tipo:'Sem departamento vinculado',nivel:'Medio',sug:'Vincular ao organograma'});
+    if(!c.adm)ic.push({i:i,n:c.nome,tipo:'Data de admissao nao informada',nivel:'Medio',sug:'Informar para calculo de tempo'});
+    if(!c.cpf)ic.push({i:i,n:c.nome,tipo:'CPF nao informado',nivel:'Baixo',sug:'Obter para identificacao fiscal'});
+    if(!c.nasc)ic.push({i:i,n:c.nome,tipo:'Data de nascimento ausente',nivel:'Baixo',sug:'Informar para faixa etaria'});
+  });
+  return ic
+}
+
+// ══ renderIncons with legend ══
+function renderIncons(emp){
+  var el=document.getElementById('incons-list');if(!el)return;
+  var list=detectIncons(emp);
+  el.innerHTML='<div style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:.9rem;margin-bottom:1rem">'+
+    '<div class="sec-t" style="margin-bottom:.6rem">&#9675; Legenda — Inconsistencias PCCS</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;font-size:.76rem">'+
+    '<div><span class="b br" style="margin-right:.3rem">Alto</span>Sem cargo CTPS — risco trabalhista</div>'+
+    '<div><span class="b br" style="margin-right:.3rem">Alto</span>Salario abaixo do minimo</div>'+
+    '<div><span class="b br" style="margin-right:.3rem">Alto</span>Desvio de funcao</div>'+
+    '<div><span class="b by" style="margin-right:.3rem">Medio</span>Sem departamento vinculado</div>'+
+    '<div><span class="b by" style="margin-right:.3rem">Medio</span>Data admissao ausente</div>'+
+    '<div><span class="b bk" style="margin-right:.3rem">Baixo</span>CPF ou Nascimento ausente</div>'+
+    '</div></div>';
+  if(!list.length){el.innerHTML+='<div class="empty"><div class="empty-ico" style="color:var(--gr)">&#10003;</div><p style="color:var(--gr)">Nenhuma inconsistencia!</p></div>';return}
+  var altos=list.filter(function(x){return x.nivel==='Alto'}).length;
+  var medios=list.filter(function(x){return x.nivel==='Medio'}).length;
+  var baixos=list.filter(function(x){return x.nivel==='Baixo'}).length;
+  el.innerHTML+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem">'+
+    '<div style="background:rgba(239,68,68,.1);border-radius:var(--r2);padding:.7rem;text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--rd)">'+altos+'</div><div style="font-size:.72rem;color:var(--t2)">Risco Alto</div></div>'+
+    '<div style="background:rgba(245,158,11,.1);border-radius:var(--r2);padding:.7rem;text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--yw)">'+medios+'</div><div style="font-size:.72rem;color:var(--t2)">Risco Medio</div></div>'+
+    '<div style="background:rgba(255,255,255,.04);border-radius:var(--r2);padding:.7rem;text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--t2)">'+baixos+'</div><div style="font-size:.72rem;color:var(--t2)">Risco Baixo</div></div>'+
+  '</div>';
+  el.innerHTML+=list.map(function(ic){var cls=ic.nivel==='Alto'?'br':ic.nivel==='Medio'?'by':'bk';return'<div style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:.8rem 1rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.8rem"><span class="b '+cls+'">'+ic.nivel+'</span><div style="flex:1"><div style="font-size:.85rem;font-weight:600">'+eh(ic.n)+'</div><div style="font-size:.75rem;color:var(--t2)">'+ic.tipo+'</div></div><div style="font-size:.72rem;color:var(--gd);text-align:right;max-width:150px;flex-shrink:0">'+ic.sug+'</div></div>'}).join('')
+}
+
+// ══ renderAnexosProj — shows ALL phase attachments ══
+function anx_card(a,i,type){
+  var icon=a.tipo&&a.tipo.indexOf('pdf')>=0?'PDF':a.tipo&&a.tipo.indexOf('image')>=0?'IMG':a.tipo&&a.tipo.indexOf('word')>=0?'DOC':a.tipo&&a.tipo.indexOf('sheet')>=0?'XLS':'FILE';
+  var clr=icon==='PDF'?'var(--rd)':icon==='IMG'?'var(--gr)':icon==='DOC'?'#60a5fa':icon==='XLS'?'var(--yw)':'var(--t2)';
+  return '<div style="display:flex;align-items:center;gap:.8rem;padding:.65rem;background:var(--nv2);border:1px solid rgba(255,255,255,.06);border-radius:var(--r2);margin-bottom:.4rem">'+
+    '<div style="width:38px;height:38px;border-radius:var(--r2);background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;color:'+clr+';flex-shrink:0">'+icon+'</div>'+
+    '<div style="flex:1;min-width:0"><div style="font-size:.84rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+eh(a.nome)+'</div>'+
+    '<div style="font-size:.7rem;color:var(--t3)">'+(a.data||'')+(a.tam?' · '+Math.round(a.tam/1024)+'KB':'')+(a.atv?' · '+eh(a.atv.substring(0,30)):'')+'</div></div>'+
+    '<div style="display:flex;gap:.3rem;flex-shrink:0">'+
+      (a.url?'<a href="'+a.url+'" target="_blank" class="btn bh bs" style="text-decoration:none">&#128065;</a>':'')+
+      (a.url?'<a href="'+a.url+'" download="'+eh(a.nome)+'" class="btn bh bs" style="text-decoration:none">&#11015;</a>':'')+
+      (type==='proj'?'<button class="btn bd bs" onclick="delAnexoProj('+i+')">&#10005;</button>':'')+
+    '</div></div>'
+}
+function renderAnexosProj(emp){
+  var el=document.getElementById('proj-anexos-list');if(!el)return;
+  var projAnexos=emp.anexos||[];
+  var faseAnexos=[];
+  (emp.fases||[]).forEach(function(f,fi){
+    var items=[];
+    (f.atividades||[]).forEach(function(a){(a.anexos||[]).forEach(function(ax){items.push({nome:ax.nome,tipo:ax.tipo,tam:ax.tam,data:ax.data,url:ax.url,atv:a.n})})});
+    if(items.length)faseAnexos.push({fase:'F'+(fi+1)+': '+f.n,itens:items})
+  });
+  var total=projAnexos.length+faseAnexos.reduce(function(s,f){return s+f.itens.length},0);
+  if(!total){el.innerHTML='<div class="empty"><div class="empty-ico">&#9675;</div><p>Nenhum anexo. Adicione arquivos ou anexe nas atividades das Fases.</p></div>';return}
+  var html='';
+  if(projAnexos.length){html+='<div style="margin-bottom:1.2rem"><div class="sec-t" style="margin-bottom:.5rem">&#9670; Arquivos do Projeto</div>'+projAnexos.map(function(a,i){return anx_card(a,i,'proj')}).join('')+'</div>'}
+  faseAnexos.forEach(function(fa){html+='<div style="margin-bottom:1.2rem"><div class="sec-t" style="margin-bottom:.5rem;color:var(--gd)">&#9711; '+eh(fa.fase)+'</div>'+fa.itens.map(function(a,i){return anx_card(a,i,'fase')}).join('')+'</div>'});
+  el.innerHTML=html
+}
+function addAnexoProj(input){
+  if(!empAtual||!input.files.length)return;var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;
+  if(!emps[idx].anexos)emps[idx].anexos=[];var cnt=input.files.length;
+  Array.from(input.files).forEach(function(f){
+    if(f.size<5*1024*1024){var rd=new FileReader();rd.onload=function(e){emps[idx].anexos.push({nome:f.name,tipo:f.type,tam:f.size,data:now(),url:e.target.result});cnt--;if(!cnt){sst('emps',emps);empAtual=emps[idx];renderAnexosProj(empAtual);toast('Adicionado!')}};rd.readAsDataURL(f)}
+    else{emps[idx].anexos.push({nome:f.name,tipo:f.type,tam:f.size,data:now()});cnt--;if(!cnt){sst('emps',emps);empAtual=emps[idx];renderAnexosProj(empAtual);toast('Adicionado!')}}
+  })
+}
+function delAnexoProj(i){if(!empAtual||!confirm('Remover?'))return;var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;emps[idx].anexos.splice(i,1);sst('emps',emps);empAtual=emps[idx];renderAnexosProj(empAtual)}
+
+// ══ openRop / salvarRop / delRop ══
+function openRop(){
+  popEmpSels();
+  var re=document.getElementById('rop-emp');if(re&&empAtual)re.value=empAtual.id;
+  var rc=document.getElementById('rop-consul');if(rc){var u=gst('users')||[];rc.innerHTML='<option value="">-- Selecionar --</option>';u.forEach(function(x){rc.innerHTML+='<option value="'+eh(x.nome)+'">'+eh(x.nome)+'</option>'})}
+  document.getElementById('rop-id').value='';
+  openM('mrop')
+}
+function salvarRop(){
+  var tit=document.getElementById('rop-titulo');if(!tit||!tit.value.trim()){toast('Titulo obrigatorio.',false);return}
+  var rops=gst('rops')||[];var id=document.getElementById('rop-id').value;
+  var obj={id:id||'r'+Date.now(),empId:document.getElementById('rop-emp').value,tipo:(document.getElementById('rop-tipo')||{}).value||'',titulo:tit.value.trim(),data:(document.getElementById('rop-data')||{}).value||now(),consul:(document.getElementById('rop-consul')||{}).value||'',sit:(document.getElementById('rop-sit')||{}).value||'',passos:(document.getElementById('rop-passos')||{}).value||'',status:(document.getElementById('rop-status')||{}).value||'Em andamento'};
+  if(id){var ix=rops.findIndex(function(r){return r.id===id});if(ix>=0)rops[ix]=obj;else rops.push(obj)}else rops.push(obj);
+  sst('rops',rops);closeM('mrop');if(empAtual)renderRops(empAtual);toast('Relatorio salvo!')
+}
+function delRop(id){if(!confirm('Excluir?'))return;sst('rops',(gst('rops')||[]).filter(function(r){return r.id!==id}));if(empAtual)renderRops(empAtual);toast('Removido.')}
+
+// ══ MISC ══
+function renderChangelog(){var logs=gst('changelog')||[];var tbody=document.getElementById('log-tbody');if(!tbody)return;tbody.innerHTML=logs.slice().reverse().map(function(l){var sc={'Implementado':'bg2','Em desenvolvimento':'by','Solicitado':'bb','Pendente':'bk'}[l.status]||'bk';return'<tr><td>'+eh(l.data||'-')+'</td><td><span class="b bb" style="font-size:.68rem">'+eh(l.tipo)+'</span></td><td>'+eh(l.desc)+'</td><td>'+eh(l.resp||'-')+'</td><td><span class="b '+sc+'">'+eh(l.status)+'</span></td><td><button class="btn bd bs" onclick="delLog(\''+l.id+'\')">x</button></td></tr>'}).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:2rem">Nenhuma alteracao.</td></tr>'}
+function salvarLog(){var desc=document.getElementById('log-desc');if(!desc||!desc.value.trim()){toast('Descricao obrigatoria.',false);return}var logs=gst('changelog')||[];logs.push({id:'cl'+Date.now(),tipo:(document.getElementById('log-tipo')||{}).value||'',desc:desc.value.trim(),resp:(document.getElementById('log-resp')||{}).value||'',data:(document.getElementById('log-data')||{}).value||now(),status:(document.getElementById('log-status')||{}).value||''});sst('changelog',logs);closeM('mlog');desc.value='';renderChangelog();toast('Registrado!')}
+function delLog(id){if(!confirm('Excluir?'))return;sst('changelog',(gst('changelog')||[]).filter(function(l){return l.id!==id}));renderChangelog()}
+function relGeral(tipo){var emps=gst('emps')||[];if(tipo==='csv'){var h='Empresa,Setor,Status,Progresso,Inicio,Prazo\n';var csv=h+emps.map(function(e){return'"'+e.nome+'","'+(e.setor||'')+'","'+e.st+'","'+calcProg(e)+'%","'+(e.ini||'')+'","'+(e.fim||'')+'"'}).join('\n');dl('pccs360_projetos.csv',csv,'text/csv');toast('CSV exportado!');}else{var w=window.open('','_blank');var s='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>PCCS 360</title><style>body{font-family:Arial,sans-serif;padding:2rem}h1{color:#0d1b2e;border-bottom:2px solid #c9a84c;padding-bottom:.5rem}table{width:100%;border-collapse:collapse;margin:1rem 0}th{background:#0d1b2e;color:#fff;padding:.5rem;text-align:left}td{padding:.5rem;border-bottom:1px solid #eee}</style></head><body><h1>PCCS 360 - Relatorio Geral</h1><p>Gerado: '+now()+'</p><table><tr><th>Empresa</th><th>Status</th><th>Progresso</th><th>Prazo</th></tr>';emps.forEach(function(e){s+='<tr><td>'+eh(e.nome)+'</td><td>'+e.st+'</td><td>'+calcProg(e)+'%</td><td>'+(e.fim?fd(e.fim):'-')+'</td></tr>'});s+='</table></body></html>';w.document.write(s);w.document.close();w.print()}}
+function salvarUser(){if(!sessao||sessao.role!=='admin'){toast('Sem permissao.',false);return}var users=gst('users')||[];if(users.length>=15){toast('Limite de 15.',false);return}var n=gv('u-nome'),e=gv('u-email'),s=gv('u-senha');var err=document.getElementById('u-err');if(!n||!e||!s){err.textContent='Preencha todos os campos.';return}if(s.length<6){err.textContent='Senha min 6 chars.';return}if(users.find(function(u){return u.email===e})){err.textContent='Email ja cadastrado.';return}err.textContent='';var ini=n.split(' ').map(function(w){return w[0]||''}).join('').substring(0,2).toUpperCase();users.push({id:'u'+Date.now(),nome:n,email:e,senha:s,role:gv('u-role'),funcao:gv('u-funcao'),ini:ini,cor:CORES[users.length%CORES.length]});sst('users',users);closeM('muser');['u-nome','u-email','u-senha','u-funcao'].forEach(function(id){var el=document.getElementById(id);if(el)el.value=''});renderUsers();toast('Usuario criado!')}
+function delUser(id){if(!confirm('Excluir?'))return;sst('users',(gst('users')||[]).filter(function(u){return u.id!==id}));renderUsers();toast('Removido.')}
+function alterarSenha(){var cur=gv('s1'),nv=gv('s2'),cf=gv('s3');var err=document.getElementById('s-err');var users=gst('users')||[];var u=users.find(function(x){return x.id===sessao.id});if(!u||u.senha!==cur){err.textContent='Senha atual incorreta.';return}if(nv.length<6){err.textContent='Minimo 6 chars.';return}if(nv!==cf){err.textContent='Senhas nao coincidem.';return}err.textContent='';u.senha=nv;sst('users',users);sessao=u;sst('sessao',u);closeM('msenha');['s1','s2','s3'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''});toast('Senha alterada!')}
+function renderCargos(){var cargos=gst('cargos')||[];var emps=gst('emps')||[];var em={};emps.forEach(function(e){em[e.id]=e.nome});document.getElementById('cargos-tbody').innerHTML=cargos.length?cargos.map(function(c,i){return'<tr><td>'+eh(c.n)+'</td><td>'+eh(c.cbo||'-')+'</td><td>'+eh(c.fam||'-')+'</td><td>'+eh(c.niv||'-')+'</td><td>'+eh(em[c.emp]||'-')+'</td><td><button class="btn bd bs" onclick="delCargo('+i+')">x</button></td></tr>'}).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:2rem">Nenhum cargo.</td></tr>'}
+function salvarCargo(){var n=gv('c-nome');if(!n)return;var cargos=gst('cargos')||[];cargos.push({n:n,cbo:gv('c-cbo'),fam:gv('c-fam'),niv:gv('c-niv'),emp:gv('c-emp')});sst('cargos',cargos);closeM('mcargo');renderCargos();toast('Cargo salvo!')}
+function delCargo(i){if(!confirm('Remover?'))return;var c=gst('cargos')||[];c.splice(i,1);sst('cargos',c);renderCargos()}
+function renderPes(){var ps=gst('pes')||[];var emps=gst('emps')||[];var em={};emps.forEach(function(e){em[e.id]=e.nome});document.getElementById('pes-tbody').innerHTML=ps.length?ps.map(function(p){return'<tr><td>'+eh(p.cargo)+'</td><td>'+eh(em[p.emp]||'-')+'</td><td>'+fmt(p.p25)+'</td><td style="color:var(--gd)">'+fmt(p.p50)+'</td><td>'+fmt(p.p75)+'</td><td>'+eh(p.fonte||'-')+'</td></tr>'}).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:2rem">Nenhuma pesquisa.</td></tr>'}
+function salvarPes(){var n=gv('ps-cargo');if(!n)return;var ps=gst('pes')||[];ps.push({cargo:n,emp:gv('ps-emp'),p25:gv('ps-p25'),p50:gv('ps-p50'),p75:gv('ps-p75'),fonte:gv('ps-fonte')});sst('pes',ps);closeM('mpes');renderPes();toast('Pesquisa salva!')}
+function renderEst(){var fx=gst('faixas')||[];document.getElementById('est-tbody').innerHTML=fx.length?fx.map(function(f){var amp=f.min&&f.max?Math.round((f.max/f.min-1)*100)+'%':'-';return'<tr><td>'+eh(f.fam)+'</td><td>'+eh(f.niv)+'</td><td>'+fmt(f.min)+'</td><td style="color:var(--gd)">'+fmt(f.mid)+'</td><td>'+fmt(f.max)+'</td><td>'+amp+'</td></tr>'}).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:2rem">Nenhuma faixa.</td></tr>'}
+function salvarFaixa(){var n=gv('fx-fam');if(!n)return;var fx=gst('faixas')||[];fx.push({fam:n,niv:gv('fx-niv'),min:gv('fx-min'),mid:gv('fx-mid'),max:gv('fx-max'),emp:gv('fx-emp')});sst('faixas',fx);closeM('mfaixa');renderEst();toast('Faixa salva!')}
+function renderGov(){var mb=gst('membros')||[];var emps=gst('emps')||[];var em={};emps.forEach(function(e){em[e.id]=e.nome});var gr=document.getElementById('gov-reg');if(gr)gr.value=gst('govReg')||'';document.getElementById('gov-tbody').innerHTML=mb.length?mb.map(function(m,i){return'<tr><td>'+eh(m.nome)+'</td><td>'+eh(m.cargo||'-')+'</td><td>'+eh(em[m.emp]||'-')+'</td><td><span class="b by">'+eh(m.papel)+'</span></td><td><button class="btn bd bs" onclick="delMembro('+i+')">x</button></td></tr>'}).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--t3);padding:2rem">Nenhum membro.</td></tr>'}
+function salvarMembro(){var n=gv('mb-nome');if(!n)return;var mb=gst('membros')||[];mb.push({nome:n,cargo:gv('mb-cargo'),emp:gv('mb-emp'),papel:gv('mb-papel')});sst('membros',mb);closeM('mmembro');renderGov();toast('Membro salvo!')}
+function delMembro(i){if(!confirm('Remover?'))return;var m=gst('membros')||[];m.splice(i,1);sst('membros',m);renderGov()}
+function renderDeptos(emp){var t=document.getElementById('deptos-tbody');if(!t)return;var list=emp.deptos||[];t.innerHTML=list.length?list.map(function(d,i){var n=(emp.colabs||[]).filter(function(c){return c.depto===d.nome}).length;return'<tr><td>'+eh(d.nome)+'</td><td>'+eh(d.resp||'-')+'</td><td>'+n+'</td><td><button class="btn bd bs" onclick="delDepto('+i+')">x</button></td></tr>'}).join(''):'<tr><td colspan="4" style="text-align:center;color:var(--t3)">Nenhum departamento.</td></tr>'}
+function salvarDepto(){var n=gv('d-nome');if(!n)return;var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;if(!emps[idx].deptos)emps[idx].deptos=[];emps[idx].deptos.push({nome:n,resp:gv('d-resp')});sst('emps',emps);empAtual=emps[idx];renderDeptos(empAtual);closeM('mdepto');toast('Departamento salvo!')}
+function delDepto(i){if(!confirm('Remover?'))return;var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;emps[idx].deptos.splice(i,1);sst('emps',emps);empAtual=emps[idx];renderDeptos(empAtual);toast('Removido.')}
+function delColab(i){if(!confirm('Excluir?'))return;var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;emps[idx].colabs.splice(i,1);sst('emps',emps);empAtual=emps[idx];renderColabs(empAtual);renderDetStats(empAtual);toast('Removido.')}
+function salvarColab(){var n=gv('cl-nome');if(!n){var err=document.getElementById('colab-err');if(err)err.textContent='Nome obrigatorio.';return}var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;if(!emps[idx].colabs)emps[idx].colabs=[];emps[idx].colabs.push({nome:cap(n),cpf:gv('cl-cpf'),sexo:gv('cl-sexo'),nasc:gv('cl-nasc'),adm1:gv('cl-adm1'),adm:gv('cl-adm'),cargo:cap(gv('cl-cargo')),real:cap(gv('cl-real')||gv('cl-cargo')),depto:gv('cl-depto'),cc:gv('cl-cc'),gestor:cap(gv('cl-gestor')),unidade:cap(gv('cl-unidade')),vinc:gv('cl-vinc'),jornada:gv('cl-jornada'),sal:gv('cl-sal'),sit:gv('cl-sit'),bene:gv('cl-bene'),obs:gv('cl-obs'),docs:[]});sst('emps',emps);empAtual=emps[idx];closeM('mcolab');renderColabs(empAtual);renderDetStats(empAtual);toast('Colaborador salvo!')}
+function rodarIACBO(){
+  if(!empAtual){toast('Abra um projeto primeiro.',false);return}
+  var colabs=(empAtual.colabs||[]).slice(0,20);
+  if(!colabs.length){toast('Nenhum colaborador.',false);return}
+  var issues=[];
+  colabs.forEach(function(c){
+    if(c.cargo&&c.real&&c.cargo.toLowerCase()!==c.real.toLowerCase()&&c.cargo.length>3&&c.real.length>3){issues.push('<p>&#9888; <strong>'+eh(c.nome)+'</strong>: Cargo CTPS "'+eh(c.cargo)+'" x Funcao Real "'+eh(c.real)+'"</p>')}
+    if(!c.cbo&&c.cargo){issues.push('<p>&#9671; <strong>'+eh(c.nome)+'</strong>: CBO nao informado para o cargo "'+eh(c.cargo)+'"</p>')}
+  });
+  var el=document.getElementById('ia-cbo-res');var out=document.getElementById('ia-cbo-out');
+  if(el)el.style.display='block';
+  if(out)out.innerHTML=issues.length?issues.join(''):'<p style="color:var(--gr)">&#10003; Nenhuma divergencia critica de CBO identificada nos colaboradores analisados.</p>';
+  var em2=document.getElementById('ia-empty');if(em2)em2.style.display='none'
+}
+
+// ══ INIT ══
+init();
 
 </script>
 </body>
