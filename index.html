@@ -423,6 +423,33 @@ input[type="date"].inp{color-scheme:dark}
     </div>
 
     <div id="tp4" style="display:none">
+      <!-- Sub-tabs for collaborators -->
+      <div class="tabs" id="colab-tabs" style="margin-bottom:.8rem">
+        <button class="tab on" onclick="colabTab('ctab-dash',this)">&#9830; Dashboard</button>
+        <button class="tab" onclick="colabTab('ctab-table',this)">&#9632; Colaboradores</button>
+      </div>
+      <!-- Dashboard panel -->
+      <div id="ctab-dash">
+        <div style="display:flex;gap:.6rem;margin-bottom:.8rem;flex-wrap:wrap;align-items:center">
+        <select class="inp" id="dash-fil-depto" onchange="renderColabs(empAtual)" style="width:180px;padding:.35rem .7rem;font-size:.78rem">
+          <option value="">Todos os departamentos</option>
+        </select>
+        <select class="inp" id="dash-fil-sit" onchange="renderColabs(empAtual)" style="width:160px;padding:.35rem .7rem;font-size:.78rem">
+          <option value="">Todas as situações</option>
+          <option>Trabalhando</option><option>Férias</option><option>Afastado INSS</option>
+          <option>Desligado</option><option>Home office</option>
+        </select>
+        <select class="inp" id="dash-fil-vinc" onchange="renderColabs(empAtual)" style="width:140px;padding:.35rem .7rem;font-size:.78rem">
+          <option value="">Todos os vínculos</option>
+          <option>CLT</option><option>PJ</option><option>Temporário</option>
+          <option>Estagiário</option><option>Aprendiz</option>
+        </select>
+        <button class="btn bh bs" onclick="document.getElementById('dash-fil-depto').value='';document.getElementById('dash-fil-sit').value='';document.getElementById('dash-fil-vinc').value='';renderColabs(empAtual)">&#10005; Limpar Filtros</button>
+      </div>
+      <div id="colab-dashboard"></div>
+      </div>
+      <!-- Table panel -->
+      <div id="ctab-table" style="display:none">
       <div class="import-area">
         <div style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">
           <div style="flex:1"><div style="font-size:.82rem;font-weight:600;color:var(--gd);margin-bottom:.2rem">◈ Importar Colaboradores</div><div style="font-size:.73rem;color:var(--t2)">Excel (.xlsx) ou CSV · Detecção automática de colunas · Duplicatas ignoradas</div></div>
@@ -444,9 +471,10 @@ input[type="date"].inp{color-scheme:dark}
         <select class="inp" id="fil-sit" onchange="filtrarColabs()" style="width:140px;padding:.38rem .7rem;font-size:.78rem"><option value="">Todos os status</option><option>Trabalhando</option><option>Férias</option><option>Afastado INSS</option><option>Desligado</option><option>Outro</option></select>
       </div>
       <div class="tw"><table><thead><tr><th style="width:28px"></th><th>Nome</th><th>Cargo CTPS</th><th>Função Real</th><th>Departamento</th><th>Salário Base</th><th>Gratificação</th><th>40% Gratif.</th><th>R$ por Fora</th><th style="color:var(--gd)">Total</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="colabs-tbody"></tbody></table></div>
-    </div>
+      </div><!-- ctab-table -->
+    </div><!-- tp4 -->
 
-    <div id="tp5" style="display:none">
+id="tp5" style="display:none">
       <div style="margin-bottom:.8rem"><button class="btn bg bs" onclick="openM('mdepto')">+ Departamento</button></div>
       <div class="tw"><table><thead><tr><th>Departamento</th><th>Responsável</th><th>Colaboradores</th><th></th></tr></thead><tbody id="deptos-tbody"></tbody></table></div>
     </div>
@@ -880,6 +908,7 @@ input[type="date"].inp{color-scheme:dark}
 
 
 
+
 // PCCS 360 v3.1 — JavaScript Enhanced
 // Changelog, projeto por status, colaborador detalhe, fases melhoradas, tp9
 
@@ -1306,6 +1335,7 @@ function renderPerf(emp){
 
 // ═══ COLABORADORES ═══
 function renderColabs(emp){
+  renderColabsDashboard(emp);
   var tbody=document.getElementById('colabs-tbody');if(!tbody)return;
   var list=emp.colabs||[];
   var busca=(document.getElementById('busca-colab')||{}).value||'';
@@ -2237,6 +2267,186 @@ function renderMoedaSelector(){
   var m=getMoeda();
   var el=document.getElementById('moeda-selector-val');
   if(el)el.textContent=m.simbolo+' '+m.nome
+}
+
+function renderColabsDashboard(emp){
+  var el=document.getElementById('colab-dashboard');
+  if(!el)return;
+  var colabs=emp.colabs||[];
+  // Apply dashboard filters
+  var fDep2=(document.getElementById('dash-fil-depto')||{}).value||'';
+  var fSit2=(document.getElementById('dash-fil-sit')||{}).value||'';
+  var fVin2=(document.getElementById('dash-fil-vinc')||{}).value||'';
+  if(fDep2)colabs=colabs.filter(function(c){return c.depto===fDep2});
+  if(fSit2)colabs=colabs.filter(function(c){return(c.sit||'')=== fSit2});
+  if(fVin2)colabs=colabs.filter(function(c){return(c.vinc||'')=== fVin2});
+  // Also update depto filter options
+  var allDeptos=[...new Set((emp.colabs||[]).map(function(c){return c.depto}).filter(Boolean))].sort();
+  var dd2=document.getElementById('dash-fil-depto');
+  if(dd2){var cv2=dd2.value;dd2.innerHTML='<option value="">Todos os departamentos</option>';allDeptos.forEach(function(d){dd2.innerHTML+='<option value="'+eh(d)+'"'+(cv2===d?' selected':'')+'>'+eh(d)+'</option>'});dd2.value=cv2}
+  if(!colabs.length){el.innerHTML='';return}
+  var m=getMoeda();
+  // ── Aggregate all financial data ──
+  var totSal=0,totGrat=0,totG40=0,totFora=0,totCom=0,totPre=0,totGeral=0;
+  var semSal=0,semDepto=0,semAdm=0,semCargo=0,salBaixo=0;
+  var vincs={},sits={},deptos={},jornadas={};
+  var salarios=[];
+  colabs.forEach(function(c){
+    var sal=parseFloat(c.sal)||0;
+    var gra=parseFloat(c.gratif)||0;
+    var g40=c.g40==='Sim'?sal*0.4:0;
+    var vfr=parseFloat(c.vfora)||0;
+    var com=parseFloat(c.comissao)||0;
+    var pre=parseFloat(c.premiao)||0;
+    var tot=sal+gra+g40+vfr+com+pre;
+    totSal+=sal;totGrat+=gra;totG40+=g40;totFora+=vfr;totCom+=com;totPre+=pre;totGeral+=tot;
+    if(sal>0)salarios.push(sal);
+    // Inconsistencies
+    if(!sal||sal<=0)semSal++;
+    if(!c.depto)semDepto++;
+    if(!c.adm)semAdm++;
+    if(!c.cargo)semCargo++;
+    if(sal>0&&sal<1412)salBaixo++;
+    // Groupings
+    var v=c.vinc||'Não informado';vincs[v]=(vincs[v]||0)+1;
+    var s=c.sit||'Não informado';sits[s]=(sits[s]||0)+1;
+    var d=c.depto||'Não informado';deptos[d]=(deptos[d]||0)+{totSal:0,count:0};
+    if(!deptos[d]){deptos[d]={count:0,totSal:0,totGeral:0}}
+    deptos[d].count++;deptos[d].totSal+=sal;deptos[d].totGeral+=tot;
+    var j=c.jornada||'Não informado';jornadas[j]=(jornadas[j]||{count:0});jornadas[j].count++;
+  });
+  var n=colabs.length;
+  var avgSal=salarios.length?Math.round(salarios.reduce(function(a,b){return a+b},0)/salarios.length):0;
+  var minSal=salarios.length?Math.min.apply(null,salarios):0;
+  var maxSal=salarios.length?Math.max.apply(null,salarios):0;
+  var fmtV=function(v){return fmtMoeda(v)};
+  // ── Build HTML ──
+  var html='';
+  // ── KPI Cards ──
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.6rem;margin-bottom:1rem">';
+  html+=kpiCard(fmtV(totSal),'Total Folha Base','gd','&#128181;');
+  html+=kpiCard(fmtV(totGeral),'Total Remuneração','bl','&#127942;');
+  html+=kpiCard(fmtV(avgSal),'Salário Médio','yw','&#9830;');
+  html+=kpiCard(fmtV(minSal),'Menor Salário','t2','&#9661;');
+  html+=kpiCard(fmtV(maxSal),'Maior Salário','gr','&#9651;');
+  html+=kpiCard(n,'Colaboradores','t2','&#128101;');
+  html+=kpiCard(semSal,'Sem Salário',semSal>0?'rd':'gr','&#9888;');
+  html+=kpiCard(salBaixo,'Abaixo Mínimo',salBaixo>0?'rd':'gr','&#9940;');
+  html+='</div>';
+  // ── Remuneração Breakdown ──
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1rem">';
+  // Left: Breakdown
+  html+='<div class="card"><div class="sec-t">&#9830; Composição da Folha</div>';
+  var items=[['Salário Base',totSal,'var(--gd)'],['Gratificação',totGrat,'#60a5fa'],['40% Gratificação',totG40,'var(--yw)'],['R$ por Fora',totFora,'#a78bfa'],['Comissão',totCom,'var(--gr)'],['Premiação',totPre,'#f472b6']];
+  items.forEach(function(it){
+    if(it[1]<=0)return;
+    var pct=totGeral>0?Math.round(it[1]/totGeral*100):0;
+    html+='<div style="margin-bottom:.5rem"><div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.2rem">'+
+      '<span style="color:var(--t2)">'+it[0]+'</span>'+
+      '<span style="color:'+it[2]+';font-weight:600">'+fmtV(it[1])+' <span style="color:var(--t3);font-weight:400">('+pct+'%)</span></span></div>'+
+      '<div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden">'+
+        '<div style="height:100%;width:'+pct+'%;background:'+it[2]+';border-radius:3px;transition:width .5s"></div>'+
+      '</div></div>'
+  });
+  html+='<div style="border-top:1px solid rgba(255,255,255,.08);margin-top:.5rem;padding-top:.5rem;display:flex;justify-content:space-between;font-size:.82rem"><strong>TOTAL GERAL</strong><strong style="color:var(--gd)">'+fmtV(totGeral)+'</strong></div>';
+  html+='</div>';
+  // Right: Situação + Vínculo
+  html+='<div style="display:flex;flex-direction:column;gap:.6rem">';
+  html+='<div class="card"><div class="sec-t">&#9679; Por Situação</div>';
+  Object.entries(sits).sort(function(a,b){return b[1]-a[1]}).slice(0,6).forEach(function(kv){
+    var pct=Math.round(kv[1]/n*100);
+    var cor=kv[0]==='Trabalhando'?'var(--gr)':kv[0]==='Desligado'?'var(--rd)':kv[0]==='Férias'?'var(--bl)':'var(--yw)';
+    html+='<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem;font-size:.78rem">'+
+      '<div style="width:8px;height:8px;border-radius:50%;background:'+cor+';flex-shrink:0"></div>'+
+      '<span style="flex:1;color:var(--t2)">'+eh(kv[0])+'</span>'+
+      '<span style="font-weight:600">'+kv[1]+'</span>'+
+      '<span style="color:var(--t3);width:35px;text-align:right">'+pct+'%</span>'+
+    '</div>'
+  });
+  html+='</div>';
+  html+='<div class="card"><div class="sec-t">&#9632; Por Vínculo</div>';
+  Object.entries(vincs).sort(function(a,b){return b[1]-a[1]}).forEach(function(kv){
+    var pct=Math.round(kv[1]/n*100);
+    html+='<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem;font-size:.78rem">'+
+      '<span style="flex:1;color:var(--t2)">'+eh(kv[0])+'</span>'+
+      '<span style="font-weight:600">'+kv[1]+'</span>'+
+      '<span style="color:var(--t3);width:35px;text-align:right">'+pct+'%</span>'+
+    '</div>'
+  });
+  html+='</div>';
+  html+='</div></div>';
+  // ── Por Departamento / Centro de Custo ──
+  html+='<div class="card" style="margin-bottom:1rem"><div class="sec-t">&#9671; Folha por Departamento</div>';
+  var deptList=Object.entries(deptos).sort(function(a,b){return b[1].totSal-a[1].totSal});
+  html+='<div style="overflow-x:auto"><table style="font-size:.78rem"><thead><tr>'+
+    '<th>Departamento</th><th>Colaboradores</th><th>Folha Base</th><th>Total Rem.</th><th>Média Sal.</th><th>% da Folha</th>'+
+  '</tr></thead><tbody>';
+  deptList.forEach(function(kv){
+    var d=kv[1];var pct=totSal>0?Math.round(d.totSal/totSal*100):0;
+    var avg2=d.count>0?Math.round(d.totSal/d.count):0;
+    html+='<tr>'+
+      '<td style="font-weight:600">'+eh(kv[0])+'</td>'+
+      '<td style="text-align:center">'+d.count+'</td>'+
+      '<td style="color:var(--gd)">'+fmtV(d.totSal)+'</td>'+
+      '<td style="color:var(--t2)">'+fmtV(d.totGeral)+'</td>'+
+      '<td>'+fmtV(avg2)+'</td>'+
+      '<td><div style="display:flex;align-items:center;gap:.4rem">'+
+        '<div style="width:60px;height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden">'+
+          '<div style="height:100%;width:'+pct+'%;background:var(--gd);border-radius:3px"></div></div>'+
+        '<span style="color:var(--gd);font-weight:600">'+pct+'%</span>'+
+      '</div></td>'+
+    '</tr>'
+  });
+  // Totals row
+  html+='<tr style="background:rgba(201,168,76,.1);border-top:2px solid rgba(201,168,76,.3)">'+
+    '<td style="font-weight:700">TOTAL</td><td style="text-align:center;font-weight:700">'+n+'</td>'+
+    '<td style="color:var(--gd);font-weight:700">'+fmtV(totSal)+'</td>'+
+    '<td style="color:var(--gd);font-weight:700">'+fmtV(totGeral)+'</td>'+
+    '<td style="font-weight:700">'+fmtV(avgSal)+'</td><td>100%</td></tr>';
+  html+='</tbody></table></div></div>';
+  // ── Inconsistências Financeiras ──
+  var inconsList=[];
+  colabs.forEach(function(c,i){
+    var sal=parseFloat(c.sal)||0;
+    if(!sal)inconsList.push({nome:c.nome,tipo:'Sem salário informado',nivel:'Alto',idx:i});
+    else if(sal<1412)inconsList.push({nome:c.nome,tipo:'Salário abaixo do mínimo (R$ 1.412)',nivel:'Alto',idx:i,val:sal});
+    if(!c.cargo)inconsList.push({nome:c.nome,tipo:'Sem cargo CTPS',nivel:'Alto',idx:i});
+    if(!c.depto)inconsList.push({nome:c.nome,tipo:'Sem departamento',nivel:'Médio',idx:i});
+    if(!c.jornada)inconsList.push({nome:c.nome,tipo:'Jornada não informada',nivel:'Médio',idx:i});
+    if(!c.adm)inconsList.push({nome:c.nome,tipo:'Data de admissão ausente',nivel:'Médio',idx:i});
+    if(c.g40==='Sim'&&sal<=0)inconsList.push({nome:c.nome,tipo:'40% Gratif. marcado mas sem salário base',nivel:'Alto',idx:i});
+  });
+  if(inconsList.length){
+    html+='<div class="card"><div class="sec-t" style="color:var(--rd)">&#9888; Inconsistências Identificadas ('+inconsList.length+')</div>';
+    html+='<div style="max-height:220px;overflow-y:auto">';
+    inconsList.forEach(function(ic){
+      var cls=ic.nivel==='Alto'?'var(--rd)':'var(--yw)';
+      html+='<div style="display:flex;align-items:center;gap:.6rem;padding:.4rem .5rem;border-bottom:1px solid rgba(255,255,255,.04);font-size:.78rem">'+
+        '<span style="width:6px;height:6px;border-radius:50%;background:'+cls+';flex-shrink:0"></span>'+
+        '<span style="flex:1;font-weight:600">'+eh(ic.nome)+'</span>'+
+        '<span style="color:var(--t2)">'+ic.tipo+'</span>'+
+        '<span style="font-size:.65rem;padding:.12rem .4rem;border-radius:10px;background:rgba(255,255,255,.06);color:'+cls+'">'+ic.nivel+'</span>'+
+        '<button class="btn bh bs" style="font-size:.65rem;padding:.1rem .4rem" onclick="verColabDet('+ic.idx+')">Ver</button>'+
+      '</div>'
+    });
+    html+='</div></div>'
+  }
+  el.innerHTML=html
+}
+function kpiCard(val,label,cor,ico){
+  var colors={'gd':'var(--gd)','gr':'var(--gr)','rd':'var(--rd)','yw':'var(--yw)','bl':'var(--bl)','t2':'var(--t2)','t3':'var(--t3)'};
+  var c2=colors[cor]||'var(--gd)';
+  return '<div class="sc" style="position:relative">'+
+    '<div style="position:absolute;top:.6rem;right:.7rem;font-size:1rem;opacity:.4">'+ico+'</div>'+
+    '<div class="sc-n" style="font-size:1.2rem;color:'+c2+'">'+val+'</div>'+
+    '<div class="sc-l">'+label+'</div>'+
+  '</div>'
+}
+function colabTab(id,btn){
+  ['ctab-dash','ctab-table'].forEach(function(t){var e=document.getElementById(t);if(e)e.style.display=t===id?'block':'none'});
+  document.querySelectorAll('#colab-tabs .tab').forEach(function(t){t.classList.remove('on')});
+  if(btn)btn.classList.add('on');
+  if(id==='ctab-dash'&&empAtual)renderColabsDashboard(empAtual)
 }
 </script>
 </body>
