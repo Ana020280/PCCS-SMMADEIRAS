@@ -433,7 +433,7 @@ input[type="date"].inp{color-scheme:dark}
         <select class="inp" id="fil-depto" onchange="filtrarColabs()" style="width:180px;padding:.38rem .7rem;font-size:.78rem"><option value="">Todos os departamentos</option></select>
         <select class="inp" id="fil-sit" onchange="filtrarColabs()" style="width:140px;padding:.38rem .7rem;font-size:.78rem"><option value="">Todos os status</option><option>Trabalhando</option><option>Férias</option><option>Afastado INSS</option><option>Desligado</option><option>Outro</option></select>
       </div>
-      <div class="tw"><table><thead><tr><th style="width:28px"></th><th>Nome</th><th>Cargo CTPS</th><th>Função Real</th><th>Departamento</th><th>Salário Base</th><th>Total Remun.</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="colabs-tbody"></tbody></table></div>
+      <div class="tw"><table><thead><tr><th style="width:28px"></th><th>Nome</th><th>Cargo CTPS</th><th>Função Real</th><th>Departamento</th><th>Salário Base</th><th>Gratificação</th><th>40% Gratif.</th><th>R$ por Fora</th><th style="color:var(--gd)">Total</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="colabs-tbody"></tbody></table></div>
     </div>
 
     <div id="tp5" style="display:none">
@@ -900,6 +900,20 @@ function init(){
   if(!gst('membros'))sst('membros',[]);
   if(!gst('rops'))sst('rops',[]);
   if(!gst('changelog'))sst('changelog',[{id:'cl1',tipo:'Nova Funcionalidade',desc:'Sistema PCCS 360 lançado com Dashboard, Fases, Kanban, Performance, Importação Excel/CSV, IA Organizacional e Relatórios Operacionais.',resp:'Instituto Primazia',data:now(),status:'Implementado'}]);
+  // Migrate existing projects to ensure correct fases structure
+  var _emps=gst('emps')||[];var _changed=false;
+  _emps.forEach(function(em){
+    if(!em.fases||!em.fases.length){
+      em.fases=FP.map(function(f){return{n:f.n,d:f.d,status:'Nao iniciado',atividades:f.a.map(function(a){return{n:a,feito:false,resp:'',prev:'',conc:'',st:'Nao iniciado',obs:'',anexos:[]}}),anexos:[]}});
+      _changed=true
+    } else {
+      em.fases.forEach(function(f,fi){
+        if(!f.atividades)f.atividades=[];
+        f.atividades.forEach(function(a){if(!a.anexos)a.anexos=[]})
+      });
+    }
+  });
+  if(_changed)sst('emps',_emps);
   var s=gst('sessao');
   if(s){var u=(gst('users')||[]).find(function(x){return x.id===s.id&&x.senha===s.senha});if(u){sessao=u;iniciarApp();return}}
 }
@@ -1019,15 +1033,20 @@ function tabP(id,btn){
   ['tp0','tp1','tp2','tp3','tp4','tp5','tp6','tp7','tp8','tp9'].forEach(function(t){var e=document.getElementById(t);if(e)e.style.display=t===id?'block':'none'});
   document.querySelectorAll('#projeto-tabs .tab').forEach(function(t){t.classList.remove('on')});if(btn)btn.classList.add('on');
   if(!empAtual)return;
-  if(id==='tp0')renderVG(empAtual);
-  if(id==='tp1')renderFases(empAtual);
-  if(id==='tp2')renderKanban(empAtual);
-  if(id==='tp3')renderPerf(empAtual);
-  if(id==='tp4')renderColabs(empAtual);
-  if(id==='tp5')renderDeptos(empAtual);
-  if(id==='tp6')renderIncons(empAtual);
-  if(id==='tp8')renderRops(empAtual);
-  if(id==='tp9')renderAnexosProj(empAtual)
+  // Reload empAtual from storage to get latest data
+  var _emps=gst('emps')||[];var _em=_emps.find(function(e){return e.id===empAtual.id});if(_em)empAtual=_em;
+  try{
+    if(id==='tp0')renderVG(empAtual);
+    else if(id==='tp1')renderFases(empAtual);
+    else if(id==='tp2')renderKanban(empAtual);
+    else if(id==='tp3')renderPerf(empAtual);
+    else if(id==='tp4')renderColabs(empAtual);
+    else if(id==='tp5')renderDeptos(empAtual);
+    else if(id==='tp6')renderIncons(empAtual);
+    else if(id==='tp7'){var ie=document.getElementById('ia-empty');if(ie)ie.style.display='block';var ir=document.getElementById('ia-res');if(ir)ir.style.display='none';}
+    else if(id==='tp8')renderRops(empAtual);
+    else if(id==='tp9')renderAnexosProj(empAtual)
+  }catch(err){console.error('tabP error:',id,err);toast('Erro ao carregar aba: '+err.message,false)}
 }
 
 function abrirEmp(id){
@@ -1268,32 +1287,57 @@ function renderColabs(emp){
   var deptos=[...new Set(allC.map(function(c){return c.depto}).filter(Boolean))].sort();
   var fd2=document.getElementById('fil-depto');
   if(fd2){var cv=fd2.value;fd2.innerHTML='<option value="">Todos os departamentos</option>';deptos.forEach(function(d){fd2.innerHTML+='<option'+(cv===d?' selected':'')+'>'+eh(d)+'</option>'})}
-  tbody.innerHTML=list.length?list.map(function(c,i){
-    var oi=allC.indexOf(c);
-    var sc2=c.sit==='Trabalhando'||c.sit==='Home office'?'bg2':c.sit==='Desligado'?'br':c.sit==='Ferias'?'bb':'by';
-    // Calculate total remuneration
+  var fmtR=function(v){return v>0?'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'-'};
+  // Calculate totals for footer
+  var totSal=0,totGratif=0,totG40=0,totVfora=0,totGeral=0;
+  allC.forEach(function(c){
     var sal=parseFloat(c.sal)||0;
-    var com=parseFloat(c.comissao)||0;
     var gra=parseFloat(c.gratif)||0;
     var vfr=parseFloat(c.vfora)||0;
+    var com=parseFloat(c.comissao)||0;
     var pre=parseFloat(c.premiao)||0;
-    var tot=sal+com+gra+vfr+pre;
-    var fmtR=function(v){return v>0?v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'-'};
+    var g40v=c.g40==='Sim'?sal*0.4:0;
+    totSal+=sal;totGratif+=gra;totG40+=g40v;totVfora+=vfr;totGeral+=(sal+gra+g40v+vfr+com+pre)
+  });
+  tbody.innerHTML=list.length?list.map(function(c,i){
+    var oi=allC.indexOf(c);
+    var sc2=c.sit==='Trabalhando'||c.sit==='Home office'?'bg2':c.sit==='Desligado'?'br':c.sit==='Ferias'||c.sit==='Férias'?'bb':'by';
+    var sal=parseFloat(c.sal)||0;
+    var gra=parseFloat(c.gratif)||0;
+    var vfr=parseFloat(c.vfora)||0;
+    var com=parseFloat(c.comissao)||0;
+    var pre=parseFloat(c.premiao)||0;
+    var g40v=c.g40==='Sim'?sal*0.4:0;
+    var tot=sal+gra+g40v+vfr+com+pre;
     return '<tr>'+
-      '<td style="width:28px;text-align:center"><input type="checkbox" class="colab-cb" value="'+oi+'" style="cursor:pointer"></td>'+
+      '<td style="width:28px;text-align:center"><input type="checkbox" class="colab-cb" value="'+oi+'" style="cursor:pointer" onclick="atualizarBtnExcluir()"></td>'+
       '<td style="font-weight:600;cursor:pointer;color:var(--gd)" onclick="verColabDet('+oi+')">'+eh(c.nome||'-')+'</td>'+
       '<td>'+eh(c.cargo||'-')+'</td>'+
       '<td style="color:var(--t2)">'+eh(c.real||c.cargo||'-')+'</td>'+
       '<td>'+eh(c.depto||'-')+'</td>'+
-      '<td style="font-weight:600;color:var(--gd)">R$ '+fmtR(sal)+'</td>'+
-      '<td style="color:var(--t2);font-size:.75rem">R$ '+fmtR(tot)+'</td>'+
+      '<td style="color:var(--gd);font-weight:600">'+fmtR(sal)+'</td>'+
+      '<td style="color:var(--t2)">'+fmtR(gra)+'</td>'+
+      '<td style="color:'+(c.g40==='Sim'?'var(--yw)':'var(--t3)')+'">'+( c.g40==='Sim'?fmtR(g40v):'Não')+'</td>'+
+      '<td style="color:var(--t2)">'+fmtR(vfr)+'</td>'+
+      '<td style="font-weight:700;color:#fff">'+fmtR(tot)+'</td>'+
       '<td><span class="b '+sc2+'">'+eh(c.sit||'-')+'</span></td>'+
       '<td><div style="display:flex;gap:.2rem">'+
         '<button class="btn bh bs" onclick="verColabDet('+oi+')" title="Ver/Editar">&#128065;</button>'+
         '<button class="btn bd bs" onclick="delColab('+oi+')">&#10005;</button>'+
       '</div></td>'+
     '</tr>'
-  }).join(''):'<tr><td colspan="9" style="text-align:center;color:var(--t3);padding:2rem">Nenhum colaborador. Importe ou cadastre manualmente.</td></tr>'
+  }).join('')+
+  // TOTALS ROW
+  '<tr style="background:rgba(201,168,76,.08);border-top:2px solid rgba(201,168,76,.3)">'+
+    '<td colspan="5" style="font-weight:700;color:var(--gd);padding:.6rem 1rem;font-size:.78rem">TOTAIS ('+allC.length+' colaboradores)</td>'+
+    '<td style="font-weight:700;color:var(--gd)">'+fmtR(totSal)+'</td>'+
+    '<td style="font-weight:700;color:var(--gd)">'+fmtR(totGratif)+'</td>'+
+    '<td style="font-weight:700;color:var(--gd)">'+fmtR(totG40)+'</td>'+
+    '<td style="font-weight:700;color:var(--gd)">'+fmtR(totVfora)+'</td>'+
+    '<td style="font-weight:700;color:var(--gd);font-size:.9rem">'+fmtR(totGeral)+'</td>'+
+    '<td colspan="2"></td>'+
+  '</tr>':
+  '<tr><td colspan="12" style="text-align:center;color:var(--t3);padding:2rem">Nenhum colaborador. Importe ou cadastre manualmente.</td></tr>'
 }
 
 function filtrarColabs(){if(empAtual)renderColabs(empAtual)}
