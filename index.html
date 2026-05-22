@@ -280,6 +280,16 @@ input[type="date"].inp{color-scheme:dark}
       <div><span class="alogo-txt">PCCS 360</span><span class="alogo-sub">Instituto Primazia</span></div>
     </div>
     <div id="hdr-role" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.2);border-radius:20px;padding:.3rem .8rem;font-size:.75rem;color:var(--gd)">&#9733; Admin</div>
+    <select id="sel-moeda" onchange="setMoeda(this.value)" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:.3rem .7rem;font-size:.72rem;color:var(--t2);font-family:inherit;cursor:pointer" title="Selecionar Moeda">
+      <option value="BRL">R$ Real BR</option>
+      <option value="USD">US$ Dólar</option>
+      <option value="EUR">€ Euro</option>
+      <option value="GBP">£ Libra</option>
+      <option value="ARS">AR$ Peso ARG</option>
+      <option value="PYG">Gs Guarani</option>
+      <option value="UYU">$U Peso URU</option>
+      <option value="CLP">CL$ Peso CHL</option>
+    </select>
   </header>
   <div class="abody">
     <nav class="sb">
@@ -515,6 +525,21 @@ input[type="date"].inp{color-scheme:dark}
 <div class="view" id="vconf">
   <div class="phdr"><div><h2><em>Configurações</em></h2></div></div>
   <div class="content">
+    <div class="card" style="margin-bottom:1rem"><div class="sec-t">&#9670; Moeda do Sistema</div>
+      <p style="font-size:.82rem;color:var(--t2);margin-bottom:.8rem">Selecione a moeda para exibição de valores. A importação detecta o formato automaticamente.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.5rem;margin-bottom:.8rem">
+        <button class="btn bo bs" onclick="setMoeda('BRL')">&#127463;&#127479; R$ Real</button>
+        <button class="btn bo bs" onclick="setMoeda('USD')">&#127482;&#127480; US$ Dólar</button>
+        <button class="btn bo bs" onclick="setMoeda('EUR')">&#127466;&#127482; &#8364; Euro</button>
+        <button class="btn bo bs" onclick="setMoeda('GBP')">&#127468;&#127463; &#163; Libra</button>
+        <button class="btn bo bs" onclick="setMoeda('ARS')">&#127462;&#127479; AR$ Peso</button>
+        <button class="btn bo bs" onclick="setMoeda('PYG')">&#127477;&#127486; Gs Guarani</button>
+        <button class="btn bo bs" onclick="setMoeda('UYU')">&#127482;&#127486; $U Peso</button>
+        <button class="btn bo bs" onclick="setMoeda('CLP')">&#127464;&#127473; CL$ Peso</button>
+      </div>
+      <div style="padding:.6rem;background:rgba(201,168,76,.06);border-radius:var(--r2);font-size:.78rem;color:var(--t2)">
+        &#9432; Planilhas com R$, US$, &#8364;, &#163; ou sem símbolo são detectadas e convertidas automaticamente.
+      </div></div>
     <div class="two">
       <div class="card"><div class="sec-t">◈ Backup de Dados</div><p style="font-size:.82rem;color:var(--t2);margin-bottom:1rem">Exporte todos os dados para backup seguro.</p><div style="display:flex;gap:.6rem;flex-wrap:wrap"><button class="btn bo" onclick="backup()">&#11015; Exportar</button><label class="btn bh" style="cursor:pointer">&#11014; Restaurar<input type="file" accept=".json" style="display:none" onchange="restaurar(this)"></label></div></div>
       <div class="card"><div class="sec-t">◉ Sobre o Sistema</div><div style="font-size:.82rem;color:var(--t2);line-height:1.9"><p><strong style="color:var(--gd)">PCCS 360</strong> v3.0</p><p>Instituto Primazia · © 2026</p></div></div>
@@ -854,6 +879,7 @@ input[type="date"].inp{color-scheme:dark}
 <script>
 
 
+
 // PCCS 360 v3.1 — JavaScript Enhanced
 // Changelog, projeto por status, colaborador detalhe, fases melhoradas, tp9
 
@@ -861,6 +887,8 @@ var K='p36_';
 function gst(k){try{return JSON.parse(localStorage.getItem(K+k))||null}catch(e){return null}}
 function sst(k,v){try{localStorage.setItem(K+k,JSON.stringify(v))}catch(e){}}
 
+var MOEDA_CONFIG={moeda:'BRL',simbolo:'R$',locale:'pt-BR'};
+var MOEDAS={BRL:{simbolo:'R$',locale:'pt-BR',nome:'Real Brasileiro'},USD:{simbolo:'US$',locale:'en-US',nome:'Dólar Americano'},EUR:{simbolo:'\u20ac',locale:'de-DE',nome:'Euro'},GBP:{simbolo:'\u00a3',locale:'en-GB',nome:'Libra Esterlina'},ARS:{simbolo:'AR$',locale:'es-AR',nome:'Peso Argentino'},PYG:{simbolo:'Gs',locale:'es-PY',nome:'Guarani Paraguaio'},UYU:{simbolo:'$U',locale:'es-UY',nome:'Peso Uruguaio'},CLP:{simbolo:'CL$',locale:'es-CL',nome:'Peso Chileno'}};
 var CORES=['#c9a84c','#3b82f6','#22c55e','#8b5cf6','#ef4444','#f59e0b','#06b6d4','#ec4899'];
 var sessao=null, empAtual=null, colabDetDocs=[];
 
@@ -882,7 +910,7 @@ function gv(id){var e=document.getElementById(id);return e?e.value.trim():''}
 function sv(id,txt){var e=document.getElementById(id);if(e)e.textContent=txt}
 function eh(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function fd(d){if(!d)return'-';var p=String(d).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d}
-function fmt(v){return v?'R$ '+parseFloat(v).toLocaleString('pt-BR',{minimumFractionDigits:2}):'-'}
+function fmt(v){return fmtMoeda(v)}
 function dl(n,c,t){var a=document.createElement('a');var b=new Blob([c],{type:t});a.href=URL.createObjectURL(b);a.download=n;a.click()}
 function toast(msg,ok){var t=document.getElementById('toast');document.getElementById('t-ico').textContent=ok===false?'✕':'✓';document.getElementById('t-msg').textContent=msg;t.style.borderColor=ok===false?'rgba(239,68,68,.3)':'rgba(201,168,76,.3)';t.classList.add('sh');setTimeout(function(){t.classList.remove('sh')},3000)}
 function toggleEye(id,btn){var i=document.getElementById(id);if(!i)return;i.type=i.type==='password'?'text':'password';btn.innerHTML=i.type==='password'?'&#128065;':'&#128584;'}
@@ -928,6 +956,9 @@ function entrar(){
 function logout(){sessao=null;sst('sessao',null);document.getElementById('vlogin').style.display='flex';document.getElementById('vapp').style.display='none';document.getElementById('ls').value=''}
 function iniciarApp(){
   document.getElementById('vlogin').style.display='none';
+  // Initialize moeda selector
+  var _ms=document.getElementById('sel-moeda');
+  if(_ms){var _mc=gst('moedaConfig');if(_mc&&_mc.moeda)_ms.value=_mc.moeda}
   document.getElementById('vapp').style.display='flex';
   var ini=sessao.ini||(sessao.nome.split(' ').map(function(w){return w[0]||''}).join('').substring(0,2).toUpperCase());
   var ava=document.getElementById('sb-ava');if(ava){ava.textContent=ini;ava.style.background='linear-gradient(135deg,'+sessao.cor+',var(--gd3))'}
@@ -1287,7 +1318,7 @@ function renderColabs(emp){
   var deptos=[...new Set(allC.map(function(c){return c.depto}).filter(Boolean))].sort();
   var fd2=document.getElementById('fil-depto');
   if(fd2){var cv=fd2.value;fd2.innerHTML='<option value="">Todos os departamentos</option>';deptos.forEach(function(d){fd2.innerHTML+='<option'+(cv===d?' selected':'')+'>'+eh(d)+'</option>'})}
-  var fmtR=function(v){return v>0?'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'-'};
+  var fmtR=function(v){return fmtMoeda(v)};
   // Calculate totals for footer
   var totSal=0,totGratif=0,totG40=0,totVfora=0,totGeral=0;
   allC.forEach(function(c){
@@ -1432,7 +1463,30 @@ function restaurar(input){if(!input.files[0])return;var reader=new FileReader();
 
 // ══ IMPORT HELPERS ══
 function parseD(v){if(!v)return'';v=String(v).trim();if(/^\d{5}$/.test(v)){var d=new Date((parseInt(v)-25569)*86400*1000);return d.toISOString().split('T')[0]}var m=v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(m)return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');m=v.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return v.substring(0,10);return''}
-function parseSal(v){if(!v)return'';var n=parseFloat(String(v).replace(/[R$\s]/g,'').replace(/\./g,'').replace(',','.'));return isNaN(n)?'':n.toFixed(2)}
+function parseSal(v){
+  if(!v&&v!==0)return'';
+  var s=String(v).trim();
+  // Remove all currency symbols and spaces
+  s=s.replace(/R\$|US\$|AR\$|CL\$|\$U|Bs\.|S\/|Gs|[R$€£¥₹₽฿]/g,'').replace(/\s/g,'').trim();
+  if(!s||s==='-'||s==='.')return'';
+  var hasDot=s.indexOf('.')>=0;
+  var hasComma=s.indexOf(',')>=0;
+  if(hasDot&&hasComma){
+    var ld=s.lastIndexOf('.');var lc=s.lastIndexOf(',');
+    if(lc>ld){s=s.replace(/\./g,'').replace(',','.')}  // BR: 1.234,56
+    else{s=s.replace(/,/g,'')}  // US: 1,234.56
+  } else if(hasComma&&!hasDot){
+    var parts=s.split(',');
+    if(parts.length===2&&parts[1].length===3&&/^\d+$/.test(parts[1])){s=s.replace(',','')}  // thousand
+    else{s=s.replace(',','.')}  // decimal
+  } else if(hasDot&&!hasComma){
+    var dparts=s.split('.');
+    if(dparts.length>2){s=s.replace(/\./g,'')}  // multiple dots = thousand sep
+    // single dot = decimal (keep as is)
+  }
+  var n=parseFloat(s);
+  return isNaN(n)?'':n.toFixed(2)
+}
 
 function mapCols(headers){
   var MAP={
@@ -2154,6 +2208,35 @@ function gerarRelatorio(){
   closeM('mgerador-rel');
   logAudit('Geração','Relatório','Relatório '+tipoRel+' gerado para '+emp.nome);
   toast('Relatório gerado!')
+}
+
+function getMoeda(){
+  var cfg=gst('moedaConfig');
+  if(cfg&&MOEDAS[cfg.moeda])return Object.assign({},MOEDAS[cfg.moeda],{moeda:cfg.moeda});
+  return Object.assign({},MOEDAS.BRL,{moeda:'BRL'})
+}
+function setMoeda(code){
+  if(!MOEDAS[code])return;
+  sst('moedaConfig',{moeda:code});
+  toast('Moeda alterada para '+MOEDAS[code].nome+'!');
+  // Re-render current view
+  if(empAtual){renderColabs(empAtual)}
+  renderDash()
+}
+function fmtMoeda(v){
+  if(!v&&v!==0)return'-';
+  var n=parseFloat(v);if(isNaN(n)||n===0)return'-';
+  var m=getMoeda();
+  try{
+    return m.simbolo+' '+n.toLocaleString(m.locale,{minimumFractionDigits:2,maximumFractionDigits:2})
+  }catch(e){
+    return m.simbolo+' '+n.toFixed(2)
+  }
+}
+function renderMoedaSelector(){
+  var m=getMoeda();
+  var el=document.getElementById('moeda-selector-val');
+  if(el)el.textContent=m.simbolo+' '+m.nome
 }
 </script>
 </body>
