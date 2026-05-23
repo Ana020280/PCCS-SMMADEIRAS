@@ -296,7 +296,7 @@ input[type="date"].inp{color-scheme:dark}
       <div class="sb-sec">
         <div class="sb-lbl">PRINCIPAL</div>
         <button class="ni on" data-v="vdash" onclick="nav('vdash')"><span class="ni-ico">◈</span>Dashboard Geral</button>
-        <button class="ni" data-v="vanal" onclick="nav('vdash');var m=document.getElementById('dash-mode');if(m)m.value='analitico';_renderDashUnified()"><span class="ni-ico">◉</span>Dashboard Analítico</button>
+        
         <button class="ni" data-v="vemp" onclick="nav('vemp')"><span class="ni-ico">◐</span>Empresas / Projetos</button>
       </div>
       <div class="sb-sec">
@@ -310,7 +310,7 @@ input[type="date"].inp{color-scheme:dark}
         <div class="sb-lbl">GESTÃO</div>
         <button class="ni" data-v="vrel" onclick="nav('vrel')"><span class="ni-ico">◕</span>Relatórios</button>
         <button class="ni" data-v="vconf" onclick="nav('vconf')"><span class="ni-ico">◗</span>Configurações</button>
-        <button class="ni" data-v="vlog" onclick="nav('vaudit')"><span class="ni-ico">&#9670;</span>Auditoria</button>
+        <button class="ni" data-v="vaudit" onclick="nav('vaudit')"><span class="ni-ico">&#9670;</span>Auditoria</button>
         <button class="ni" data-v="vlog" onclick="nav('vlog')"><span class="ni-ico">◆</span>Registro de Alterações</button>
       </div>
       <div class="sb-sec">
@@ -398,10 +398,9 @@ input[type="date"].inp{color-scheme:dark}
     <div class="srow" id="det-stats"></div>
     <div class="tabs" id="projeto-tabs">
       <button class="tab on" onclick="tabP('tp0',this)">◈ Visão Geral</button>
+      <button class="tab" onclick="tabP('tp3',this)">◐ Produtividade</button>
       <button class="tab" onclick="tabP('tp1',this)">◉ Fases do PCCS</button>
-      
-      <button class="tab" onclick="tabP('tp3',this)">◐ Performance</button>
-      <button class="tab" onclick="tabP('tp4',this)">◑ Colaboradores</button>
+      <button class="tab" onclick="tabP('tp4',this)">◑ Dados Folha</button>
       <button class="tab" onclick="tabP('tp5',this)">◒ Departamentos</button>
       <button class="tab" onclick="tabP('tp6',this)">◓ Inconsistências</button>
       <button class="tab" onclick="tabP('tp7',this)">◔ IA Organizacional</button>
@@ -817,10 +816,51 @@ input[type="date"].inp{color-scheme:dark}
     </div>
   </div>
 </div>
+<!-- MODAL BLOCO ENTREGAVEL -->
+<div class="ov" id="mbloco">
+  <div class="modal" style="max-width:500px">
+    <div class="mhdr"><h3 id="bloco-modal-titulo">Entregável</h3><button class="mcl" onclick="closeM('mbloco')">&#10005;</button></div>
+    <div id="bloco-modal-desc" style="font-size:.78rem;color:var(--t2);background:rgba(201,168,76,.06);border-radius:var(--r2);padding:.6rem .8rem;margin-bottom:.9rem"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+      <div class="fg"><label>Responsável</label><input class="inp" id="bloco-resp" placeholder="Nome do responsável"></div>
+      <div class="fg"><label>Prazo</label><input class="inp" type="date" id="bloco-prazo" style="color-scheme:dark"></div>
+      <div class="fg" style="grid-column:1/-1"><label>Status</label>
+        <select class="inp" id="bloco-st">
+          <option value="Não iniciado">⚫ Não iniciado</option>
+          <option value="Em andamento">🟡 Em andamento</option>
+          <option value="Concluído">🟢 Concluído</option>
+          <option value="Pendente">🔴 Pendente</option>
+        </select>
+      </div>
+    </div>
+    <div id="bloco-count-area" style="display:none;margin:.6rem 0">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+        <div class="fg"><label>Quantidade realizada</label><input class="inp" type="number" id="bloco-count" min="0" placeholder="Ex: 22"></div>
+        <div class="fg"><label>Meta total</label><input class="inp" type="number" id="bloco-meta" min="0" placeholder="Ex: 58"></div>
+      </div>
+    </div>
+    <div class="fg" style="margin-top:.6rem"><label>Link / URL de evidência</label><input class="inp" id="bloco-link" placeholder="https://... (Google Drive, sistema, etc)"></div>
+    <div class="fg"><label>Observações</label><textarea class="inp" id="bloco-obs" rows="3" placeholder="Descreva o que foi feito, quem participou, decisões..."></textarea></div>
+    <div class="fg">
+      <label>Arquivos de Evidência</label>
+      <label class="btn bh bs" style="cursor:pointer">📎 Anexar<input type="file" multiple accept=".pdf,.doc,.docx,.xlsx,.jpg,.jpeg,.png" style="display:none" onchange="addBlocoAnexo(this)"></label>
+      <div id="bloco-anexos-list" style="margin-top:.4rem;display:flex;flex-wrap:wrap;gap:.25rem"></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:.6rem;margin-top:1rem">
+      <button class="btn bh" onclick="closeM('mbloco')">Cancelar</button>
+      <button class="btn bg" onclick="salvarBloco()">Salvar Entregável</button>
+    </div>
+  </div>
+</div>
+
 
 <div class="toast" id="toast"><span id="t-ico">&#10003;</span><span id="t-msg">Salvo!</span></div>
 
 <script>
+
+
+
+
 // PCCS 360 v3.1 — JavaScript Enhanced
 // Changelog, projeto por status, colaborador detalhe, fases melhoradas, tp9
 
@@ -904,7 +944,7 @@ function nav(vid){
   document.querySelectorAll('.view').forEach(function(v){v.classList.remove('on')});
   var el=document.getElementById(vid);if(el)el.classList.add('on');
   document.querySelectorAll('.ni').forEach(function(n){n.classList.toggle('on',n.dataset.v===vid)});
-  var renders={vdash:renderDash,vaudit:renderAudit,vanal:renderAnal,vemp:renderEmps,vusers:renderUsers,vcargos:renderCargos,vpes:renderPes,vest:renderEst,vgov:renderGov,vlog:renderChangelog};
+  var renders={vdash:renderDash,vanal:renderDash,vaudit:renderAudit,vanal:renderAnal,vemp:renderEmps,vusers:renderUsers,vcargos:renderCargos,vpes:renderPes,vest:renderEst,vgov:renderGov,vlog:renderChangelog};
   if(renders[vid])renders[vid]();
   window.scrollTo(0,0)
 }
@@ -959,7 +999,7 @@ function editEmp(id){var em=(gst('emps')||[]).find(function(e){return e.id===id}
 function delEmp(id){if(!confirm('Excluir projeto?'))return;sst('emps',(gst('emps')||[]).filter(function(e){return e.id!==id}));toast('Excluído.');renderEmps();if(document.getElementById('vdash').classList.contains('on'))renderDash()}
 
 // ═══ PROGRESS UTILS ═══
-function calcProg(emp){var t=0,d=0;(emp.fases||[]).forEach(function(f){(f.atividades||[]).forEach(function(a){t++;if(a.feito||a.st==='Concluído')d++})});return t>0?Math.round(d/t*100):0}
+function _calcProgBase(emp){var t=0,d=0;(emp.fases||[]).forEach(function(f){(f.atividades||[]).forEach(function(a){t++;if(a.feito||a.st==='Concluído')d++})});return t>0?Math.round(d/t*100):0}
 function calcFaseProg(fase){var t=(fase.atividades||[]).length,d=(fase.atividades||[]).filter(function(a){return a.feito||a.st==='Concluído'}).length;return t>0?Math.round(d/t*100):0}
 function autoFaseStatus(fase){var p=calcFaseProg(fase);if(p===100)fase.status='Concluído';else if(p>0&&fase.status==='Não iniciado')fase.status='Em andamento';return fase}
 
@@ -998,10 +1038,10 @@ function tabP(id,btn){
   if(!empAtual)return;
   var _el=gst('emps')||[];var _ef=_el.find(function(e){return e.id===empAtual.id});if(_ef)empAtual=_ef;
   if(id==='tp0')renderVG(empAtual);
-  if(id==='tp1')renderFases(empAtual);
+  if(id==='tp1'){var _emps=gst('emps')||[];var _ef2=_emps.find(function(e){return e.id===empAtual.id});if(_ef2)empAtual=_ef2;renderFases(empAtual)};
   if(id==='tp2')renderKanban(empAtual);
   if(id==='tp3')renderPerf(empAtual);
-  if(id==='tp4')renderColabs(empAtual);
+  if(id==='tp4'){renderColabs(empAtual);colabTab('ctab-dash',document.querySelector('#colab-tabs .tab'));}
   if(id==='tp5')renderDeptos(empAtual);
   if(id==='tp6')renderIncons(empAtual);
   if(id==='tp8')renderRops(empAtual);
@@ -1090,47 +1130,145 @@ function renderVG(emp){
 // ═══ FASES (MELHORADO COM STATUS POR FASE) ═══
 function renderFases(emp){
   var ehdr=document.getElementById('emp-hdr-info');
-  if(ehdr)ehdr.innerHTML='<h3>'+eh(emp.nome)+'</h3><div class="emp-meta"><span><strong>'+eh(emp.setor||'-')+'</strong> Setor</span><span><strong>'+eh(emp.lider||'-')+'</strong> Líder</span><span><strong>'+eh(emp.resp||'-')+'</strong> Responsável</span><span><strong>'+fd(emp.ini||'-')+'</strong> Início</span><span><strong>'+fd(emp.fim||'-')+'</strong> Prazo</span><span><strong>'+calcProg(emp)+'%</strong> Concluído</span></div>';
+  if(ehdr)ehdr.innerHTML='<h3>'+eh(emp.nome)+'</h3><div class="emp-meta"><span><strong>'+eh(emp.setor||'-')+'</strong> Setor</span><span><strong>'+fd(emp.ini||'-')+'</strong> Início</span><span><strong>'+fd(emp.fim||'-')+'</strong> Prazo</span><span><strong>'+calcProg(emp)+'%</strong> Progresso Geral</span></div>';
+
+  if(!emp.fases2)emp.fases2={};
   var can=sessao&&(sessao.role==='admin'||sessao.role==='editor');
-  document.getElementById('fases-list').innerHTML=(emp.fases||[]).map(function(f,fi){
-    var pp=calcFaseProg(f);
-    var autoStatus=pp===100?'Concluído':pp>0?'Em andamento':f.status||'Não iniciado';
-    var stCls=autoStatus==='Concluído'?'bg2':autoStatus==='Em andamento'?'by':'bk';
-    var hoje=new Date();
-    var aHtml=(f.atividades||[]).map(function(a,ai){
-      var done=a.feito||a.st==='Concluído';
-      var atrs=a.prev&&new Date(a.prev)<hoje&&!done;
-      return '<div class="atv '+(done?'dn':'')+'" onclick="'+(can?'abrirAtv(\''+emp.id+'\','+fi+','+ai+')':'')+' ">'+
-        '<div class="achk">'+(done?'✓':'')+'</div>'+
-        '<span class="an">'+eh(a.n)+'</span>'+
-        (a.resp?'<span class="ares">'+eh(a.resp)+'</span>':'')+ 
-        (atrs?'<span class="b br" style="font-size:.62rem;margin-left:.3rem">Atrasado</span>':'')+
-        (a.prev&&!atrs&&!done?'<span style="font-size:.66rem;color:var(--t3);margin-left:.3rem">⏰ '+fd(a.prev)+'</span>':'')+
-      '</div>'
-    }).join('');
-    return '<div class="fase" id="fc'+fi+'">'+
-      '<div class="fhdr" onclick="tgFase('+fi+')">'+
-        '<div class="fnum">'+(fi+1)+'</div>'+
-        '<div class="ftit"><h4>'+eh(f.n)+'</h4><p>'+eh(f.d||'')+'</p></div>'+
-        '<div style="display:flex;align-items:center;gap:.4rem;flex-shrink:0">'+
-          (can?'<select class="inp" style="padding:.2rem .5rem;font-size:.68rem;width:110px;border-color:rgba(255,255,255,.1)" onclick="event.stopPropagation()" onchange="mudarFaseStatus(\''+emp.id+'\','+fi+',this.value)">'+FASE_STATUS.map(function(s){return'<option'+(s===autoStatus?' selected':'')+'>'+s+'</option>'}).join('')+'</select>':'<span class="b b'+stCls+'" style="font-size:.65rem">'+autoStatus+'</span>')+
-          '<small style="font-size:.65rem;color:var(--t2)">'+((f.atividades||[]).filter(function(a){return a.feito||a.st==='Concluído'}).length)+'/'+(f.atividades||[]).length+'</small>'+
-          '<span class="b b'+stCls+'" style="font-size:.65rem">'+pp+'%</span>'+
-          '<span class="fchev">▼</span>'+
-        '</div>'+
-      '</div>'+
-      '<div class="fbody">'+
-        '<div class="pr" style="margin-bottom:.7rem"><div class="pb"><div class="pf" style="width:'+pp+'%"></div></div><span class="pc">'+pp+'%</span></div>'+
-        (can?'<div style="display:flex;gap:.4rem;margin-bottom:.7rem;flex-wrap:wrap">'+
-          '<label class="btn bh bs" style="cursor:pointer;font-size:.72rem">&#128206; Anexar<input type="file" multiple style="display:none" onchange="addAnexoFase(\''+emp.id+'\','+fi+',this)"></label>'+
-          '<button class="btn bh bs" style="font-size:.72rem" onclick="exportFasePDF(\''+emp.id+'\','+fi+')">⬇ PDF</button>'+
-          '<button class="btn bh bs" style="font-size:.72rem" onclick="exportFaseCSV(\''+emp.id+'\','+fi+')">⬇ CSV</button>'+
-          ((f.anexos&&f.anexos.length)?'<span class="b bk" style="font-size:.65rem">'+f.anexos.length+' anexo(s)</span>':'')+
-        '</div>':'') +
-        '<div>'+aHtml+'</div>'+
-      '</div>'+
-    '</div>'
-  }).join('')
+  var hoje=new Date();
+
+  var html='';
+  FP2.forEach(function(fase,fi){
+    var fd2=emp.fases2||{};
+    var fdata=fd2[fi]||{};
+    var blocos=fase.blocos||[];
+
+    // Calculate phase progress based on blocos
+    var done=0,tot=blocos.length;
+    blocos.forEach(function(b){
+      var bd=fdata[b.k]||{};
+      if(bd.st==='Concluido'||bd.st==='Concluído')done++
+    });
+    var pct=tot>0?Math.round(done/tot*100):0;
+
+    // Phase header stats
+    var resp=fdata._resp||'—';
+    var prazoF=fdata._prazo?fd(fdata._prazo):'—';
+    var atrasada=fdata._prazo&&new Date(fdata._prazo)<hoje&&pct<100;
+    var pendentes=tot-done;
+
+    html+='<div class="fase-card" id="fc2_'+fi+'" style="margin-bottom:1rem">';
+
+    // ── HEADER EXECUTIVO ──
+    html+='<div class="fase-header" style="background:var(--nv2);border:1px solid rgba(255,255,255,.07);border-radius:var(--r);overflow:hidden">';
+    html+='<div class="fase-hdr-top" onclick="tgFase2('+fi+')" style="cursor:pointer;padding:1rem 1.2rem;display:flex;align-items:center;gap:.9rem;border-left:4px solid '+fase.cor+'">';
+    html+='<div style="width:40px;height:40px;border-radius:50%;background:'+fase.cor+'22;border:2px solid '+fase.cor+'44;display:flex;align-items:center;justify-content:center;font-family:Cinzel,serif;font-size:.82rem;color:'+fase.cor+';flex-shrink:0">F'+(fi+1)+'</div>';
+    html+='<div style="flex:1">';
+    html+='<div style="font-family:Cinzel,serif;font-size:.95rem;font-weight:600;color:#fff;margin-bottom:.15rem">'+eh(fase.n)+'</div>';
+    html+='<div style="font-size:.72rem;color:var(--t2)">'+eh(fase.desc)+'</div>';
+    html+='</div>';
+    html+='<div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0">';
+    // KPI pills
+    html+='<span style="font-size:.68rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:.15rem .55rem;color:var(--t2)">'+done+'/'+tot+'</span>';
+    html+='<span class="b '+(pct===100?'bg2':pct>0?'by':'bk')+'" style="font-size:.68rem">'+pct+'%</span>';
+    if(atrasada)html+='<span class="b br" style="font-size:.62rem">Atrasada</span>';
+    html+='<span style="color:var(--t3);font-size:.75rem;margin-left:.3rem">▾</span>';
+    html+='</div>';
+    html+='</div>'; // hdr-top
+
+    // ── KPIs RÁPIDOS (sempre visíveis) ──
+    html+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:1px solid rgba(255,255,255,.05)">';
+    var kpis=[
+      {v:done,l:'Concluídos',c:'var(--gr)'},
+      {v:pendentes,l:'Pendentes',c:pendentes>0?'var(--yw)':'var(--gr)'},
+      {v:pct+'%',l:'Progresso',c:'var(--gd)'},
+      {v:resp==='—'?'—':resp.split(' ')[0],l:'Responsável',c:'var(--t2)'},
+      {v:prazoF,l:'Prazo',c:atrasada?'var(--rd)':'var(--t2)'}
+    ];
+    kpis.forEach(function(k){
+      html+='<div style="padding:.6rem;text-align:center;border-right:1px solid rgba(255,255,255,.05)">'+
+        '<div style="font-size:1rem;font-weight:700;color:'+k.c+';font-family:Cinzel,serif">'+k.v+'</div>'+
+        '<div style="font-size:.58rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-top:.1rem">'+k.l+'</div></div>'
+    });
+    html+='</div>'; // kpis
+
+    // ── PROGRESS BAR ──
+    html+='<div style="height:4px;background:rgba(255,255,255,.06)"><div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,'+fase.cor+','+fase.cor+'aa);transition:width .5s"></div></div>';
+    html+='</div>'; // fase-header
+
+    // ── BLOCOS DE ENTREGÁVEIS (collapsible) ──
+    html+='<div id="fc2_body_'+fi+'" style="display:none;margin-top:.5rem">';
+
+    // Fase config bar (responsável + prazo da fase)
+    if(can){
+      html+='<div style="background:var(--nv2);border:1px solid rgba(255,255,255,.06);border-radius:var(--r2);padding:.6rem .9rem;margin-bottom:.6rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">';
+      html+='<span style="font-size:.72rem;color:var(--t2);font-weight:600">Fase '+( fi+1)+' ─</span>';
+      html+='<input type="text" placeholder="Responsável pela fase" value="'+eh(resp==='—'?'':resp)+'" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:var(--r2);padding:.28rem .6rem;color:#fff;font-size:.75rem;font-family:inherit;flex:1;min-width:120px" onchange="saveFaseConfig(\''+emp.id+'\','+fi+',\'resp\',this.value)">';
+      html+='<input type="date" value="'+( fdata._prazo||'')+'" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:var(--r2);padding:.28rem .6rem;color:#fff;font-size:.75rem;font-family:inherit;color-scheme:dark" onchange="saveFaseConfig(\''+emp.id+'\','+fi+',\'prazo\',this.value)">';
+      html+='</div>'
+    }
+
+    // Blocos grid
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.6rem">';
+    blocos.forEach(function(b,bi){
+      var bd=fdata[b.k]||{};
+      var bSt=bd.st||'Não iniciado';
+      var bPct=bSt==='Concluído'||bSt==='Concluido'?100:(bd.pct||0);
+      var hasAnexo=(bd.anexos&&bd.anexos.length>0)||(bd.link&&bd.link.length>0);
+      var stDot={'Concluído':'#22c55e','Concluido':'#22c55e','Em andamento':'#f59e0b','Pendente':'#ef4444','Não iniciado':'#4b5563'}[bSt]||'#4b5563';
+      var stBadge={'Concluído':'bg2','Concluido':'bg2','Em andamento':'by','Pendente':'br','Não iniciado':'bk'}[bSt]||'bk';
+
+      // Count for count_manual type
+      var countVal=bd.count||0;var countMeta=bd.meta||b.meta||0;
+
+      html+='<div class="bloco-card" style="background:var(--nv2);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:.9rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden" onclick="abrirBloco(\''+emp.id+'\','+fi+',\''+b.k+'\')" onmouseover="this.style.borderColor=\'rgba(201,168,76,.3)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.06)\'">';
+
+      // Top accent
+      html+='<div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,'+fase.cor+',transparent)"></div>';
+
+      // Bloco header
+      html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.5rem">';
+      html+='<div style="flex:1">';
+      html+='<div style="font-size:.83rem;font-weight:600;color:#fff;margin-bottom:.2rem">'+eh(b.n)+'</div>';
+      html+='<div style="font-size:.72rem;color:var(--t2)">'+eh(b.desc)+'</div>';
+      html+='</div>';
+      html+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:.25rem;margin-left:.5rem">';
+      html+='<div style="width:10px;height:10px;border-radius:50%;background:'+stDot+';flex-shrink:0"></div>';
+      if(hasAnexo)html+='<span style="font-size:.6rem;color:var(--gd)">📎</span>';
+      html+='</div></div>';
+
+      // Count display for count types
+      if(b.tipo==='count_manual'&&countMeta>0){
+        var cPct=Math.round(countVal/countMeta*100);
+        html+='<div style="margin-bottom:.5rem">';
+        html+='<div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:.25rem"><span style="color:var(--t3)">'+countVal+'/'+countMeta+'</span><span style="color:'+fase.cor+'">'+cPct+'%</span></div>';
+        html+='<div style="height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+Math.min(cPct,100)+'%;background:'+fase.cor+';border-radius:3px;transition:width .4s"></div></div>';
+        html+='</div>'
+      }else if(b.tipo==='count'){
+        // Auto-count from colabs
+        var autoCount=(emp.colabs||[]).length;
+        html+='<div style="font-size:1.5rem;font-weight:700;color:'+fase.cor+';font-family:Cinzel,serif;margin-bottom:.3rem">'+autoCount+'</div>';
+        html+='<div style="font-size:.68rem;color:var(--t2)">colaboradores cadastrados</div>'
+      }else if(b.tipo==='incons'){
+        // Auto-count from inconsistencias
+        var ic=detectIncons(emp);
+        html+='<div style="font-size:1.5rem;font-weight:700;color:'+(ic.length>0?'var(--yw)':'var(--gr)')+';font-family:Cinzel,serif;margin-bottom:.3rem">'+ic.length+'</div>';
+        html+='<div style="font-size:.68rem;color:var(--t2)">inconsistências identificadas</div>'
+      }
+
+      // Status footer
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:.5rem">';
+      html+='<span class="b '+stBadge+'" style="font-size:.65rem">'+bSt+'</span>';
+      if(bd.resp)html+='<span style="font-size:.7rem;color:var(--t3)">'+eh(bd.resp.split(' ')[0])+'</span>';
+      if(bd.prazo)html+='<span style="font-size:.7rem;color:var(--t3)">'+fd(bd.prazo)+'</span>';
+      html+='</div>';
+      html+='</div>' // bloco-card
+    });
+    html+='</div>'; // blocos grid
+    html+='</div>'; // fc2_body
+    html+='</div>'; // fase-card
+  });
+
+  document.getElementById('fases-list').innerHTML=html
 }
 function tgFase(fi){var c=document.getElementById('fc'+fi);if(c)c.classList.toggle('op')}
 
@@ -1955,6 +2093,189 @@ function kpiCard(val,label,cor,ico){
     '<div class="sc-l">'+label+'</div>'+
   '</div>'
 }
+
+
+
+function tgFase2(fi){
+  var body=document.getElementById('fc2_body_'+fi);
+  if(body){body.style.display=body.style.display==='none'?'block':'none'}
+}
+function saveFaseConfig(eid,fi,key,val){
+  var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===eid});if(idx<0)return;
+  if(!emps[idx].fases2)emps[idx].fases2={};
+  if(!emps[idx].fases2[fi])emps[idx].fases2[fi]={};
+  emps[idx].fases2[fi]['_'+key]=val;
+  sst('emps',emps);empAtual=emps[idx];
+  toast('Salvo!')
+}
+function abrirBloco(eid,fi,bk){
+  var emps=gst('emps')||[];var em=emps.find(function(e){return e.id===eid});if(!em)return;
+  blocoAtual={eid:eid,fi:fi,bk:bk};
+  var fase=FP2[fi];var bloco=fase?fase.blocos.find(function(b){return b.k===bk}):null;
+  if(!bloco)return;
+  var fdata=(em.fases2||{})[fi]||{};
+  var bd=fdata[bk]||{};
+
+  // Populate modal
+  var titulo=document.getElementById('bloco-modal-titulo');
+  if(titulo)titulo.textContent=bloco.n;
+  var desc=document.getElementById('bloco-modal-desc');
+  if(desc)desc.textContent=bloco.desc;
+
+  var setV=function(id,v){var e=document.getElementById(id);if(e)e.value=v||''};
+  setV('bloco-resp',bd.resp);
+  setV('bloco-prazo',bd.prazo);
+  setV('bloco-st',bd.st||'Não iniciado');
+  setV('bloco-obs',bd.obs);
+  setV('bloco-link',bd.link);
+  if(bloco.tipo==='count_manual'){
+    var cm=document.getElementById('bloco-count-area');
+    if(cm){cm.style.display='block';setV('bloco-count',bd.count||0);setV('bloco-meta',bd.meta||bloco.meta||0)}
+  }else{var cm=document.getElementById('bloco-count-area');if(cm)cm.style.display='none'}
+
+  // Render anexos
+  renderBlocoAnexos(bd.anexos||[]);
+  openM('mbloco')
+}
+function renderBlocoAnexos(lista){
+  blocoAnexosPending=JSON.parse(JSON.stringify(lista||[]));
+  var el=document.getElementById('bloco-anexos-list');
+  if(!el)return;
+  el.innerHTML=blocoAnexosPending.map(function(ax,i){
+    return'<div style="display:inline-flex;align-items:center;gap:.3rem;background:var(--nv3);border:1px solid rgba(255,255,255,.08);border-radius:var(--r2);padding:.2rem .5rem;font-size:.73rem;margin:.15rem">'+
+      '<span style="color:var(--gd)">📎</span>'+
+      '<span style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+eh(ax.nome)+'</span>'+
+      (ax.url?'<a href="'+ax.url+'" download="'+eh(ax.nome)+'" target="_blank" style="color:var(--gd);text-decoration:none">⬇</a>':'')+
+      '<button onclick="blocoAnexosPending.splice('+i+',1);renderBlocoAnexos(blocoAnexosPending)" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:.8rem;padding:0">✕</button>'+
+    '</div>'
+  }).join('')
+}
+function addBlocoAnexo(input){
+  Array.from(input.files).forEach(function(f){
+    if(f.size<8*1024*1024){var r=new FileReader();r.onload=function(e){blocoAnexosPending.push({nome:f.name,tipo:f.type,tam:f.size,data:now(),url:e.target.result});renderBlocoAnexos(blocoAnexosPending)};r.readAsDataURL(f)}
+    else{blocoAnexosPending.push({nome:f.name,tipo:f.type,tam:f.size,data:now()});renderBlocoAnexos(blocoAnexosPending)}
+  });input.value=''
+}
+function salvarBloco(){
+  var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===blocoAtual.eid});if(idx<0)return;
+  if(!emps[idx].fases2)emps[idx].fases2={};
+  if(!emps[idx].fases2[blocoAtual.fi])emps[idx].fases2[blocoAtual.fi]={};
+  var bd={};
+  bd.resp=gv('bloco-resp');bd.prazo=gv('bloco-prazo');bd.st=gv('bloco-st');
+  bd.obs=gv('bloco-obs');bd.link=gv('bloco-link');bd.anexos=blocoAnexosPending.slice();
+  var cCount=document.getElementById('bloco-count');var cMeta=document.getElementById('bloco-meta');
+  if(cCount)bd.count=parseInt(cCount.value)||0;
+  if(cMeta)bd.meta=parseInt(cMeta.value)||0;
+  if(bd.st==='Concluído'||bd.st==='Concluido'){if(!bd.conc)bd.conc=new Date().toISOString().split('T')[0]}
+  emps[idx].fases2[blocoAtual.fi][blocoAtual.bk]=bd;
+  sst('emps',emps);empAtual=emps[idx];
+  closeM('mbloco');renderFases(empAtual);renderDetStats(empAtual);
+  logAudit('Atualização','Fases','Bloco '+blocoAtual.bk+' atualizado');
+  toast('Entregável salvo!')
+}
+var FP2=[
+  {
+    n:'Levantamento e Diagnóstico',
+    ico:'◈',
+    cor:'#c9a84c',
+    desc:'Coleta, análise e mapeamento da situação atual da empresa',
+    blocos:[
+      {k:'organograma',n:'Organograma',desc:'Estrutura hierárquica recebida e analisada',tipo:'upload',meta:1},
+      {k:'colaboradores',n:'Base de Colaboradores',desc:'Planilha importada e validada',tipo:'count',campo:'colabs'},
+      {k:'remuneracao',n:'Estrutura Salarial Atual',desc:'Política e dados salariais recebidos',tipo:'doc'},
+      {k:'entrevistas',n:'Entrevistas com Líderes',desc:'Reuniões realizadas com gestores',tipo:'count_manual',meta:0},
+      {k:'diagnostico',n:'Diagnóstico Organizacional',desc:'Relatório final elaborado',tipo:'doc'}
+    ]
+  },
+  {
+    n:'Mapeamento e Descrição de Cargos',
+    ico:'◉',
+    cor:'#3b82f6',
+    desc:'Identificação, descrição e validação funcional de todos os cargos',
+    blocos:[
+      {k:'cargos_id',n:'Cargos Identificados',desc:'Total de cargos mapeados na empresa',tipo:'count_manual',meta:0},
+      {k:'descricoes',n:'Descrições Elaboradas',desc:'Descrições de cargo redigidas',tipo:'count_manual',meta:0},
+      {k:'cbo',n:'CBO Vinculado',desc:'Classificação Brasileira de Ocupações aplicada',tipo:'count_manual',meta:0},
+      {k:'inconsistencias_cargo',n:'Inconsistências Tratadas',desc:'Desvios de função identificados e tratados',tipo:'incons'},
+      {k:'validacao_gestores',n:'Validação pelos Gestores',desc:'Aprovação das descrições pelos gestores',tipo:'count_manual',meta:0}
+    ]
+  },
+  {
+    n:'Avaliação e Hierarquização',
+    ico:'◎',
+    cor:'#8b5cf6',
+    desc:'Pontuação, classificação e estrutura hierárquica dos cargos',
+    blocos:[
+      {k:'metodologia',n:'Metodologia Definida',desc:'Critérios de avaliação aprovados',tipo:'doc'},
+      {k:'pontuacao',n:'Cargos Avaliados e Pontuados',desc:'Avaliação realizada por cargo',tipo:'count_manual',meta:0},
+      {k:'hierarquia',n:'Hierarquia e Níveis',desc:'Estrutura de níveis de carreira definida',tipo:'doc'},
+      {k:'comite_aval',n:'Aprovação pelo Comitê',desc:'Resultado validado pelo comitê PCCS',tipo:'doc'}
+    ]
+  },
+  {
+    n:'Pesquisa Salarial',
+    ico:'◐',
+    cor:'#22c55e',
+    desc:'Benchmark de mercado e análise do impacto financeiro',
+    blocos:[
+      {k:'pesquisa_mercado',n:'Pesquisa de Mercado',desc:'Fontes consultadas e dados coletados',tipo:'doc'},
+      {k:'benchmark',n:'Benchmark P25/P50/P75',desc:'Tabela de mercado por cargo elaborada',tipo:'count_manual',meta:0},
+      {k:'impacto',n:'Impacto Financeiro',desc:'Planilha de custo projetado aprovada',tipo:'doc'},
+      {k:'aprovacao_dir',n:'Aprovação da Diretoria',desc:'Viabilidade financeira aprovada',tipo:'doc'}
+    ]
+  },
+  {
+    n:'Estrutura Salarial e Carreiras',
+    ico:'◑',
+    cor:'#f59e0b',
+    desc:'Tabelas salariais, faixas e trilhas de desenvolvimento',
+    blocos:[
+      {k:'faixas',n:'Faixas Salariais',desc:'Tabela com mínimo/referência/máximo por nível',tipo:'doc'},
+      {k:'trilhas',n:'Trilhas de Carreira',desc:'Critérios de progressão definidos',tipo:'doc'},
+      {k:'criterios',n:'Critérios de Progressão',desc:'Tempo, avaliação e formação exigida',tipo:'doc'},
+      {k:'politica_sal',n:'Política Salarial',desc:'Documento aprovado e assinado',tipo:'doc'}
+    ]
+  },
+  {
+    n:'Governança e Comitê PCCS',
+    ico:'◒',
+    cor:'#ec4899',
+    desc:'Constituição do comitê, regras e critérios de aprovação',
+    blocos:[
+      {k:'comite',n:'Comitê Constituído',desc:'Membros e papéis definidos',tipo:'doc'},
+      {k:'regulamento',n:'Regulamento do PCCS',desc:'Regras internas aprovadas',tipo:'doc'},
+      {k:'elegibilidade',n:'Critérios de Elegibilidade',desc:'Quem pode ser promovido e em quais condições',tipo:'doc'},
+      {k:'juridico',n:'Validação Jurídica',desc:'Revisão pelo jurídico ou DP concluída',tipo:'doc'}
+    ]
+  },
+  {
+    n:'Implantação e Sustentação',
+    ico:'◓',
+    cor:'#06b6d4',
+    desc:'Comunicação, treinamento e entrega final',
+    blocos:[
+      {k:'comunicacao',n:'Comunicação Interna',desc:'Material enviado a todos os colaboradores',tipo:'doc'},
+      {k:'treinamento',n:'Lideranças Treinadas',desc:'Gestores capacitados para aplicar o PCCS',tipo:'count_manual',meta:0},
+      {k:'implantacao_rh',n:'Lançamento no RH',desc:'Dados integrados ao sistema de folha',tipo:'doc'},
+      {k:'entrega_final',n:'Entrega Final',desc:'Relatório final e ata de encerramento',tipo:'doc'}
+    ]
+  }
+];
+
+var _origCalcProg=_calcProgBase;
+function calcProg(emp){
+  if(!emp)return 0;
+  if(!emp.fases2||Object.keys(emp.fases2).length===0){return _origCalcProg(emp)}
+  var tot=0,done=0;
+  FP2.forEach(function(fase,fi){
+    var fdata=(emp.fases2||{})[fi]||{};
+    fase.blocos.forEach(function(b){tot++;var bd=fdata[b.k]||{};if(bd.st==='Concluído'||bd.st==='Concluido')done++})
+  });
+  return tot>0?Math.round(done/tot*100):0
+}
+var blocoAnexosPending=[];
+
+
 </script>
 </body>
 </html>
