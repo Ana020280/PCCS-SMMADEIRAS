@@ -509,8 +509,13 @@ input[type="date"].inp{color-scheme:dark}
 
 <!-- BANCO DE CARGOS -->
 <div class="view" id="vcargos">
-  <div class="phdr"><div><h2>Banco de <em>Cargos</em></h2></div><div class="phdr-r"><button class="btn bg" onclick="openM('mcargo')">+ Novo Cargo</button></div></div>
-  <div class="content"><div class="tw"><table><thead><tr><th>Cargo</th><th>CBO</th><th>Família</th><th>Nível</th><th>Empresa</th><th></th></tr></thead><tbody id="cargos-tbody"></tbody></table></div></div>
+  <div class="phdr"><div><h2>Banco de <em>Cargos</em></h2><p>Descrições de cargo, avaliação por pontos e faixas salariais</p></div>
+    <div class="phdr-r">
+      <label class="btn bh bs" style="cursor:pointer">&#128202; Importar CSV<input type="file" accept=".csv" style="display:none" onchange="importCargoCSV(this)"></label>
+      <button class="btn bo bs" onclick="exportCargosCSV()">&#11015; Exportar CSV</button>
+      <button class="btn bg" onclick="openM('mcargo');document.getElementById('c-edit-idx').value='-1'">+ Novo Cargo</button>
+    </div></div>
+  <div class="content"><div class="tw"><table><thead><tr><th>Cargo</th><th>CBO</th><th>Família</th><th>Nível</th><th>Área</th><th>Pontos</th><th>Faixa Salarial</th><th>Empresa</th><th>Ações</th></tr></thead><tbody id="cargos-tbody"></tbody></table></div></div>
 </div>
 
 <!-- PESQUISA SALARIAL -->
@@ -601,7 +606,25 @@ input[type="date"].inp{color-scheme:dark}
     <div class="fr"><div class="fg"><label>Líder</label><input class="inp" id="emp-lider"></div><div class="fg"><label>Responsável pelas Informações</label><input class="inp" id="emp-resp"></div></div>
     <div class="fr"><div class="fg"><label>Data Início</label><input class="inp" type="date" id="emp-ini"></div><div class="fg"><label>Data Final Prevista</label><input class="inp" type="date" id="emp-fim"></div></div>
     <div class="fr"><div class="fg"><label>Consultora</label><select class="inp" id="emp-consul"></select></div><div class="fg"><label>Status</label><select class="inp" id="emp-st"><option>Não iniciado</option><option>Em andamento</option><option>Concluído</option><option>Suspenso</option></select></div></div>
-    <div style="display:flex;justify-content:flex-end;gap:.6rem;margin-top:1rem"><button class="btn bh" onclick="closeM('memp')">Cancelar</button><button class="btn bg" onclick="salvarEmp()">Salvar</button></div>
+      <div class="fr" style="margin-top:.6rem">
+    <div class="fg">
+      <label>Logo da Empresa (para documentos)</label>
+      <label class="btn bh bs" style="cursor:pointer">🖼 Upload Logo Empresa
+        <input type="file" accept="image/*" style="display:none" onchange="uploadEmpLogo(this,'emp-logo-preview')">
+      </label>
+      <img id="emp-logo-preview" style="display:none;max-height:50px;margin-top:.4rem;border-radius:4px">
+      <input type="hidden" id="emp-logo-data">
+    </div>
+    <div class="fg">
+      <label>Logo Instituto Primazia (para documentos)</label>
+      <label class="btn bh bs" style="cursor:pointer">🖼 Upload Logo Primazia
+        <input type="file" accept="image/*" style="display:none" onchange="uploadEmpLogo(this,'emp-logo-inst-preview')">
+      </label>
+      <img id="emp-logo-inst-preview" style="display:none;max-height:50px;margin-top:.4rem;border-radius:4px">
+      <input type="hidden" id="emp-logo-inst-data">
+    </div>
+  </div>
+  <div style="display:flex;justify-content:flex-end;gap:.6rem;margin-top:1rem"><button class="btn bh" onclick="closeM('memp')">Cancelar</button><button class="btn bg" onclick="salvarEmp()">Salvar</button></div>
   </div>
 </div>
 
@@ -703,12 +726,88 @@ input[type="date"].inp{color-scheme:dark}
 </div>
 
 <div class="ov" id="mcargo">
-  <div class="modal" style="max-width:540px">
-    <div class="mhdr"><h3>◑ Novo Cargo</h3><button class="mcl" onclick="closeM('mcargo')">&#10005;</button></div>
-    <div class="fr"><div class="fg"><label>Nome *</label><input class="inp" id="c-nome"></div><div class="fg"><label>CBO</label><input class="inp" id="c-cbo"></div></div>
-    <div class="fr"><div class="fg"><label>Família</label><input class="inp" id="c-fam"></div><div class="fg"><label>Nível</label><select class="inp" id="c-niv"><option>Auxiliar</option><option>Assistente</option><option>Analista Júnior</option><option>Analista Pleno</option><option>Analista Sênior</option><option>Especialista</option><option>Coordenador</option><option>Gerente</option><option>Diretor</option></select></div></div>
-    <div class="fg"><label>Empresa</label><select class="inp" id="c-emp"></select></div>
-    <div style="display:flex;justify-content:flex-end;gap:.6rem;margin-top:1rem"><button class="btn bh" onclick="closeM('mcargo')">Cancelar</button><button class="btn bg" onclick="salvarCargo()">Salvar</button></div>
+  <div class="modal" style="max-width:800px;max-height:95vh">
+    <div class="mhdr"><h3 id="mcargo-titulo">◑ Descrição de Cargo</h3><button class="mcl" onclick="closeM('mcargo')">&#10005;</button></div>
+    <input type="hidden" id="c-edit-idx" value="-1">
+    <div class="tabs" style="margin-bottom:.8rem">
+      <button class="tab on" onclick="cargoTab('ctab-geral',this)">◈ Identificação</button>
+      <button class="tab" onclick="cargoTab('ctab-spec',this)">◉ Especificação</button>
+      <button class="tab" onclick="cargoTab('ctab-funcs',this)">◎ Funções</button>
+      <button class="tab" onclick="cargoTab('ctab-pontos',this)">◐ Avaliação</button>
+      <button class="tab" onclick="cargoTab('ctab-salarios',this)">◑ Salários</button>
+    </div>
+    <!-- TAB 1: Identificação -->
+    <div id="ctab-geral">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+        <div class="fg"><label>Título do Cargo *</label><input class="inp" id="c-nome" placeholder="Ex: Auxiliar de Marketing"></div>
+        <div class="fg"><label>CBO</label><input class="inp" id="c-cbo" placeholder="Ex: 1423-35"></div>
+        <div class="fg"><label>Área</label><input class="inp" id="c-area" placeholder="Ex: Operacional, Gerencial"></div>
+        <div class="fg"><label>Departamento</label><input class="inp" id="c-depto" placeholder="Ex: Marketing Comercial"></div>
+        <div class="fg"><label>Família de Cargo</label><input class="inp" id="c-fam" placeholder="Ex: Marketing"></div>
+        <div class="fg"><label>Nível</label><select class="inp" id="c-niv"><option value="">Selecionar</option><option>Auxiliar</option><option>Assistente</option><option>Analista Júnior</option><option>Analista Pleno</option><option>Analista Sênior</option><option>Especialista</option><option>Coordenador</option><option>Gerente</option><option>Diretor</option></select></div>
+        <div class="fg"><label>Reporta-se a</label><input class="inp" id="c-superior" placeholder="Ex: Analista de Marketing"></div>
+        <div class="fg"><label>Empresa</label><select class="inp" id="c-emp"></select></div>
+        <div class="fg" style="grid-column:1/-1"><label>Sumário do Cargo</label><textarea class="inp" id="c-sumario" rows="3" placeholder="A missão do cargo de... consiste em..."></textarea></div>
+      </div>
+    </div>
+    <!-- TAB 2: Especificação -->
+    <div id="ctab-spec" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+        <div class="fg" style="grid-column:1/-1"><label>Conhecimento Desejável</label><textarea class="inp" id="c-conhecimento" rows="2" placeholder="Conhecimentos necessários para o cargo..."></textarea></div>
+        <div class="fg"><label>Supervisão de Pessoas</label><select class="inp" id="c-supervisao"><option value="">Selecionar</option><option>Sim</option><option>Não</option></select></div>
+        <div class="fg"><label>Disponibilidade de Viagem</label><select class="inp" id="c-viagem"><option value="">Selecionar</option><option>Sim</option><option>Não</option></select></div>
+        <div class="fg"><label>Formação Acadêmica</label><input class="inp" id="c-formacao" placeholder="Ex: Ensino Médio Completo"></div>
+        <div class="fg"><label>Idiomas</label><input class="inp" id="c-idiomas" placeholder="Ex: Português"></div>
+        <div class="fg"><label>Especializações</label><input class="inp" id="c-especializacao" placeholder="Ex: Gestão de Marketing"></div>
+        <div class="fg"><label>Curso de Capacitação</label><input class="inp" id="c-capacitacao" placeholder="Ex: Redes Sociais, Canva"></div>
+        <div class="fg"><label>Contato Dep. Interno</label><input class="inp" id="c-contato-int" placeholder="Ex: Todos os departamentos"></div>
+        <div class="fg"><label>Contato Dep. Externo</label><input class="inp" id="c-contato-ext" placeholder="Ex: Clientes"></div>
+        <div class="fg"><label>Experiência</label><input class="inp" id="c-experiencia" placeholder="Ex: 1 ano, Não necessária"></div>
+        <div class="fg"><label>Horário de Trabalho</label><input class="inp" id="c-horario" placeholder="Ex: 08h às 17h30 (seg-sex)"></div>
+        <div class="fg" style="grid-column:1/-1"><label>Habilidades / Competências</label><textarea class="inp" id="c-habilidades" rows="2" placeholder="Criatividade, Comunicação, Trabalho em equipe..."></textarea></div>
+      </div>
+    </div>
+    <!-- TAB 3: Funções -->
+    <div id="ctab-funcs" style="display:none">
+      <div class="fg"><label>🔁 Funções Diárias</label><textarea class="inp" id="c-func-diaria" rows="6" placeholder="Descreva as atividades realizadas diariamente..."></textarea></div>
+      <div class="fg"><label>📅 Funções Periódicas (semanal/mensal)</label><textarea class="inp" id="c-func-periodica" rows="4" placeholder="Descreva as atividades realizadas periodicamente..."></textarea></div>
+      <div class="fg"><label>⚡ Funções Ocasionais</label><textarea class="inp" id="c-func-ocasional" rows="3" placeholder="Descreva as atividades realizadas ocasionalmente..."></textarea></div>
+    </div>
+    <!-- TAB 4: Avaliação por Pontos (F3) -->
+    <div id="ctab-pontos" style="display:none">
+      <div style="font-size:.78rem;color:var(--t2);margin-bottom:.8rem">Metodologia de Pontos (Benedito R. Pontes). Defina a pontuação para cada fator de avaliação deste cargo.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+        <div class="fg"><label>Escolaridade / Formação (pts)</label><input class="inp" type="number" id="c-pts-escol" min="0" oninput="calcTotalPtsCargo()" max="200" placeholder="0-200"></div>
+        <div class="fg"><label>Experiência (pts)</label><input class="inp" type="number" id="c-pts-exp" min="0" oninput="calcTotalPtsCargo()" max="200" placeholder="0-200"></div>
+        <div class="fg"><label>Iniciativa / Complexidade (pts)</label><input class="inp" type="number" id="c-pts-inic" min="0" oninput="calcTotalPtsCargo()" max="200" placeholder="0-200"></div>
+        <div class="fg"><label>Complexidade / Amplitude (pts)</label><input class="inp" type="number" id="c-pts-comp" min="0" oninput="calcTotalPtsCargo()" max="200" placeholder="0-200"></div>
+        <div class="fg"><label>Supervisão Exercida (pts)</label><input class="inp" type="number" id="c-pts-sup" min="0" oninput="calcTotalPtsCargo()" max="200" placeholder="0-200"></div>
+        <div class="fg"><label>Responsabilidade (pts)</label><input class="inp" type="number" id="c-pts-resp" min="0" oninput="calcTotalPtsCargo()" max="200" placeholder="0-200"></div>
+      </div>
+      <div id="cargo-total-pts" style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);border-radius:var(--r2);padding:.6rem 1rem;margin-top:.5rem;font-size:.82rem">Total de Pontos: <strong id="cargo-pts-value">0</strong></div>
+    </div>
+    <!-- TAB 5: Salários (F5) -->
+    <div id="ctab-salarios" style="display:none">
+      <div style="font-size:.78rem;color:var(--t2);margin-bottom:.8rem">Defina até 5 níveis de progressão horizontal. A amplitude entre níveis é variável conforme sua análise.</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem">
+        <div class="fg"><label>N1 — Inicial (R$)</label><input class="inp" type="number" id="c-sal-n1" min="0" step="0.01" placeholder="0,00" oninput="calcAmplitudeCargo()"></div>
+        <div class="fg"><label>N2 (R$)</label><input class="inp" type="number" id="c-sal-n2" min="0" step="0.01" placeholder="0,00" oninput="calcAmplitudeCargo()"></div>
+        <div class="fg"><label>N3 — Referência (R$)</label><input class="inp" type="number" id="c-sal-n3" min="0" step="0.01" placeholder="0,00" oninput="calcAmplitudeCargo()"></div>
+        <div class="fg"><label>N4 (R$)</label><input class="inp" type="number" id="c-sal-n4" min="0" step="0.01" placeholder="0,00" oninput="calcAmplitudeCargo()"></div>
+        <div class="fg"><label>N5 — Teto (R$)</label><input class="inp" type="number" id="c-sal-n5" min="0" step="0.01" placeholder="0,00" oninput="calcAmplitudeCargo()"></div>
+      </div>
+      <div id="cargo-amplitude" style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.15);border-radius:var(--r2);padding:.6rem 1rem;font-size:.78rem;color:var(--t2)">Informe N1 e N5 para calcular a amplitude total.</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">
+      <div style="display:flex;gap:.4rem">
+        <label class="btn bh bs" style="cursor:pointer">📂 Importar Descrição<input type="file" accept=".docx,.doc,.pdf" style="display:none" onchange="importCargoDocx(this)"></label>
+        <button class="btn bo bs" onclick="exportCargosCSV()">📊 CSV</button>
+      </div>
+      <div style="display:flex;gap:.6rem">
+        <button class="btn bh" onclick="closeM('mcargo')">Cancelar</button>
+        <button class="btn bg" onclick="salvarCargo()">Salvar Cargo</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -866,6 +965,8 @@ input[type="date"].inp{color-scheme:dark}
 
 
 
+
+
 // PCCS 360 v3.1 — JavaScript Enhanced
 // Changelog, projeto por status, colaborador detalhe, fases melhoradas, tp9
 
@@ -1000,7 +1101,7 @@ function salvarEmp(){
       var idx=emps.findIndex(function(e){return e.id===empEditId});
       if(idx>=0){
         var em=emps[idx];
-        em.nome=cap(n);em.setor=gv('emp-setor');em.lider=gv('emp-lider');
+        em.nome=cap(n);em.setor=gv('emp-setor');em.lider=gv('emp-lider');em.logoEmp=document.getElementById('emp-logo-data').value||em.logoEmp||'';em.logoInst=document.getElementById('emp-logo-inst-data').value||em.logoInst||'';
         em.resp=gv('emp-resp');em.ini=gv('emp-ini');em.fim=gv('emp-fim');
         em.st=gv('emp-st');em.consul=gv('emp-consul');
       }
@@ -1009,6 +1110,8 @@ function salvarEmp(){
         id:'e'+Date.now(),nome:cap(n),setor:gv('emp-setor'),lider:gv('emp-lider'),
         resp:gv('emp-resp'),ini:gv('emp-ini'),fim:gv('emp-fim'),consul:gv('emp-consul'),
         st:gv('emp-st')||'Em andamento',fases:fases,fases2:{},
+        logoEmp:document.getElementById('emp-logo-data').value||'',
+        logoInst:document.getElementById('emp-logo-inst-data').value||'',
         colabs:[],deptos:[],obs:'',anexos:[]
       })
     }
@@ -1282,6 +1385,19 @@ function renderFases(emp){
         var autoCount=(emp.colabs||[]).length;
         html+='<div style="font-size:1.5rem;font-weight:700;color:'+fase.cor+';font-family:Cinzel,serif;margin-bottom:.3rem">'+autoCount+'</div>';
         html+='<div style="font-size:.68rem;color:var(--t2)">colaboradores cadastrados</div>'
+      }else if(b.tipo==='count_cargos'){
+        var cargosEmp=(gst('cargos')||[]).filter(function(c){return c.emp===emp.id});
+        var total=cargosEmp.length;
+        var comDesc=cargosEmp.filter(function(c){return c.sumario&&c.sumario.length>10}).length;
+        var comPts=cargosEmp.filter(function(c){return (parseInt(c.pts_escolaridade)||0)>0}).length;
+        if(total>0){
+          html+='<div style="font-size:1.5rem;font-weight:700;color:'+fase.cor+';font-family:Cinzel,serif;margin-bottom:.3rem">'+comDesc+'/'+total+'</div>';
+          html+='<div style="font-size:.68rem;color:var(--t2)">descritos</div>';
+          html+='<div style="font-size:.68rem;color:var(--t3);margin-top:.2rem">'+comPts+'/'+total+' avaliados por pontos</div>'
+        }else{
+          html+='<div style="font-size:1.2rem;font-weight:700;color:var(--t3)">0</div>';
+          html+='<div style="font-size:.68rem;color:var(--t3)"><a onclick="nav(\'vcargos\')" style="color:var(--gd);cursor:pointer">Ir para Banco de Cargos</a></div>'
+        }
       }else if(b.tipo==='incons'){
         // Auto-count from inconsistencias
         var ic=detectIncons(emp);
@@ -2167,8 +2283,62 @@ function delAnexoProj(i){if(!empAtual||!confirm('Remover?'))return;var emps=gst(
 function renderAnal(){var m=document.getElementById('dash-mode');if(m)m.value='analitico';_renderDashUnified()}
 
 // ═══ MÓDULOS ═══
-function renderCargos(){var cargos=gst('cargos')||[];var emps=gst('emps')||[];var em={};emps.forEach(function(e){em[e.id]=e.nome});document.getElementById('cargos-tbody').innerHTML=cargos.length?cargos.map(function(c,i){return'<tr><td style="font-weight:600">'+eh(c.n)+'</td><td>'+eh(c.cbo||'-')+'</td><td>'+eh(c.fam||'-')+'</td><td>'+eh(c.niv||'-')+'</td><td>'+eh(em[c.emp]||'-')+'</td><td><button class="btn bd bs" onclick="delCargo('+i+')">✕</button></td></tr>'}).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:2rem">Nenhum cargo.</td></tr>'}
-function salvarCargo(){var n=gv('c-nome');if(!n){toast('Nome obrigatório.',false);return}var cargos=gst('cargos')||[];cargos.push({n:n,cbo:gv('c-cbo'),fam:gv('c-fam'),niv:gv('c-niv'),emp:gv('c-emp')});sst('cargos',cargos);closeM('mcargo');renderCargos();toast('Cargo salvo!')}
+function renderCargos(){
+  var cargos=gst('cargos')||[];var emps=gst('emps')||[];var em={};
+  emps.forEach(function(e){em[e.id]=e.nome});
+  var tbody=document.getElementById('cargos-tbody');
+  if(!tbody)return;
+  tbody.innerHTML=cargos.length?cargos.map(function(c,i){
+    var pts=(parseInt(c.pts_escolaridade)||0)+(parseInt(c.pts_experiencia)||0)+(parseInt(c.pts_iniciativa)||0)+(parseInt(c.pts_complexidade)||0)+(parseInt(c.pts_supervisao)||0)+(parseInt(c.pts_responsabilidade)||0);
+    return'<tr>'+
+      '<td style="font-weight:600;cursor:pointer;color:var(--gd)" onclick="abrirDetalhesCargo('+i+')">'+eh(c.n)+'</td>'+
+      '<td>'+eh(c.cbo||'-')+'</td>'+
+      '<td>'+eh(c.fam||'-')+'</td>'+
+      '<td>'+eh(c.niv||'-')+'</td>'+
+      '<td>'+eh(c.area||'-')+'</td>'+
+      '<td>'+(pts>0?'<span class="b bb" style="font-size:.7rem">'+pts+' pts</span>':'-')+'</td>'+
+      '<td>'+(c.sal_n1?'R$ '+parseFloat(c.sal_n1).toLocaleString('pt-BR',{minimumFractionDigits:2})+' → '+( c.sal_n5?'R$ '+parseFloat(c.sal_n5).toLocaleString('pt-BR',{minimumFractionDigits:2}):''):'-')+'</td>'+
+      '<td>'+eh(em[c.emp]||'-')+'</td>'+
+      '<td><div style="display:flex;gap:.2rem">'+
+        '<button class="btn bh bs" onclick="editCargo('+i+')" title="Editar">&#10000;</button>'+
+        '<button class="btn bo bs" onclick="exportCargoWord('+i+')" title="Word">W</button>'+
+        '<button class="btn bd bs" onclick="delCargo('+i+')">&#10005;</button>'+
+      '</div></td>'+
+    '</tr>'
+  }).join(''):'<tr><td colspan="9" style="text-align:center;color:var(--t3);padding:2rem">Nenhum cargo. Crie ou importe descrições de cargo.</td></tr>'
+}
+function salvarCargo(){
+  var n=gv('c-nome');if(!n){toast('Nome obrigátorio.',false);return}
+  var cargos=gst('cargos')||[];
+  var editIdx=parseInt(document.getElementById('c-edit-idx').value||'-1');
+  var cargo={
+    n:cap(n),cbo:gv('c-cbo'),fam:gv('c-fam'),niv:gv('c-niv'),emp:gv('c-emp'),
+    area:gv('c-area'),depto:gv('c-depto'),superior:gv('c-superior'),
+    sumario:gv('c-sumario'),conhecimento:gv('c-conhecimento'),
+    supervisao:gv('c-supervisao'),formacao:gv('c-formacao'),
+    especializacao:gv('c-especializacao'),capacitacao:gv('c-capacitacao'),
+    viagem:gv('c-viagem'),idiomas:gv('c-idiomas'),
+    contato_int:gv('c-contato-int'),contato_ext:gv('c-contato-ext'),
+    experiencia:gv('c-experiencia'),habilidades:gv('c-habilidades'),
+    func_diaria:gv('c-func-diaria'),func_periodica:gv('c-func-periodica'),
+    func_ocasional:gv('c-func-ocasional'),horario:gv('c-horario'),
+    // Evaluation points (F3)
+    pts_escolaridade:gv('c-pts-escol'),pts_experiencia:gv('c-pts-exp'),
+    pts_iniciativa:gv('c-pts-inic'),pts_complexidade:gv('c-pts-comp'),
+    pts_supervisao:gv('c-pts-sup'),pts_responsabilidade:gv('c-pts-resp'),
+    // Salary levels (F5) - 5 horizontal levels
+    sal_n1:gv('c-sal-n1'),sal_n2:gv('c-sal-n2'),sal_n3:gv('c-sal-n3'),
+    sal_n4:gv('c-sal-n4'),sal_n5:gv('c-sal-n5'),
+    dt_criacao:new Date().toLocaleDateString('pt-BR'),
+    criado_por:sessao?sessao.nome:''
+  };
+  if(editIdx>=0){cargos[editIdx]=cargo}else{cargos.push(cargo)}
+  sst('cargos',cargos);closeM('mcargo');
+  document.getElementById('c-edit-idx').value='-1';
+  renderCargos();
+  logAudit('Cargo','Banco de Cargos',(editIdx>=0?'Editado':'Criado')+': '+cap(n));
+  toast('Cargo salvo!')
+}
 function delCargo(i){if(!confirm('Remover?'))return;var c=gst('cargos')||[];c.splice(i,1);sst('cargos',c);renderCargos()}
 function renderPes(){var ps=gst('pes')||[];var emps=gst('emps')||[];var em={};emps.forEach(function(e){em[e.id]=e.nome});document.getElementById('pes-tbody').innerHTML=ps.length?ps.map(function(p){return'<tr><td style="font-weight:600">'+eh(p.cargo)+'</td><td>'+eh(em[p.emp]||'-')+'</td><td>'+fmt(p.p25)+'</td><td style="color:var(--gd)">'+fmt(p.p50)+'</td><td>'+fmt(p.p75)+'</td><td>'+eh(p.fonte||'-')+'</td></tr>'}).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:2rem">Nenhuma pesquisa.</td></tr>'}
 function salvarPes(){var n=gv('ps-cargo');if(!n){toast('Cargo obrigatório.',false);return}var ps=gst('pes')||[];ps.push({cargo:n,emp:gv('ps-emp'),p25:gv('ps-p25'),p50:gv('ps-p50'),p75:gv('ps-p75'),fonte:gv('ps-fonte')});sst('pes',ps);closeM('mpes');renderPes();toast('Pesquisa salva!')}
@@ -2642,7 +2812,7 @@ var FP2=[
     cor:'#3b82f6',
     desc:'Identificação, descrição e validação funcional de todos os cargos',
     blocos:[
-      {k:'cargos_id',n:'Cargos Identificados',desc:'Total de cargos mapeados na empresa',tipo:'count_manual',meta:0},
+      {k:'cargos_id',n:'Cargos Identificados e Descritos',desc:'Cargos criados no Banco de Cargos com descrição completa',tipo:'count_cargos',meta:0},
       {k:'descricoes',n:'Descrições Elaboradas',desc:'Descrições de cargo redigidas',tipo:'count_manual',meta:0},
       {k:'cbo',n:'CBO Vinculado',desc:'Classificação Brasileira de Ocupações aplicada',tipo:'count_manual',meta:0},
       {k:'inconsistencias_cargo',n:'Inconsistências Tratadas',desc:'Desvios de função identificados e tratados',tipo:'incons'},
@@ -2807,6 +2977,184 @@ function rodarIACarreira(){
   var res=document.getElementById('ia-res');if(res){res.style.display='block';document.getElementById('ia-out').innerHTML=txt}
   var em=document.getElementById('ia-empty');if(em)em.style.display='none'
 }
+
+function editCargo(i){
+  var cargos=gst('cargos')||[];var c=cargos[i];if(!c)return;
+  document.getElementById('c-edit-idx').value=i;
+  var setV=function(id,v){var e=document.getElementById(id);if(e)e.value=v||''};
+  setV('c-nome',c.n);setV('c-cbo',c.cbo);setV('c-fam',c.fam);setV('c-area',c.area);
+  setV('c-depto',c.depto);setV('c-superior',c.superior);setV('c-sumario',c.sumario);
+  setV('c-conhecimento',c.conhecimento);setV('c-supervisao',c.supervisao);
+  setV('c-formacao',c.formacao);setV('c-especializacao',c.especializacao);
+  setV('c-capacitacao',c.capacitacao);setV('c-viagem',c.viagem);
+  setV('c-idiomas',c.idiomas);setV('c-contato-int',c.contato_int);
+  setV('c-contato-ext',c.contato_ext);setV('c-experiencia',c.experiencia);
+  setV('c-habilidades',c.habilidades);setV('c-func-diaria',c.func_diaria);
+  setV('c-func-periodica',c.func_periodica);setV('c-func-ocasional',c.func_ocasional);
+  setV('c-horario',c.horario);
+  setV('c-pts-escol',c.pts_escolaridade);setV('c-pts-exp',c.pts_experiencia);
+  setV('c-pts-inic',c.pts_iniciativa);setV('c-pts-comp',c.pts_complexidade);
+  setV('c-pts-sup',c.pts_supervisao);setV('c-pts-resp',c.pts_responsabilidade);
+  setV('c-sal-n1',c.sal_n1);setV('c-sal-n2',c.sal_n2);setV('c-sal-n3',c.sal_n3);
+  setV('c-sal-n4',c.sal_n4);setV('c-sal-n5',c.sal_n5);
+  var niv=document.getElementById('c-niv');if(niv)niv.value=c.niv||'';
+  var emp=document.getElementById('c-emp');if(emp)emp.value=c.emp||'';
+  document.querySelector('#mcargo .mhdr h3').textContent='◑ Editar Cargo';
+  openM('mcargo')
+}
+
+function abrirDetalhesCargo(i){
+  var cargos=gst('cargos')||[];var c=cargos[i];if(!c)return;
+  var pts=(parseInt(c.pts_escolaridade)||0)+(parseInt(c.pts_experiencia)||0)+(parseInt(c.pts_iniciativa)||0)+(parseInt(c.pts_complexidade)||0)+(parseInt(c.pts_supervisao)||0)+(parseInt(c.pts_responsabilidade)||0);
+  var html='<div style="font-family:Cinzel,serif;font-size:1.1rem;color:var(--gd);margin-bottom:.6rem">'+(c.n||'Cargo')+'</div>';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;font-size:.78rem;margin-bottom:.7rem">';
+  var fields=[['CBO',c.cbo],['Nível',c.niv],['Família',c.fam],['Area',c.area],['Departamento',c.depto],['Reporta-se a',c.superior],['Formação',c.formacao],['Experiência',c.experiencia],['Jornada',c.horario]];
+  fields.forEach(function(f){if(f[1])html+='<div><span style="color:var(--t3);font-size:.68rem;text-transform:uppercase">'+f[0]+'</span><br><strong>'+eh(f[1])+'</strong></div>'});
+  html+='</div>';
+  if(pts>0)html+='<div style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.15);border-radius:var(--r2);padding:.5rem .8rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--t3)">Pontuação PCCS</span><br><strong style="font-size:1.2rem;color:#60a5fa">'+pts+' pts</strong></div>';
+  if(c.sal_n1){html+='<div style="font-size:.78rem;margin-bottom:.5rem"><span style="color:var(--t3)">Progressão Salarial</span><br>';
+    ['N1','N2','N3','N4','N5'].forEach(function(n){var v=c['sal_'+n.toLowerCase()];if(v)html+='<span style="margin-right:.5rem;color:var(--gd)">'+n+': R$ '+parseFloat(v).toLocaleString('pt-BR',{minimumFractionDigits:2})+'</span>'});
+    html+='</div>'}
+  if(c.sumario)html+='<div style="font-size:.78rem;color:var(--t2);background:rgba(255,255,255,.03);border-radius:var(--r2);padding:.5rem .7rem;margin-bottom:.4rem"><strong>Sumário:</strong><br>'+eh(c.sumario)+'</div>';
+  if(c.func_diaria)html+='<div style="font-size:.78rem;color:var(--t2);margin-bottom:.3rem"><strong>Funções Diárias (resumo):</strong><br>'+eh((c.func_diaria||'').substring(0,200))+'...</div>';
+  // Show in modal
+  var md=document.getElementById('mcolab-det');if(!md)return;
+  var tit=document.getElementById('colab-det-titulo');if(tit)tit.textContent=c.n||'Cargo';
+  // Show in a simple alert-like div for now
+  toast(c.n+' — '+pts+' pts');
+  editCargo(i) // Opens full edit modal for viewing
+}
+
+function exportCargoWord(i){
+  var cargos=gst('cargos')||[];var c=cargos[i];if(!c)return;
+  var w=window.open('','_blank');
+  var logo=gst('logoInst')||'';
+  var s='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+c.n+'</title>';
+  s+='<style>body{font-family:Arial,sans-serif;font-size:11pt;color:#111;padding:2cm}table{width:100%;border-collapse:collapse;margin-bottom:1em}td,th{border:1px solid #333;padding:6px 8px;font-size:10pt}th{background:#0d1b2e;color:#fff}.header{text-align:center;margin-bottom:1em}.logo{height:60px}.title{font-size:14pt;font-weight:bold;text-align:center;margin:8px 0}.sec{font-size:12pt;font-weight:bold;background:#f0f0f0;padding:4px;margin-top:1em}@media print{button{display:none}}</style>';
+  s+='</head><body>';
+  s+='<div class="header">';
+  if(logo)s+='<img class="logo" src="'+logo+'" alt="Logo">';
+  s+='<div class="title">SISTEMA DE GESTÃO — DESCRIÇÃO DE CARGO E FUNÇÕES</div></div>';
+  s+='<table><tr><th style="width:25%">Título do Cargo</th><td colspan="2"><b>'+(c.n||'')+'</b></td><th>Data</th><td>'+( c.dt_criacao||new Date().toLocaleDateString('pt-BR'))+'</td></tr>';
+  s+='<tr><td></td><td></td><td></td><th>CBO</th><td>'+(c.cbo||'')+'</td></tr>';
+  s+='<tr><th>Área</th><td>'+(c.area||'')+'</td><th>Departamento</th><td colspan="2">'+(c.depto||'')+'</td></tr>';
+  s+='<tr><th>Reporta-se a</th><td colspan="4">'+(c.superior||'')+'</td></tr></table>';
+  s+='<div class="sec">Sumário do Cargo</div><p>'+(c.sumario||'')+'</p>';
+  s+='<div class="sec">Especificação do Cargo</div>';
+  s+='<table>';
+  var specs=[['Conhecimento Desejável',c.conhecimento],['Supervisão de Pessoas',c.supervisao],['Formação Acadêmica',c.formacao],['Especializações',c.especializacao],['Curso de Capacitação',c.capacitacao],['Disponibilidade de Viagem',c.viagem],['Idiomas',c.idiomas],['Contato Dep. Interno',c.contato_int],['Contato Dep. Externo',c.contato_ext],['Experiência',c.experiencia]];
+  specs.forEach(function(sp){if(sp[1])s+='<tr><th style="width:30%">'+sp[0]+'</th><td>'+eh(sp[1])+'</td></tr>'});
+  s+='</table>';
+  if(c.habilidades){s+='<div class="sec">Perfil Exigido - Competências</div><p>'+( c.habilidades||'')+'</p>'}
+  s+='<div class="sec">Descrição Detalhada das Funções</div>';
+  if(c.func_diaria)s+='<p><b>Diário:</b></p><p>'+eh(c.func_diaria).replace(/\n/g,'<br>')+'</p>';
+  if(c.func_periodica)s+='<p><b>Periódico:</b></p><p>'+eh(c.func_periodica).replace(/\n/g,'<br>')+'</p>';
+  if(c.func_ocasional)s+='<p><b>Ocasional:</b></p><p>'+eh(c.func_ocasional).replace(/\n/g,'<br>')+'</p>';
+  s+='<table style="margin-top:1em"><tr><th>Elaborado por</th><th>Revisado por</th><th>Responsável pela implantação</th></tr>';
+  s+='<tr><td>'+(c.criado_por||'Instituto Primazia')+'</td><td></td><td></td></tr></table>';
+  if(c.horario)s+='<p><b>Horário de trabalho:</b> '+eh(c.horario)+'</p>';
+  s+='<br><p>Eu______________________________, CPF_____________________, estou em concordância e ciente de minhas funções acima descritas.</p>';
+  s+='<p style="margin-top:1.5em">____________________________________<br>Nome do Colaborador por Extenso.</p>';
+  s+='<br><button onclick="window.print()">&#128196; Imprimir / Salvar PDF</button>';
+  s+='</body></html>';
+  w.document.write(s);w.document.close()
+}
+
+function importCargoDocx(input){
+  if(!input.files[0])return;
+  toast('Arquivo recebido. Extraindo dados...');
+  // For now, store the file as attachment and prompt manual fill
+  var reader=new FileReader();
+  reader.onload=function(e){
+    // Store the file data URL and open the cargo modal
+    var cargos=gst('cargos')||[];
+    // Pre-fill cargo name from filename
+    var fname=input.files[0].name.replace(/\.[^.]+$/,'').replace(/_/g,' ').replace(/-/g,' ');
+    document.getElementById('c-edit-idx').value='-1';
+    var nome=document.getElementById('c-nome');if(nome)nome.value=cap(fname);
+    openM('mcargo');
+    toast('Preencha os campos da descrição importada.');
+  };
+  reader.readAsArrayBuffer(input.files[0]);
+  input.value=''
+}
+
+function exportCargosCSV(){
+  var cargos=gst('cargos')||[];
+  if(!cargos.length){toast('Nenhum cargo cadastrado.',false);return}
+  var headers=['Nome','CBO','Familia','Nivel','Area','Departamento','Superior','Formacao','Experiencia','Pontos','Sal.N1','Sal.N2','Sal.N3','Sal.N4','Sal.N5','Empresa'];
+  var emps=gst('emps')||[];var em={};emps.forEach(function(e){em[e.id]=e.nome});
+  var rows=cargos.map(function(c){
+    var pts=(parseInt(c.pts_escolaridade)||0)+(parseInt(c.pts_experiencia)||0)+(parseInt(c.pts_iniciativa)||0)+(parseInt(c.pts_complexidade)||0)+(parseInt(c.pts_supervisao)||0)+(parseInt(c.pts_responsabilidade)||0);
+    return[c.n,c.cbo,c.fam,c.niv,c.area,c.depto,c.superior,c.formacao,c.experiencia,pts,c.sal_n1,c.sal_n2,c.sal_n3,c.sal_n4,c.sal_n5,em[c.emp]||''].map(function(v){return'"'+(v||'')+'"{"}'.replace('"{}"','""')})
+  });
+  var csv=[headers.join(',')].concat(rows.map(function(r){return r.join(',')})).join('\n');
+  dl('cargos_pccs_'+new Date().toISOString().split('T')[0]+'.csv',csv,'text/csv');
+  toast('CSV exportado!')
+}
+function cargoTab(id,btn){
+  ['ctab-geral','ctab-spec','ctab-funcs','ctab-pontos','ctab-salarios'].forEach(function(t){var e=document.getElementById(t);if(e)e.style.display=t===id?'block':'none'});
+  document.querySelectorAll('#mcargo .tab').forEach(function(t){t.classList.remove('on')});
+  if(btn)btn.classList.add('on')
+}
+
+function calcAmplitudeCargo(){
+  var n1=parseFloat(document.getElementById('c-sal-n1').value)||0;
+  var n5=parseFloat(document.getElementById('c-sal-n5').value)||0;
+  var el=document.getElementById('cargo-amplitude');
+  if(!el)return;
+  if(n1>0&&n5>0){
+    var amp=Math.round((n5-n1)/n1*100);
+    el.innerHTML='Amplitude Total: <strong style="color:var(--gd)">'+amp+'%</strong> | N1: R$ '+n1.toLocaleString('pt-BR',{minimumFractionDigits:2})+' → N5: R$ '+n5.toLocaleString('pt-BR',{minimumFractionDigits:2})+'<br><span style="color:var(--t3);font-size:.72rem">Variação por nível: '+Math.round(amp/4)+'% (configurável)</span>'
+  }else{el.innerHTML='Informe N1 e N5 para calcular a amplitude total.'}
+}
+
+function calcTotalPtsCargo(){
+  var ids=['c-pts-escol','c-pts-exp','c-pts-inic','c-pts-comp','c-pts-sup','c-pts-resp'];
+  var tot=ids.reduce(function(s,id){return s+(parseInt(document.getElementById(id).value)||0)},0);
+  var el=document.getElementById('cargo-pts-value');if(el)el.textContent=tot;
+  return tot
+}
+
+function importCargoCSV(input){
+  if(!input.files[0])return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var lines=e.target.result.split('\n');
+    if(lines.length<2){toast('CSV vazio.',false);return}
+    var headers=lines[0].split(',').map(function(h){return h.replace(/"/g,'').trim().toLowerCase()});
+    var cargos=gst('cargos')||[];var added=0;
+    lines.slice(1).forEach(function(line){
+      if(!line.trim())return;
+      var vals=line.split(',').map(function(v){return v.replace(/^"|"$/g,'').trim()});
+      var get=function(col){var i=headers.indexOf(col);return i>=0?vals[i]||'':''};
+      var n=cap(get('nome'));if(!n)return;
+      cargos.push({n:n,cbo:get('cbo'),fam:get('familia')||get('família'),niv:get('nivel')||get('nível'),area:get('area')||get('área'),depto:get('departamento'),superior:get('superior'),formacao:get('formacao')||get('formação'),experiencia:get('experiencia')||get('experiência'),sal_n1:get('sal.n1')||get('n1'),sal_n2:get('sal.n2')||get('n2'),sal_n3:get('sal.n3')||get('n3'),sal_n4:get('sal.n4')||get('n4'),sal_n5:get('sal.n5')||get('n5')});
+      added++
+    });
+    sst('cargos',cargos);renderCargos();toast(added+' cargo(s) importado(s)!')
+  };
+  reader.readAsText(input.files[0],'UTF-8');input.value=''
+}
+  function getCargosEmpCount(emp){
+    var cargos=gst('cargos')||[];
+    return cargos.filter(function(c){return c.emp===emp.id}).length
+  }
+
+function uploadEmpLogo(input,previewId){
+  if(!input.files[0])return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var prev=document.getElementById(previewId);if(prev){prev.src=e.target.result;prev.style.display='block'}
+    // Store in hidden input
+    var hiddenId=previewId.replace('-preview','-data');
+    var hidden=document.getElementById(hiddenId);if(hidden)hidden.value=e.target.result;
+    toast('Logo carregada!')
+  };
+  reader.readAsDataURL(input.files[0]);input.value=''
+}
+
+
 </script>
 </body>
 </html>
