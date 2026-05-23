@@ -692,11 +692,11 @@ id="tp5" style="display:none">
     <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.1);border-radius:var(--r2);padding:.7rem .9rem;margin-bottom:1rem">
       <div style="font-size:.72rem;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem">Atividade</div>
       <div id="a-nome-display" style="font-size:.92rem;font-weight:600;color:#fff"></div>
-    </div>
+    <div id="a-hint-text" style="font-size:.72rem;color:#60a5fa;margin-top:.25rem;font-style:italic"></div></div>
     <input type="hidden" id="a-nome">
     <div class="fr">
       <div class="fg"><label>Responsável</label><input class="inp" id="a-resp" placeholder="Nome do responsável"></div>
-      <div class="fg"><label>Prazo</label><input class="inp" type="date" id="a-prev"></div>
+      <div class="fg"><label>Data de Execução</label><input class="inp" type="date" id="a-prev"></div>
     </div>
     <div class="fr">
       <div class="fg"><label>Status</label>
@@ -707,12 +707,17 @@ id="tp5" style="display:none">
           <option value="Pendente">🔴 Pendente</option>
         </select>
       </div>
-      <div class="fg"><label>Data Conclusão</label><input class="inp" type="date" id="a-conc"></div>
+      <div class="fg"><label>Data de Conclusão</label><input class="inp" type="date" id="a-conc"></div>
     </div>
-    <div class="fg"><label>Observação</label><textarea class="inp" id="a-obs" rows="3" placeholder="Notas, riscos, decisões..."></textarea></div>
+    <div class="fg"><label>Link / URL relacionado</label>
+      <input class="inp" id="a-link" placeholder="https://... (organograma, documento, drive, etc)">
+    </div>
+    <div class="fg"><label>Observações / Evidências</label><textarea class="inp" id="a-obs" rows="3" placeholder="Descreva o que foi feito, quem participou, decisões tomadas..."></textarea></div>
     <div class="fg">
-      <label>Anexos</label>
-      <label class="btn bh bs" style="cursor:pointer">&#128206; Anexar arquivo<input type="file" multiple accept=".pdf,.doc,.docx,.xlsx,.jpg,.jpeg,.png" style="display:none" onchange="addAtvAnexo(this)"></label>
+      <label>Arquivos de Evidência</label>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+        <label class="btn bh bs" style="cursor:pointer">&#128206; Anexar PDF/Imagem/Word<input type="file" multiple accept=".pdf,.doc,.docx,.xlsx,.jpg,.jpeg,.png" style="display:none" onchange="addAtvAnexo(this)"></label>
+      </div>
       <div id="atv-anexos-list" style="margin-top:.4rem;display:flex;flex-wrap:wrap;gap:.3rem"></div>
     </div>
     <div style="display:flex;justify-content:flex-end;gap:.6rem;margin-top:1rem">
@@ -909,6 +914,8 @@ id="tp5" style="display:none">
 
 
 
+
+
 // PCCS 360 v3.1 — JavaScript Enhanced
 // Changelog, projeto por status, colaborador detalhe, fases melhoradas, tp9
 
@@ -922,14 +929,52 @@ var CORES=['#c9a84c','#3b82f6','#22c55e','#8b5cf6','#ef4444','#f59e0b','#06b6d4'
 var sessao=null, empAtual=null, colabDetDocs=[];
 
 var FP=[
-  {n:'Levantamento e Diagnóstico Organizacional',d:'Coleta, análise e mapeamento da situação atual',a:['Reunião de abertura e alinhamento estratégico','Coleta do organograma atual','Levantamento de colaboradores e cargos','Análise da estrutura de remuneração atual','Identificação de inconsistências e riscos','Entrevistas com líderes e gestores','Análise de cultura e clima organizacional','Mapeamento de processos críticos','Diagnóstico financeiro da folha de pagamento','Relatório de diagnóstico inicial']},
-  {n:'Mapeamento e Descrição de Cargos',d:'Identificação e descrição funcional de todos os cargos',a:['Definição da metodologia de descrição','Coleta de informações por questionário','Entrevistas individuais para descrição','Redação das descrições de cargo','Validação com gestores responsáveis','Revisão e aprovação das descrições','Codificação e classificação CBO','Mapeamento de competências por cargo','Identificação de lacunas de competências','Aprovação final pelo comitê']},
-  {n:'Avaliação e Classificação de Cargos',d:'Pontuação, classificação e hierarquização',a:['Definição do método de avaliação (pontos/Hay)','Calibração dos fatores e pesos','Avaliação técnica de todos os cargos','Sessão do comitê de avaliação','Hierarquização e ranking dos cargos','Definição de graus e classes salariais','Validação com a diretoria','Ajustes e aprovação final','Elaboração da grade de cargos','Divulgação interna da estrutura']},
-  {n:'Pesquisa Salarial e Viabilidade Financeira',d:'Pesquisa de mercado e análise de competitividade',a:['Definição das fontes de pesquisa','Coleta de dados de mercado (P25/P50/P75)','Análise comparativa mercado x empresa','Análise de viabilidade financeira','Projeção do impacto na folha','Simulação de cenários de adequação','Apresentação dos resultados à diretoria','Definição do posicionamento de mercado','Aprovação do posicionamento','Relatório final de pesquisa salarial']},
-  {n:'Estrutura Salarial e Trilhas de Carreira',d:'Criação das faixas salariais e trilhas de desenvolvimento',a:['Definição das famílias de cargos','Elaboração das faixas salariais por nível','Definição de amplitude e sobreposição','Criação das trilhas de carreira','Definição de critérios de progressão','Política de mérito e promoção','Validação com RH e finanças','Aprovação da estrutura salarial','Manual de cargos e salários','Revisão final e aprovação']},
-  {n:'Governança, Comitê e Regras de Progressão',d:'Estruturação do comitê e fluxos de aprovação',a:['Constituição formal do comitê PCCS','Definição de papéis e responsabilidades','Elaboração do regulamento interno','Definição da periodicidade de revisão','Política de enquadramento e equiparação','Regras de admissão e promoção','Política de benefícios vinculada ao PCCS','Definição de critérios de mérito','Validação jurídica das políticas','Aprovação e publicação das diretrizes']},
-  {n:'Implantação, Comunicação e Sustentação',d:'Implementação, comunicação e monitoramento',a:['Plano de comunicação e gestão da mudança','Treinamento de líderes e gestores','Apresentação para os colaboradores','Enquadramento inicial dos colaboradores','Registro no sistema de gestão','Ajustes e correções pós-implantação','Criação de indicadores de monitoramento','Manual de uso do PCCS','Avaliação de resultados (90 dias)','Encerramento formal do projeto']}
-];
+  {n:'Levantamento e Diagnóstico Organizacional',d:'Coleta, análise e mapeamento da situação atual da empresa',a:[
+    {t:'Reunião de abertura e alinhamento estratégico',hint:'Registre os participantes, pauta e decisões tomadas',tipo:'reuniao'},
+    {t:'Coleta do organograma atual',hint:'Anexe o organograma em imagem, PDF ou informe o link',tipo:'organograma'},
+    {t:'Colaboradores importados e validados',hint:'Confirme que a planilha foi importada e os dados estão corretos',tipo:'planilha'},
+    {t:'Análise da estrutura de remuneração atual',hint:'Anexe ou descreva a atual política salarial',tipo:'documento'},
+    {t:'Entrevistas com líderes e gestores realizadas',hint:'Liste os líderes entrevistados e principais pontos levantados',tipo:'reuniao'},
+    {t:'Diagnóstico organizacional concluído',hint:'Anexe o relatório de diagnóstico final',tipo:'relatorio'}
+  ]},
+  {n:'Mapeamento e Descrição de Cargos',d:'Identificação e descrição funcional de todos os cargos',a:[
+    {t:'Cargos e funções identificados e listados',hint:'Liste todos os cargos encontrados e suas variações',tipo:'lista'},
+    {t:'Descrições de cargo elaboradas',hint:'Anexe o documento com as descrições de cargo (Word/PDF)',tipo:'descricao'},
+    {t:'CBO analisado e vinculado a cada cargo',hint:'Informe o código CBO de cada cargo mapeado',tipo:'cbo'},
+    {t:'Inconsistências de cargo identificadas',hint:'Documente os desvios de função encontrados',tipo:'documento'},
+    {t:'Validação com gestores concluída',hint:'Registre a aprovação dos gestores para cada descrição',tipo:'validacao'}
+  ]},
+  {n:'Avaliação e Hierarquização de Cargos',d:'Pontuação, classificação e hierarquia de cargos',a:[
+    {t:'Metodologia de avaliação definida',hint:'Descreva o método utilizado (pontos por fatores, etc)',tipo:'metodologia'},
+    {t:'Avaliação e pontuação dos cargos realizada',hint:'Anexe a planilha de avaliação com pontuações',tipo:'planilha'},
+    {t:'Hierarquia e níveis de carreira definidos',hint:'Anexe o organograma com a nova estrutura hierárquica',tipo:'organograma'},
+    {t:'Validação pelo comitê concluída',hint:'Registre a ata de aprovação do comitê',tipo:'ata'}
+  ]},
+  {n:'Pesquisa Salarial e Viabilidade Financeira',d:'Benchmark de mercado e análise do impacto financeiro',a:[
+    {t:'Pesquisa salarial de mercado realizada',hint:'Informe as fontes utilizadas (CAGED, pesquisas setoriais, etc)',tipo:'pesquisa'},
+    {t:'Benchmark P25/P50/P75 concluído',hint:'Anexe a tabela de mercado por cargo',tipo:'planilha'},
+    {t:'Impacto financeiro calculado',hint:'Anexe a planilha de impacto financeiro projetado',tipo:'planilha'},
+    {t:'Viabilidade aprovada pela diretoria',hint:'Registre a aprovação formal da diretoria',tipo:'aprovacao'}
+  ]},
+  {n:'Estrutura Salarial e Trilhas de Carreira',d:'Tabelas salariais, faixas e trilhas de desenvolvimento',a:[
+    {t:'Tabelas e faixas salariais criadas',hint:'Anexe a tabela salarial aprovada com mínimo/referência/máximo',tipo:'planilha'},
+    {t:'Trilhas de carreira definidas',hint:'Documente os critérios de progressão horizontal e vertical',tipo:'documento'},
+    {t:'Critérios de progressão estruturados',hint:'Descreva tempo de casa, avaliação, formação exigida',tipo:'documento'},
+    {t:'Política salarial redigida e aprovada',hint:'Anexe o documento da Política Salarial assinado',tipo:'politica'}
+  ]},
+  {n:'Governança e Comitê PCCS',d:'Constituição do comitê, regras e critérios de aprovação',a:[
+    {t:'Comitê PCCS constituído',hint:'Liste os membros e seus papéis no comitê',tipo:'comite'},
+    {t:'Regras e políticas do PCCS criadas',hint:'Anexe o regulamento interno do PCCS',tipo:'politica'},
+    {t:'Critérios de elegibilidade definidos',hint:'Documente quem pode ser promovido e em quais condições',tipo:'documento'},
+    {t:'Política validada juridicamente',hint:'Confirme revisão pelo jurídico ou DP',tipo:'validacao'}
+  ]},
+  {n:'Implantação e Sustentação',d:'Comunicação, treinamento e entrega final',a:[
+    {t:'Comunicação interna realizada',hint:'Anexe o material de comunicação enviado aos colaboradores',tipo:'comunicacao'},
+    {t:'Lideranças treinadas para aplicação do PCCS',hint:'Registre os líderes treinados e a data do treinamento',tipo:'treinamento'},
+    {t:'Implantação executada no sistema de RH',hint:'Confirme que os dados foram lançados no sistema de folha',tipo:'implantacao'},
+    {t:'Entrega final realizada ao cliente',hint:'Anexe o relatório final e a ata de encerramento assinada',tipo:'relatorio'}
+  ]}
+];;
 
 var FASE_STATUS=['Não iniciado','Planejado','Em andamento','Pendente','Concluído'];
 
@@ -1557,29 +1602,45 @@ function mapCols(headers){
 }
 
 function processRows(rows,colMap){
-  var cols=[];var seen={};
+  var cols=[];var seen={};var seenNome={};
+  // Words that indicate a TOTAL/SUMMARY row — skip these
+  var skipWords=['total','subtotal','soma','sum','totais','grand total','total geral','media','average','count','contagem'];
   rows.forEach(function(row){
     if(!row||!row.length)return;
     var gc=function(k){return colMap[k]!==undefined&&row[colMap[k]]!==undefined?(row[colMap[k]]||'').toString().trim():''};
     var n=cap(gc('nome'));
-    if(!n||n.toLowerCase()==='nome'||n.toLowerCase()==='colaborador')return;
+    if(!n)return;
+    var nl=n.toLowerCase();
+    // Skip header repetitions
+    if(nl==='nome'||nl==='colaborador'||nl==='funcionario'||nl==='empregado')return;
+    // Skip total/summary rows
+    var isTotal=skipWords.some(function(w){return nl===w||nl.startsWith(w+' ')||nl.endsWith(' '+w)});
+    if(isTotal)return;
+    // Skip rows where salary looks like a sum (> 50000 and no CPF - likely a total row)
+    var rawSal=gc('sal');
+    var salNum=parseFloat(parseSal(rawSal));
     var cpf=gc('cpf').replace(/\D/g,'');
+    if(!cpf&&salNum>50000&&n.length<20)return; // likely a total row without CPF
+    // Dedup by CPF
     if(cpf&&seen[cpf])return;
     if(cpf)seen[cpf]=true;
+    // Dedup by exact name (case-insensitive) when no CPF
+    if(!cpf){if(seenNome[nl])return;seenNome[nl]=true}
     // Normalize situacao
     var sit=gc('sit');
-    if(sit.toLowerCase()==='ativo'||sit.toLowerCase()==='active')sit='Trabalhando';
-    else if(sit.toLowerCase()==='afastado')sit='Afastado INSS';
-    else if(sit.toLowerCase()==='desligado'||sit.toLowerCase()==='inativo')sit='Desligado';
+    var sl=sit.toLowerCase();
+    if(sl==='ativo'||sl==='active'||sl==='ativa')sit='Trabalhando';
+    else if(sl==='afastado')sit='Afastado INSS';
+    else if(sl==='desligado'||sl==='inativo'||sl==='demitido')sit='Desligado';
+    else if(sl==='ferias'||sl==='férias')sit='Férias';
     if(!sit)sit='Trabalhando';
     cols.push({
       nome:n,
       cpf:cpf?cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'):'',
       cargo:cap(gc('cargo')),real:cap(gc('real')||gc('cargo')),
       depto:cap(gc('depto')),cc:gc('cc'),gestor:cap(gc('gestor')),unidade:cap(gc('unidade')),
-      vinc:gc('vinc')||'CLT',jornada:gc('jornada'),
-      sexo:gc('sexo'),
-      sal:parseSal(gc('sal')),comissao:parseSal(gc('comissao')),
+      vinc:gc('vinc')||'CLT',jornada:gc('jornada'),sexo:gc('sexo'),
+      sal:parseSal(rawSal),comissao:parseSal(gc('comissao')),
       gratif:parseSal(gc('gratif')),g40:gc('g40'),
       vfora:parseSal(gc('vfora')),premiao:parseSal(gc('premiao')),
       sit:sit,bene:gc('bene'),
@@ -1770,17 +1831,68 @@ function kbDrop(ev,col){
 
 // ══ IMPROVED detectIncons ══
 function detectIncons(emp){
-  var ic=[];var MIN_SAL=1412;
+  var ic=[];
+  var MIN_44H=1412; // 2025 minimum for 44h/week
+  // Calculate proportional minimum based on jornada
+  function getMinSal(jornada){
+    if(!jornada)return MIN_44H;
+    var j=jornada.toLowerCase();
+    if(j.indexOf('40h')>=0||j.indexOf('40 h')>=0)return Math.round(MIN_44H*40/44);
+    if(j.indexOf('30h')>=0||j.indexOf('30 h')>=0)return Math.round(MIN_44H*30/44);
+    if(j.indexOf('20h')>=0||j.indexOf('20 h')>=0)return Math.round(MIN_44H*20/44);
+    if(j.indexOf('12x36')>=0)return MIN_44H; // 12x36 = ~44h equivalent
+    if(j.indexOf('horista')>=0)return 0; // hourly - skip check
+    if(j.indexOf('parcial')>=0||j.indexOf('meio')>=0)return Math.round(MIN_44H*0.5);
+    return MIN_44H;
+  }
   (emp.colabs||[]).forEach(function(c,i){
     if(!c.nome)return;
-    if(!c.cargo&&!c.real)ic.push({i:i,n:c.nome,tipo:'Sem cargo CTPS definido',nivel:'Alto',sug:'Regularizar — risco trabalhista'});
-    if(!c.sal||parseFloat(c.sal)<MIN_SAL)ic.push({i:i,n:c.nome,tipo:'Salario abaixo do minimo (R$ '+MIN_SAL.toLocaleString('pt-BR')+')',nivel:'Alto',sug:'Regularizar urgente'});
-    if(c.cargo&&c.real&&c.cargo.toLowerCase()!==c.real.toLowerCase()&&Math.abs(c.cargo.length-c.real.length)>8)ic.push({i:i,n:c.nome,tipo:'Funcao real diverge do cargo CTPS',nivel:'Alto',sug:'Verificar CBO — desvio de funcao'});
-    if(c.sit==='Desligado')ic.push({i:i,n:c.nome,tipo:'Colaborador desligado no cadastro ativo',nivel:'Medio',sug:'Verificar necessidade'});
-    if(!c.depto)ic.push({i:i,n:c.nome,tipo:'Sem departamento vinculado',nivel:'Medio',sug:'Vincular ao organograma'});
-    if(!c.adm)ic.push({i:i,n:c.nome,tipo:'Data de admissao nao informada',nivel:'Medio',sug:'Informar para calculo de tempo'});
-    if(!c.cpf)ic.push({i:i,n:c.nome,tipo:'CPF nao informado',nivel:'Baixo',sug:'Obter para identificacao fiscal'});
-    if(!c.nasc)ic.push({i:i,n:c.nome,tipo:'Data de nascimento ausente',nivel:'Baixo',sug:'Informar para faixa etaria'});
+    var sal=parseFloat(c.sal)||0;
+    var minSal=getMinSal(c.jornada);
+    // Alto risks
+    if(!c.cargo&&!c.real)
+      ic.push({i:i,n:c.nome,tipo:'Sem cargo CTPS definido',nivel:'Alto',sug:'Regularizar — risco trabalhista'});
+    if(minSal>0&&(!sal||sal<minSal)){
+      var jornadaInfo=c.jornada?(' (jornada: '+c.jornada+', mínimo proporcional: R$ '+minSal.toLocaleString('pt-BR')+')'):' (mínimo: R$ '+minSal.toLocaleString('pt-BR')+')';
+      ic.push({i:i,n:c.nome,tipo:'Salário abaixo do mínimo proporcional'+jornadaInfo,nivel:'Alto',sug:'Verificar se jornada está correta ou regularizar salário'});
+    }
+    if(c.cargo&&c.real&&c.cargo.toLowerCase()!==c.real.toLowerCase()&&Math.abs(c.cargo.length-c.real.length)>6)
+      ic.push({i:i,n:c.nome,tipo:'Função real diverge do cargo CTPS',nivel:'Alto',sug:'Verificar CBO — risco de desvio de função'});
+    // Médio risks
+    if(c.sit==='Desligado')
+      ic.push({i:i,n:c.nome,tipo:'Colaborador desligado presente no cadastro',nivel:'Medio',sug:'Verificar necessidade de manutenção'});
+    if(!c.depto)
+      ic.push({i:i,n:c.nome,tipo:'Sem departamento vinculado',nivel:'Medio',sug:'Vincular ao organograma'});
+    if(!c.adm)
+      ic.push({i:i,n:c.nome,tipo:'Data de admissão não informada',nivel:'Medio',sug:'Informar para cálculo de tempo de empresa'});
+    if(!c.jornada)
+      ic.push({i:i,n:c.nome,tipo:'Jornada de trabalho não informada',nivel:'Medio',sug:'Necessária para verificação do salário mínimo proporcional'});
+    // Baixo risks
+    if(!c.cpf)
+      ic.push({i:i,n:c.nome,tipo:'CPF não informado',nivel:'Baixo',sug:'Obter CPF para identificação fiscal'});
+    if(!c.nasc)
+      ic.push({i:i,n:c.nome,tipo:'Data de nascimento não informada',nivel:'Baixo',sug:'Informar para cálculo de faixa etária'});
+  });
+  // Check: same function, different salaries
+  var funcSals={};
+  (emp.colabs||[]).forEach(function(c,i){
+    var fn=cap(c.real||c.cargo||'');
+    if(!fn)return;
+    var sal=parseFloat(c.sal)||0;
+    if(!funcSals[fn])funcSals[fn]=[];
+    funcSals[fn].push({i:i,nome:c.nome,sal:sal})
+  });
+  Object.keys(funcSals).forEach(function(fn){
+    var items=funcSals[fn].filter(function(x){return x.sal>0});
+    if(items.length<2)return;
+    var sals=items.map(function(x){return x.sal});
+    var minS=Math.min.apply(null,sals);var maxS=Math.max.apply(null,sals);
+    var diffPct=minS>0?Math.round((maxS-minS)/minS*100):0;
+    if(diffPct>30){// flag if > 30% variation in same role
+      items.forEach(function(it){
+        ic.push({i:it.i,n:it.nome,tipo:'Função "'+fn+'" — variação salarial de '+diffPct+'% entre colaboradores (min R$ '+minS.toLocaleString('pt-BR',{minimumFractionDigits:2})+' / max R$ '+maxS.toLocaleString('pt-BR',{minimumFractionDigits:2})+')',nivel:'Medio',sug:'Verificar equidade salarial para mesma função'})
+      })
+    }
   });
   return ic
 }
@@ -2278,19 +2390,28 @@ function renderColabsDashboard(emp){
   var fSit2=(document.getElementById('dash-fil-sit')||{}).value||'';
   var fVin2=(document.getElementById('dash-fil-vinc')||{}).value||'';
   if(fDep2)colabs=colabs.filter(function(c){return c.depto===fDep2});
-  if(fSit2)colabs=colabs.filter(function(c){return(c.sit||'')=== fSit2});
-  if(fVin2)colabs=colabs.filter(function(c){return(c.vinc||'')=== fVin2});
-  // Also update depto filter options
-  var allDeptos=[...new Set((emp.colabs||[]).map(function(c){return c.depto}).filter(Boolean))].sort();
-  var dd2=document.getElementById('dash-fil-depto');
-  if(dd2){var cv2=dd2.value;dd2.innerHTML='<option value="">Todos os departamentos</option>';allDeptos.forEach(function(d){dd2.innerHTML+='<option value="'+eh(d)+'"'+(cv2===d?' selected':'')+'>'+eh(d)+'</option>'});dd2.value=cv2}
-  if(!colabs.length){el.innerHTML='';return}
+  if(fSit2)colabs=colabs.filter(function(c){return(c.sit||'')===fSit2});
+  if(fVin2)colabs=colabs.filter(function(c){return(c.vinc||'')===fVin2});
+  // Update depto filter options
+  var allD=[...new Set((emp.colabs||[]).map(function(c){return c.depto}).filter(Boolean))].sort();
+  var dd=document.getElementById('dash-fil-depto');
+  if(dd){var cv=dd.value;dd.innerHTML='<option value="">Todos os departamentos</option>';allD.forEach(function(d){dd.innerHTML+='<option value="'+eh(d)+'"'+(cv===d?' selected':'')+'>'+eh(d)+'</option>'});dd.value=cv}
+  if(!colabs.length){el.innerHTML='<div class="empty"><div class="empty-ico">&#128101;</div><p>Nenhum colaborador. Importe ou cadastre manualmente.</p></div>';return}
   var m=getMoeda();
-  // ── Aggregate all financial data ──
-  var totSal=0,totGrat=0,totG40=0,totFora=0,totCom=0,totPre=0,totGeral=0;
-  var semSal=0,semDepto=0,semAdm=0,semCargo=0,salBaixo=0;
-  var vincs={},sits={},deptos={},jornadas={};
+  var fmtV=function(v){return fmtMoeda(v)};
+  // ── Calculate totals CORRECTLY ──
+  var totSal=0,totGrat=0,totG40=0,totFora=0,totCom=0,totPre=0;
+  var semSal=0,semDepto=0,semCargo=0,salBaixo=0;
+  var vincs={},sits={},deptos={};
   var salarios=[];
+  function getMinSalFn(j){
+    if(!j)return 1412;var jl=j.toLowerCase();
+    if(jl.indexOf('40h')>=0)return 1284;
+    if(jl.indexOf('30h')>=0)return 963;
+    if(jl.indexOf('20h')>=0)return 642;
+    if(jl.indexOf('horista')>=0)return 0;
+    return 1412
+  }
   colabs.forEach(function(c){
     var sal=parseFloat(c.sal)||0;
     var gra=parseFloat(c.gratif)||0;
@@ -2298,70 +2419,93 @@ function renderColabsDashboard(emp){
     var vfr=parseFloat(c.vfora)||0;
     var com=parseFloat(c.comissao)||0;
     var pre=parseFloat(c.premiao)||0;
-    var tot=sal+gra+g40+vfr+com+pre;
-    totSal+=sal;totGrat+=gra;totG40+=g40;totFora+=vfr;totCom+=com;totPre+=pre;totGeral+=tot;
-    if(sal>0)salarios.push(sal);
-    // Inconsistencies
+    // Accumulate SEPARATELY (do NOT add to totGeral twice)
+    totSal+=sal;totGrat+=gra;totG40+=g40;totFora+=vfr;totCom+=com;totPre+=pre;
+    if(sal>0)salarios.push({val:sal,nome:c.nome,depto:c.depto||''});
+    var minS=getMinSalFn(c.jornada);
     if(!sal||sal<=0)semSal++;
     if(!c.depto)semDepto++;
-    if(!c.adm)semAdm++;
-    if(!c.cargo)semCargo++;
-    if(sal>0&&sal<1412)salBaixo++;
-    // Groupings
-    var v=c.vinc||'Não informado';vincs[v]=(vincs[v]||0)+1;
-    var s=c.sit||'Não informado';sits[s]=(sits[s]||0)+1;
-    var d=c.depto||'Não informado';deptos[d]=(deptos[d]||0)+{totSal:0,count:0};
-    if(!deptos[d]){deptos[d]={count:0,totSal:0,totGeral:0}}
-    deptos[d].count++;deptos[d].totSal+=sal;deptos[d].totGeral+=tot;
-    var j=c.jornada||'Não informado';jornadas[j]=(jornadas[j]||{count:0});jornadas[j].count++;
+    if(!c.cargo&&!c.real)semCargo++;
+    if(minS>0&&sal>0&&sal<minS)salBaixo++;
+    var v=c.vinc||'Não informado';if(!vincs[v])vincs[v]=0;vincs[v]++;
+    var s=c.sit||'Não informado';if(!sits[s])sits[s]=0;sits[s]++;
+    var d=c.depto||'Não informado';
+    if(!deptos[d])deptos[d]={count:0,totSal:0,totGrat:0,totG40:0,totFora:0,totGeral:0};
+    deptos[d].count++;deptos[d].totSal+=sal;deptos[d].totGrat+=gra;
+    deptos[d].totG40+=g40;deptos[d].totFora+=vfr;
+    deptos[d].totGeral+=sal+gra+g40+vfr+com+pre
   });
+  var totGeral=totSal+totGrat+totG40+totFora+totCom+totPre;
   var n=colabs.length;
-  var avgSal=salarios.length?Math.round(salarios.reduce(function(a,b){return a+b},0)/salarios.length):0;
-  var minSal=salarios.length?Math.min.apply(null,salarios):0;
-  var maxSal=salarios.length?Math.max.apply(null,salarios):0;
-  var fmtV=function(v){return fmtMoeda(v)};
-  // ── Build HTML ──
+  var salVals=salarios.map(function(x){return x.val});
+  var avgSal=salVals.length?Math.round(salVals.reduce(function(a,b){return a+b},0)/salVals.length):0;
+  var minSal=salVals.length?Math.min.apply(null,salVals):0;
+  var maxSal=salVals.length?Math.max.apply(null,salVals):0;
+  var minNome=salarios.filter(function(x){return x.val===minSal})[0];
+  var maxNome=salarios.filter(function(x){return x.val===maxSal})[0];
+  // ── SAME FUNCTION DIFF SALARY check ──
+  var funcSals2={};
+  colabs.forEach(function(c){
+    var fn=cap(c.real||c.cargo||'');
+    if(!fn)return;
+    var sal=parseFloat(c.sal)||0;if(!sal)return;
+    if(!funcSals2[fn])funcSals2[fn]=[];funcSals2[fn].push(sal)
+  });
+  var funcIncons=Object.entries(funcSals2).filter(function(kv){
+    if(kv[1].length<2)return false;
+    var mn=Math.min.apply(null,kv[1]);var mx=Math.max.apply(null,kv[1]);
+    return mn>0&&(mx-mn)/mn>0.30
+  });
+  // ── HTML ──
   var html='';
-  // ── KPI Cards ──
-  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.6rem;margin-bottom:1rem">';
-  html+=kpiCard(fmtV(totSal),'Total Folha Base','gd','&#128181;');
-  html+=kpiCard(fmtV(totGeral),'Total Remuneração','bl','&#127942;');
-  html+=kpiCard(fmtV(avgSal),'Salário Médio','yw','&#9830;');
-  html+=kpiCard(fmtV(minSal),'Menor Salário','t2','&#9661;');
-  html+=kpiCard(fmtV(maxSal),'Maior Salário','gr','&#9651;');
+  // KPI row
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:.6rem;margin-bottom:.8rem">';
+  html+=kpiCard(fmtV(totSal),'Total Salário Base','gd','&#128181;');
+  html+=kpiCard(fmtV(totGrat),'Total Gratificações','bl','&#11088;');
+  html+=kpiCard(fmtV(totG40),'Total 40% Gratif.','yw','&#9670;');
+  html+=kpiCard(fmtV(totFora),'Total por Fora','pu','&#128179;');
+  html+=kpiCard(fmtV(totGeral),'TOTAL GERAL','gr','&#9651;');
+  html+=kpiCard(fmtV(avgSal),'Salário Médio','t2','&#9830;');
+  html+=kpiCard(fmtV(minSal)+(minNome?' <small style="font-size:.5rem;color:var(--t3);display:block">'+eh(minNome.nome.split(' ')[0])+'</small>':''),'Menor Salário','t3','&#9661;');
+  html+=kpiCard(fmtV(maxSal)+(maxNome?' <small style="font-size:.5rem;color:var(--t3);display:block">'+eh(maxNome.nome.split(' ')[0])+'</small>':''),'Maior Salário','gr','&#9651;');
   html+=kpiCard(n,'Colaboradores','t2','&#128101;');
   html+=kpiCard(semSal,'Sem Salário',semSal>0?'rd':'gr','&#9888;');
-  html+=kpiCard(salBaixo,'Abaixo Mínimo',salBaixo>0?'rd':'gr','&#9940;');
+  html+=kpiCard(salBaixo,'Abaixo Mínimo*',salBaixo>0?'yw':'gr','&#9940;');
+  html+=kpiCard(funcIncons.length,'Funções c/ variação',funcIncons.length>0?'yw':'gr','&#9878;');
   html+='</div>';
-  // ── Remuneração Breakdown ──
-  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1rem">';
-  // Left: Breakdown
-  html+='<div class="card"><div class="sec-t">&#9830; Composição da Folha</div>';
-  var items=[['Salário Base',totSal,'var(--gd)'],['Gratificação',totGrat,'#60a5fa'],['40% Gratificação',totG40,'var(--yw)'],['R$ por Fora',totFora,'#a78bfa'],['Comissão',totCom,'var(--gr)'],['Premiação',totPre,'#f472b6']];
+  html+='<p style="font-size:.7rem;color:var(--t3);margin-bottom:.8rem">* Salário mínimo proporcional à jornada (44h=R$1.412 | 40h=R$1.284 | 30h=R$963 | 20h=R$642)</p>';
+  // ── Composição da Folha ──
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">';
+  html+='<div class="card"><div class="sec-t">&#9830; Composição Total da Folha</div>';
+  var items=[
+    ['Salário Base',totSal,'var(--gd)'],
+    ['Gratificações',totGrat,'#60a5fa'],
+    ['40% Gratificação',totG40,'var(--yw)'],
+    ['R$ por Fora',totFora,'#a78bfa'],
+    ['Comissão',totCom,'var(--gr)'],
+    ['Premiação',totPre,'#f472b6']
+  ];
   items.forEach(function(it){
     if(it[1]<=0)return;
     var pct=totGeral>0?Math.round(it[1]/totGeral*100):0;
-    html+='<div style="margin-bottom:.5rem"><div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.2rem">'+
+    html+='<div style="margin-bottom:.45rem"><div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.18rem">'+
       '<span style="color:var(--t2)">'+it[0]+'</span>'+
-      '<span style="color:'+it[2]+';font-weight:600">'+fmtV(it[1])+' <span style="color:var(--t3);font-weight:400">('+pct+'%)</span></span></div>'+
-      '<div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden">'+
-        '<div style="height:100%;width:'+pct+'%;background:'+it[2]+';border-radius:3px;transition:width .5s"></div>'+
-      '</div></div>'
+      '<span style="color:'+it[2]+';font-weight:600">'+fmtV(it[1])+'<span style="color:var(--t3);font-weight:400"> '+pct+'%</span></span></div>'+
+      '<div style="height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden">'+
+        '<div style="height:100%;width:'+pct+'%;background:'+it[2]+';border-radius:3px"></div></div></div>'
   });
-  html+='<div style="border-top:1px solid rgba(255,255,255,.08);margin-top:.5rem;padding-top:.5rem;display:flex;justify-content:space-between;font-size:.82rem"><strong>TOTAL GERAL</strong><strong style="color:var(--gd)">'+fmtV(totGeral)+'</strong></div>';
+  html+='<div style="border-top:1px solid rgba(255,255,255,.1);margin-top:.5rem;padding-top:.5rem;display:flex;justify-content:space-between"><strong>TOTAL GERAL</strong><strong style="color:var(--gd)">'+fmtV(totGeral)+'</strong></div>';
   html+='</div>';
-  // Right: Situação + Vínculo
+  // Situação + Vínculo
   html+='<div style="display:flex;flex-direction:column;gap:.6rem">';
   html+='<div class="card"><div class="sec-t">&#9679; Por Situação</div>';
-  Object.entries(sits).sort(function(a,b){return b[1]-a[1]}).slice(0,6).forEach(function(kv){
+  Object.entries(sits).sort(function(a,b){return b[1]-a[1]}).forEach(function(kv){
     var pct=Math.round(kv[1]/n*100);
-    var cor=kv[0]==='Trabalhando'?'var(--gr)':kv[0]==='Desligado'?'var(--rd)':kv[0]==='Férias'?'var(--bl)':'var(--yw)';
+    var cor=kv[0]==='Trabalhando'?'var(--gr)':kv[0]==='Desligado'?'var(--rd)':'var(--yw)';
     html+='<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem;font-size:.78rem">'+
       '<div style="width:8px;height:8px;border-radius:50%;background:'+cor+';flex-shrink:0"></div>'+
       '<span style="flex:1;color:var(--t2)">'+eh(kv[0])+'</span>'+
-      '<span style="font-weight:600">'+kv[1]+'</span>'+
-      '<span style="color:var(--t3);width:35px;text-align:right">'+pct+'%</span>'+
-    '</div>'
+      '<span style="font-weight:600">'+kv[1]+'</span><span style="color:var(--t3);width:32px;text-align:right">'+pct+'%</span></div>'
   });
   html+='</div>';
   html+='<div class="card"><div class="sec-t">&#9632; Por Vínculo</div>';
@@ -2369,64 +2513,77 @@ function renderColabsDashboard(emp){
     var pct=Math.round(kv[1]/n*100);
     html+='<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem;font-size:.78rem">'+
       '<span style="flex:1;color:var(--t2)">'+eh(kv[0])+'</span>'+
-      '<span style="font-weight:600">'+kv[1]+'</span>'+
-      '<span style="color:var(--t3);width:35px;text-align:right">'+pct+'%</span>'+
-    '</div>'
+      '<span style="font-weight:600">'+kv[1]+'</span><span style="color:var(--t3);width:32px;text-align:right">'+pct+'%</span></div>'
   });
-  html+='</div>';
-  html+='</div></div>';
-  // ── Por Departamento / Centro de Custo ──
-  html+='<div class="card" style="margin-bottom:1rem"><div class="sec-t">&#9671; Folha por Departamento</div>';
-  var deptList=Object.entries(deptos).sort(function(a,b){return b[1].totSal-a[1].totSal});
-  html+='<div style="overflow-x:auto"><table style="font-size:.78rem"><thead><tr>'+
-    '<th>Departamento</th><th>Colaboradores</th><th>Folha Base</th><th>Total Rem.</th><th>Média Sal.</th><th>% da Folha</th>'+
-  '</tr></thead><tbody>';
-  deptList.forEach(function(kv){
+  html+='</div></div></div>';
+  // ── Folha por Departamento ──
+  html+='<div class="card" style="margin-bottom:.8rem"><div class="sec-t">&#9671; Folha por Departamento</div><div style="overflow-x:auto"><table style="font-size:.77rem"><thead><tr>'+
+    '<th>Departamento</th><th style="text-align:center">Qtd.</th><th>Sal. Base</th><th>Gratif.</th><th>40% Gratif</th><th>R$ por Fora</th><th>TOTAL</th><th>Média Sal.</th><th>% Folha</th></tr></thead><tbody>';
+  Object.entries(deptos).sort(function(a,b){return b[1].totSal-a[1].totSal}).forEach(function(kv){
     var d=kv[1];var pct=totSal>0?Math.round(d.totSal/totSal*100):0;
     var avg2=d.count>0?Math.round(d.totSal/d.count):0;
-    html+='<tr>'+
-      '<td style="font-weight:600">'+eh(kv[0])+'</td>'+
+    html+='<tr><td style="font-weight:600">'+eh(kv[0])+'</td>'+
       '<td style="text-align:center">'+d.count+'</td>'+
       '<td style="color:var(--gd)">'+fmtV(d.totSal)+'</td>'+
-      '<td style="color:var(--t2)">'+fmtV(d.totGeral)+'</td>'+
+      '<td style="color:var(--t2)">'+fmtV(d.totGrat)+'</td>'+
+      '<td style="color:var(--yw)">'+fmtV(d.totG40)+'</td>'+
+      '<td style="color:#a78bfa">'+fmtV(d.totFora)+'</td>'+
+      '<td style="font-weight:700">'+fmtV(d.totGeral)+'</td>'+
       '<td>'+fmtV(avg2)+'</td>'+
-      '<td><div style="display:flex;align-items:center;gap:.4rem">'+
-        '<div style="width:60px;height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden">'+
-          '<div style="height:100%;width:'+pct+'%;background:var(--gd);border-radius:3px"></div></div>'+
-        '<span style="color:var(--gd);font-weight:600">'+pct+'%</span>'+
-      '</div></td>'+
+      '<td><div style="display:flex;align-items:center;gap:.3rem">'+
+        '<div style="width:45px;height:5px;background:rgba(255,255,255,.08);border-radius:3px"><div style="height:100%;width:'+pct+'%;background:var(--gd);border-radius:3px"></div></div>'+
+        '<span style="color:var(--gd);font-weight:600">'+pct+'%</span></div></td>'+
     '</tr>'
   });
-  // Totals row
   html+='<tr style="background:rgba(201,168,76,.1);border-top:2px solid rgba(201,168,76,.3)">'+
     '<td style="font-weight:700">TOTAL</td><td style="text-align:center;font-weight:700">'+n+'</td>'+
     '<td style="color:var(--gd);font-weight:700">'+fmtV(totSal)+'</td>'+
-    '<td style="color:var(--gd);font-weight:700">'+fmtV(totGeral)+'</td>'+
+    '<td style="color:var(--t2);font-weight:700">'+fmtV(totGrat)+'</td>'+
+    '<td style="color:var(--yw);font-weight:700">'+fmtV(totG40)+'</td>'+
+    '<td style="color:#a78bfa;font-weight:700">'+fmtV(totFora)+'</td>'+
+    '<td style="color:var(--gd);font-weight:700;font-size:.9rem">'+fmtV(totGeral)+'</td>'+
     '<td style="font-weight:700">'+fmtV(avgSal)+'</td><td>100%</td></tr>';
   html+='</tbody></table></div></div>';
-  // ── Inconsistências Financeiras ──
+  // ── Funções com variação salarial ──
+  if(funcIncons.length){
+    html+='<div class="card" style="margin-bottom:.8rem"><div class="sec-t" style="color:var(--yw)">&#9878; Funções com Variação Salarial Acima de 30%</div>';
+    funcIncons.forEach(function(kv){
+      var mn=Math.min.apply(null,kv[1]);var mx=Math.max.apply(null,kv[1]);
+      var diff=Math.round((mx-mn)/mn*100);
+      html+='<div style="display:flex;align-items:center;gap:.8rem;padding:.5rem;background:rgba(245,158,11,.05);border-radius:var(--r2);margin-bottom:.4rem;font-size:.79rem">'+
+        '<span style="flex:1;font-weight:600">'+eh(kv[0])+'</span>'+
+        '<span style="color:var(--t2)">'+kv[1].length+' colaboradores</span>'+
+        '<span style="color:var(--yw)">'+fmtV(mn)+' → '+fmtV(mx)+'</span>'+
+        '<span class="b by" style="font-size:.65rem">'+diff+'% variação</span>'+
+      '</div>'
+    });
+    html+='</div>'
+  }
+  // ── Inconsistências financeiras ──
   var inconsList=[];
   colabs.forEach(function(c,i){
     var sal=parseFloat(c.sal)||0;
+    var minS=getMinSalFn(c.jornada);
     if(!sal)inconsList.push({nome:c.nome,tipo:'Sem salário informado',nivel:'Alto',idx:i});
-    else if(sal<1412)inconsList.push({nome:c.nome,tipo:'Salário abaixo do mínimo (R$ 1.412)',nivel:'Alto',idx:i,val:sal});
-    if(!c.cargo)inconsList.push({nome:c.nome,tipo:'Sem cargo CTPS',nivel:'Alto',idx:i});
+    else if(minS>0&&sal<minS)inconsList.push({nome:c.nome,tipo:'Salário R$ '+sal.toLocaleString('pt-BR',{minimumFractionDigits:2})+' abaixo do mínimo proporcional ('+( c.jornada||'44h')+' → R$ '+minS.toLocaleString('pt-BR')+')',nivel:'Alto',idx:i});
+    if(!c.cargo&&!c.real)inconsList.push({nome:c.nome,tipo:'Sem cargo CTPS',nivel:'Alto',idx:i});
     if(!c.depto)inconsList.push({nome:c.nome,tipo:'Sem departamento',nivel:'Médio',idx:i});
     if(!c.jornada)inconsList.push({nome:c.nome,tipo:'Jornada não informada',nivel:'Médio',idx:i});
-    if(!c.adm)inconsList.push({nome:c.nome,tipo:'Data de admissão ausente',nivel:'Médio',idx:i});
-    if(c.g40==='Sim'&&sal<=0)inconsList.push({nome:c.nome,tipo:'40% Gratif. marcado mas sem salário base',nivel:'Alto',idx:i});
   });
   if(inconsList.length){
-    html+='<div class="card"><div class="sec-t" style="color:var(--rd)">&#9888; Inconsistências Identificadas ('+inconsList.length+')</div>';
-    html+='<div style="max-height:220px;overflow-y:auto">';
+    html+='<div class="card"><div class="sec-t" style="color:var(--rd)">&#9888; Inconsistências ('+inconsList.length+')</div><div style="max-height:220px;overflow-y:auto">';
+    var altos=inconsList.filter(function(x){return x.nivel==='Alto'});
+    var medios=inconsList.filter(function(x){return x.nivel==='Médio'});
+    html+='<div style="display:flex;gap:.5rem;margin-bottom:.5rem">'+
+      '<span class="b br">Alto: '+altos.length+'</span>'+
+      '<span class="b by">Médio: '+medios.length+'</span></div>';
     inconsList.forEach(function(ic){
-      var cls=ic.nivel==='Alto'?'var(--rd)':'var(--yw)';
-      html+='<div style="display:flex;align-items:center;gap:.6rem;padding:.4rem .5rem;border-bottom:1px solid rgba(255,255,255,.04);font-size:.78rem">'+
-        '<span style="width:6px;height:6px;border-radius:50%;background:'+cls+';flex-shrink:0"></span>'+
-        '<span style="flex:1;font-weight:600">'+eh(ic.nome)+'</span>'+
-        '<span style="color:var(--t2)">'+ic.tipo+'</span>'+
-        '<span style="font-size:.65rem;padding:.12rem .4rem;border-radius:10px;background:rgba(255,255,255,.06);color:'+cls+'">'+ic.nivel+'</span>'+
-        '<button class="btn bh bs" style="font-size:.65rem;padding:.1rem .4rem" onclick="verColabDet('+ic.idx+')">Ver</button>'+
+      var cor=ic.nivel==='Alto'?'var(--rd)':'var(--yw)';
+      html+='<div style="display:flex;align-items:center;gap:.6rem;padding:.38rem .5rem;border-bottom:1px solid rgba(255,255,255,.04);font-size:.77rem">'+
+        '<span style="width:6px;height:6px;border-radius:50%;background:'+cor+';flex-shrink:0"></span>'+
+        '<span style="font-weight:600;min-width:120px">'+eh(ic.nome)+'</span>'+
+        '<span style="flex:1;color:var(--t2)">'+ic.tipo+'</span>'+
+        '<button class="btn bh bs" style="font-size:.62rem;padding:.1rem .35rem" onclick="verColabDet('+ic.idx+')">Ver</button>'+
       '</div>'
     });
     html+='</div></div>'
@@ -2448,6 +2605,8 @@ function colabTab(id,btn){
   if(btn)btn.classList.add('on');
   if(id==='ctab-dash'&&empAtual)renderColabsDashboard(empAtual)
 }
+
+
 </script>
 </body>
 </html>
