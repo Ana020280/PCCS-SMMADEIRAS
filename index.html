@@ -862,6 +862,7 @@ input[type="date"].inp{color-scheme:dark}
 
 
 
+
 // PCCS 360 v3.1 — JavaScript Enhanced
 // Changelog, projeto por status, colaborador detalhe, fases melhoradas, tp9
 
@@ -1029,7 +1030,7 @@ function editEmp(id){var em=(gst('emps')||[]).find(function(e){return e.id===id}
 function delEmp(id){if(!confirm('Excluir projeto?'))return;sst('emps',(gst('emps')||[]).filter(function(e){return e.id!==id}));toast('Excluído.');renderEmps();if(document.getElementById('vdash').classList.contains('on'))renderDash()}
 
 // ═══ PROGRESS UTILS ═══
-function _calcProgBase(emp){var t=0,d=0;(emp.fases||[]).forEach(function(f){(f.atividades||[]).forEach(function(a){t++;if(a.feito||a.st==='Concluído')d++})});return t>0?Math.round(d/t*100):0}
+
 function calcFaseProg(fase){var t=(fase.atividades||[]).length,d=(fase.atividades||[]).filter(function(a){return a.feito||a.st==='Concluído'}).length;return t>0?Math.round(d/t*100):0}
 function autoFaseStatus(fase){var p=calcFaseProg(fase);if(p===100)fase.status='Concluído';else if(p>0&&fase.status==='Não iniciado')fase.status='Em andamento';return fase}
 
@@ -2292,18 +2293,33 @@ var FP2=[
   }
 ];
 
-var _origCalcProg=_calcProgBase;
+
 function calcProg(emp){
   if(!emp)return 0;
-  if(!emp.fases2||Object.keys(emp.fases2).length===0){return _origCalcProg(emp)}
-  var tot=0,done=0;
-  FP2.forEach(function(fase,fi){
-    var fdata=(emp.fases2||{})[fi]||{};
-    fase.blocos.forEach(function(b){tot++;var bd=fdata[b.k]||{};if(bd.st==='Concluído'||bd.st==='Concluido')done++})
+  // If fases2 has data, use strategic blocks
+  if(emp.fases2&&typeof emp.fases2==='object'&&Object.keys(emp.fases2).length>0&&typeof FP2!=='undefined'){
+    var tot=0,done=0;
+    FP2.forEach(function(fase,fi){
+      var fdata=(emp.fases2||{})[fi]||{};
+      (fase.blocos||[]).forEach(function(b){
+        tot++;
+        var bd=fdata[b.k]||{};
+        if(bd.st==='Concluído'||bd.st==='Concluido')done++
+      })
+    });
+    if(tot>0)return Math.round(done/tot*100)
+  }
+  // Fallback: count from fases/atividades (old structure)
+  var t=0,d=0;
+  (emp.fases||[]).forEach(function(f){
+    (f.atividades||[]).forEach(function(a){
+      t++;if(a.feito||a.st==='Concluído'||a.st==='Concluido')d++
+    })
   });
-  return tot>0?Math.round(done/tot*100):0
+  return t>0?Math.round(d/t*100):0
 }
 var blocoAnexosPending=[];
+
 
 
 
