@@ -865,6 +865,7 @@ input[type="date"].inp{color-scheme:dark}
 
 
 
+
 // PCCS 360 v3.1 — JavaScript Enhanced
 // Changelog, projeto por status, colaborador detalhe, fases melhoradas, tp9
 
@@ -1647,8 +1648,10 @@ function delDepto(i){if(!empAtual||!confirm('Remover?'))return;var emps=gst('emp
 
 // ═══ INCONSISTÊNCIAS ═══
 function detectIncons(emp){
-  var ic=[],MIN=1412;
-  function minS(j){
+  var ic=[];var colabs=emp.colabs||[];
+  var MIN=1412;
+
+  function minSal(j){
     if(!j)return MIN;var jl=j.toLowerCase();
     if(jl.indexOf('horista')>=0||jl.indexOf('diarista')>=0)return 0;
     if(jl.indexOf('meio')>=0||jl.indexOf('parcial')>=0||jl.indexOf('aprendiz')>=0||jl.indexOf('estagi')>=0)return 706;
@@ -1656,22 +1659,49 @@ function detectIncons(emp){
     if(jl.indexOf('30h')>=0)return 963;if(jl.indexOf('20h')>=0)return 642;
     return MIN
   }
-  (emp.colabs||[]).forEach(function(c,i){
-    if(!c.nome)return;
-    var sal=parseFloat(c.sal)||0,ms=minS(c.jornada);
-    if(!c.cargo&&!c.real)ic.push({i:i,n:c.nome,tipo:'Sem cargo CTPS',nivel:'Alto',sug:'Regularizar'});
-    if(ms>0&&(!sal||sal<ms))ic.push({i:i,n:c.nome,tipo:'Sal. abaixo do minimo'+(c.jornada?' ('+c.jornada+' min R$ '+ms.toLocaleString('pt-BR')+')':""),nivel:'Alto',sug:'Verificar jornada'});
-    if(c.cargo&&c.real&&c.cargo.toLowerCase()!==c.real.toLowerCase()&&Math.abs(c.cargo.length-c.real.length)>6)
-      ic.push({i:i,n:c.nome,tipo:'Funcao real diverge do cargo CTPS',nivel:'Alto',sug:'Verificar CBO'});
-    if(!c.depto)ic.push({i:i,n:c.nome,tipo:'Sem departamento',nivel:'Medio',sug:'Vincular ao organograma'});
-    if(!c.adm)ic.push({i:i,n:c.nome,tipo:'Data admissao ausente',nivel:'Medio',sug:'Informar'});
-    if(!c.cpf)ic.push({i:i,n:c.nome,tipo:'CPF nao informado',nivel:'Baixo',sug:'Obter'})
+
+  function addIc(i,nome,tipo,nivel,cat,sug,extra){
+    ic.push({i:i,n:nome,tipo:tipo,nivel:nivel,cat:cat||tipo,sug:sug||'',extra:extra||'',depto:colabs[i]?colabs[i].depto||'':''})
+  }
+
+  // ── NÍVEL 1: CRÍTICO (risco legal imediato) ──
+  colabs.forEach(function(c,i){
+    var sal=parseFloat(c.sal)||0;var ms=minSal(c.jornada);
+
+    // 1.1 Salário abaixo do mínimo legal — CLT art. 76
+    if(ms>0&&sal>0&&sal<ms)
+      addIc(i,c.nome,'Salário abaixo do mínimo proporcional','Critico','Remuneração',
+        'Regularizar urgente — multa e ação trabalhista',
+        'Jornada: '+(c.jornada||'não informada')+' → Mínimo: R$ '+ms.toLocaleString('pt-BR'));
+
+    // 1.2 Sem cargo CTPS — obrigação legal CLT art. 29
+    if(!c.cargo&&!c.real)
+      addIc(i,c.nome,'Sem cargo CTPS registrado','Critico','Cargo/Função',
+        'Definir e registrar cargo CTPS imediatamente','Risco: nulidade do contrato');
+
+    // 1.3 Desvio de função grave (cargo ≠ função real + salário diferente)
+    if(c.cargo&&c.real&&c.cargo.toLowerCase()!==c.real.toLowerCase()){
+      var cartLen=Math.abs(c.cargo.length-c.real.length);
+      if(cartLen>8)
+        addIc(i,c.nome,'Desvio de função — cargo CTPS diverge da função real','Critico','Cargo/Função',
+          'Regularizar CTPS ou formalizar desvio — risco de equiparação salarial',
+          'CTPS: '+c.cargo+' | Real: '+c.real)
+    }
+
+    // 1.4 Salário zero com vínculo ativo
+    if((!sal||sal<=0)&&c.sit==='Trabalhando')
+      addIc(i,c.nome,'Salário não informado — colaborador ativo','Critico','Remuneração',
+        'Lançar salário base imediatamente','Vínculo: '+(c.vinc||'não informado'))
   });
+
+  // ── NÍVEL 2: ALTO (risco trabalhista / equidade) ──
+
+  // 2.1 Mesma função, variação salarial > 30%
   var funcSals={};
-  (emp.colabs||[]).forEach(function(c,i){
+  colabs.forEach(function(c,i){
     var fn=cap(c.real||c.cargo||'');if(!fn)return;
     var sal=parseFloat(c.sal)||0;if(!sal)return;
-    if(!funcSals[fn])funcSals[fn]=[];funcSals[fn].push({i:i,nome:c.nome,sal:sal})
+    if(!funcSals[fn])funcSals[fn]=[];funcSals[fn].push({i:i,nome:c.nome,sal:sal,depto:c.depto||''})
   });
   Object.keys(funcSals).forEach(function(fn){
     var items=funcSals[fn].filter(function(x){return x.sal>0});if(items.length<2)return;
@@ -1679,50 +1709,192 @@ function detectIncons(emp){
     var mn=Math.min.apply(null,sals),mx=Math.max.apply(null,sals);
     var diff=mn>0?Math.round((mx-mn)/mn*100):0;
     if(diff>30)items.forEach(function(it){
-      ic.push({i:it.i,n:it.nome,tipo:'Funcao "'+fn+'" variacao salarial '+diff+'%',nivel:'Medio',sug:'Verificar equidade'})
+      ic.push({i:it.i,n:it.nome,tipo:'Equidade salarial — mesma função com variação de '+diff+'%',nivel:'Alto',
+        cat:'Equidade Salarial',sug:'Revisar e alinhar faixas salariais por função',
+        extra:'Função: '+fn+' | Faixa: R$ '+mn.toLocaleString('pt-BR',{minimumFractionDigits:2})+' a R$ '+mx.toLocaleString('pt-BR',{minimumFractionDigits:2}),
+        depto:it.depto})
     })
   });
+
+  // 2.2 Inversão salarial (gestor ganha menos que subordinado)
+  var gestorSals={};
+  colabs.forEach(function(c){
+    var sal=parseFloat(c.sal)||0;if(!sal||!c.nome)return;
+    gestorSals[cap(c.nome)]=sal
+  });
+  colabs.forEach(function(c,i){
+    if(!c.gestor)return;
+    var salG=gestorSals[cap(c.gestor)];var salC=parseFloat(c.sal)||0;
+    if(salG&&salC&&salG<salC&&salG>0)
+      addIc(i,c.nome,'Inversão salarial — colaborador ganha mais que o gestor','Alto','Estrutura Salarial',
+        'Revisar estrutura hierárquica e faixas salariais',
+        'Gestor: '+c.gestor+' (R$ '+salG.toLocaleString('pt-BR',{minimumFractionDigits:2})+') | Colaborador: R$ '+salC.toLocaleString('pt-BR',{minimumFractionDigits:2}))
+  });
+
+  // 2.3 Compactação salarial (diferença < 5% entre níveis distintos)
+  var cargoNiveis=['Auxiliar','Assistente','Analista','Coordenador','Gerente','Diretor'];
+  var cargosSal={};
+  colabs.forEach(function(c){
+    var cargo=cap(c.cargo||c.real||'');if(!cargo)return;
+    var sal=parseFloat(c.sal)||0;if(!sal)return;
+    cargosSal[cargo]=(cargosSal[cargo]||[]);cargosSal[cargo].push(sal)
+  });
+  // Check if different level names have similar salaries
+  colabs.forEach(function(c,i){
+    var cargo=cap(c.cargo||'');var sal=parseFloat(c.sal)||0;if(!cargo||!sal)return;
+    var nivel=cargoNiveis.find(function(n){return cargo.toLowerCase().indexOf(n.toLowerCase())>=0});
+    if(!nivel)return;
+    var nivelIdx=cargoNiveis.indexOf(nivel);if(nivelIdx<=0)return;
+    var nivelAnterior=cargoNiveis[nivelIdx-1];
+    Object.keys(cargosSal).forEach(function(outroCargo){
+      if(outroCargo===cargo)return;
+      if(outroCargo.toLowerCase().indexOf(nivelAnterior.toLowerCase())<0)return;
+      var outraSals=cargosSal[outroCargo];
+      var outraMedia=outraSals.reduce(function(a,b){return a+b},0)/outraSals.length;
+      if(outraMedia>0&&Math.abs(sal-outraMedia)/outraMedia<0.05)
+        addIc(i,c.nome,'Compactação salarial — diferença < 5% entre '+nivelAnterior+' e '+nivel,'Alto','Estrutura Salarial',
+          'Ampliar spread entre níveis hierárquicos',
+          'Cargo: '+cargo+' R$ '+sal.toLocaleString('pt-BR',{minimumFractionDigits:2})+' | '+nivelAnterior+' média: R$ '+outraMedia.toFixed(2))
+    })
+  });
+
+  // ── NÍVEL 3: MÉDIO (dados incompletos / estrutura) ──
+  colabs.forEach(function(c,i){
+    // 3.1 Data de admissão ausente
+    if(!c.adm)
+      addIc(i,c.nome,'Data de admissão não informada','Medio','Dados Cadastrais',
+        'Necessária para cálculo de tempo de empresa, férias e progressão de carreira');
+
+    // 3.2 Jornada não informada (impede verificação de mínimo proporcional)
+    if(!c.jornada)
+      addIc(i,c.nome,'Jornada de trabalho não informada','Medio','Dados Cadastrais',
+        'Necessária para verificar salário mínimo proporcional e horas extras');
+
+    // 3.3 Sem departamento
+    if(!c.depto)
+      addIc(i,c.nome,'Departamento não vinculado','Medio','Estrutura Organizacional',
+        'Vincular ao organograma para correta estruturação do PCCS');
+
+    // 3.4 Colaborador desligado no cadastro ativo
+    if(c.sit==='Desligado')
+      addIc(i,c.nome,'Colaborador desligado presente no cadastro','Medio','Situação',
+        'Verificar necessidade — pode distorcer análises salariais e de headcount');
+
+    // 3.5 Sem gestor imediato (impossibilita mapeamento de hierarquia)
+    if(!c.gestor&&c.cargo&&c.cargo.toLowerCase().indexOf('diretor')<0&&c.cargo.toLowerCase().indexOf('president')<0)
+      addIc(i,c.nome,'Gestor imediato não informado','Medio','Estrutura Organizacional',
+        'Necessário para mapeamento hierárquico e avaliação de inversão salarial');
+  });
+
+  // ── NÍVEL 4: BAIXO (dados secundários do PCCS) ──
+  colabs.forEach(function(c,i){
+    if(!c.cpf)addIc(i,c.nome,'CPF não informado','Baixo','Dados Cadastrais','Obter para identificação fiscal e legal');
+    if(!c.nasc)addIc(i,c.nome,'Data de nascimento não informada','Baixo','Dados Cadastrais','Necessária para análise de perfil etário e planos de sucessão');
+    if(!c.escol)addIc(i,c.nome,'Escolaridade não informada','Baixo','Dados para PCCS','Relevante para faixas de cargo e critérios de progressão');
+    if(!c.cbo&&(c.cargo||c.real))addIc(i,c.nome,'CBO não informado','Baixo','Dados para PCCS','Classificação Brasileira de Ocupações — necessária para compliance e pesquisa salarial')
+  });
+
+  // ── NÍVEL 5: ATENÇÃO (oportunidades de melhoria PCCS) ──
+  colabs.forEach(function(c,i){
+    // Muito tempo de empresa sem progressão (estimado por data adm)
+    if(c.adm){
+      var adm=new Date(c.adm);var hoje=new Date();
+      var anos=Math.floor((hoje-adm)/(365.25*24*3600*1000));
+      if(anos>=5&&c.cargo&&c.cargo.toLowerCase().indexOf('auxiliar')>=0)
+        addIc(i,c.nome,'Tempo de empresa >= '+anos+' anos sem progressão de cargo aparente','Atencao','Plano de Carreira',
+          'Avaliar elegibilidade para progressão horizontal ou vertical no PCCS',
+          'Cargo atual: '+c.cargo+' | Admissão: '+c.adm)
+    }
+    // Benefícios não informados
+    if(!c.bene)addIc(i,c.nome,'Benefícios não mapeados','Atencao','Remuneração Indireta','Mapear VA, VT, plano de saúde para composição da remuneração total')
+  });
+
   return ic
 }
 function renderIncons(emp){
   var el=document.getElementById('incons-list');if(!el)return;
-  var list=detectIncons(emp);
-  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-ico">◎</div><p>Nenhuma inconsistência detectada. Excelente!</p></div>';return}
-  var altos=list.filter(function(x){return x.nivel==='Alto'});
-  var medios=list.filter(function(x){return x.nivel==='Medio'||x.nivel==='Médio'});
-  var baixos=list.filter(function(x){return x.nivel==='Baixo'});
-  var html='<div style="display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap">';
-  html+='<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:var(--r);padding:.8rem 1.2rem;text-align:center"><div style="font-size:1.6rem;font-weight:700;color:var(--rd)">'+altos.length+'</div><div style="font-size:.65rem;color:var(--t2);text-transform:uppercase">Risco Alto</div></div>';
-  html+='<div style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);border-radius:var(--r);padding:.8rem 1.2rem;text-align:center"><div style="font-size:1.6rem;font-weight:700;color:var(--yw)">'+medios.length+'</div><div style="font-size:.65rem;color:var(--t2);text-transform:uppercase">Risco Médio</div></div>';
-  html+='<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);padding:.8rem 1.2rem;text-align:center"><div style="font-size:1.6rem;font-weight:700;color:var(--t2)">'+baixos.length+'</div><div style="font-size:.65rem;color:var(--t2);text-transform:uppercase">Risco Baixo</div></div>';
-  html+='<div style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);border-radius:var(--r);padding:.8rem 1.2rem;text-align:center"><div style="font-size:1.6rem;font-weight:700;color:var(--bl)">'+list.length+'</div><div style="font-size:.65rem;color:var(--t2);text-transform:uppercase">Total</div></div>';
-  html+='</div>';
-  // Group by type
-  var byType={};
-  list.forEach(function(ic){var t=ic.tipo.split('(')[0].split(' abaixo')[0].split(' diverge')[0].trim();if(!byType[t])byType[t]=[];byType[t].push(ic)});
-  Object.entries(byType).forEach(function(kv2){
-    var items=kv2[1];var niv=items[0].nivel;
-    var cls=niv==='Alto'?'br':niv==='Medio'||niv==='Médio'?'by':'bk';
-    html+='<div style="margin-bottom:.7rem;background:var(--nv2);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);overflow:hidden">';
-    html+='<div style="display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;border-bottom:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.02)">';
-    html+='<span class="b '+cls+'">'+niv+'</span>';
-    html+='<span style="font-weight:600;flex:1;font-size:.82rem">'+eh(kv2[0])+'</span>';
-    html+='<span style="font-size:.72rem;color:var(--t3)">'+items.length+' colaborador(es)</span>';
-    if(items[0].sug)html+='<span style="font-size:.7rem;color:var(--gd);font-style:italic">&#10097; '+eh(items[0].sug)+'</span>';
-    html+='</div>';
-    html+='<div style="padding:.5rem 1rem">';
-    items.forEach(function(ic){
-      var c2=emp.colabs?emp.colabs[ic.i]:null;
-      var depto=c2?c2.depto||'':ic.depto||'';
-      html+='<div style="display:flex;align-items:center;gap:.6rem;padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:.78rem">';
-      html+='<span style="font-weight:600;min-width:160px">'+eh(ic.n)+'</span>';
-      if(depto)html+='<span style="font-size:.7rem;color:var(--t3);background:rgba(255,255,255,.04);padding:.1rem .4rem;border-radius:10px">'+eh(depto)+'</span>';
-      if(ic.tipo!==kv2[0])html+='<span style="flex:1;color:var(--t2);font-size:.73rem">'+eh(ic.tipo.replace(kv2[0],'').trim())+'</span>';
-      html+='<button class="btn bh bs" style="font-size:.62rem;padding:.1rem .35rem" onclick="verColabDet('+ic.i+')">Ver</button>';
+  var ic=detectIncons(emp);
+  
+  var LEGENDA=[
+    {nivel:'Critico',label:'CRÍTICO',cor:'#dc2626',bg:'rgba(220,38,38,.12)',desc:'Risco legal imediato — ação obrigatória e urgente (CLT, multas, ações trabalhistas)'},
+    {nivel:'Alto',label:'ALTO',cor:'#f59e0b',bg:'rgba(245,158,11,.1)',desc:'Risco trabalhista significativo — compromete a implantação do PCCS'},
+    {nivel:'Medio',label:'MÉDIO',cor:'#f59e0b',bg:'rgba(245,158,11,.06)',desc:'Dados incompletos que prejudicam análises e estruturação do plano'},
+    {nivel:'Baixo',label:'BAIXO',cor:'#9ca3af',bg:'rgba(156,163,175,.08)',desc:'Dados secundários — relevantes para PCCS completo e análise salarial'},
+    {nivel:'Atencao',label:'ATENÇÃO',cor:'#22c55e',bg:'rgba(34,197,94,.06)',desc:'Oportunidades de melhoria no plano de carreira e remuneração indireta'}
+  ];
+
+  if(!ic.length){
+    el.innerHTML='<div class="empty"><div class="empty-ico">&#9728;</div><p>Nenhuma inconsistência detectada. Excelente!</p></div>';return
+  }
+
+  // Counts per level
+  var counts={};ic.forEach(function(x){counts[x.nivel]=(counts[x.nivel]||0)+1});
+
+  var html='';
+  // ── Legenda ──
+  html+='<div class="card" style="margin-bottom:1rem"><div class="sec-t">&#9679; Legenda de Classificação PCCS</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.5rem">';
+  LEGENDA.forEach(function(lg){
+    html+='<div style="background:'+lg.bg+';border:1px solid '+lg.cor+'33;border-radius:var(--r2);padding:.6rem .9rem">'+
+      '<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.2rem">'+
+        '<span style="background:'+lg.cor+';color:#fff;font-size:.62rem;font-weight:700;padding:.12rem .45rem;border-radius:3px;letter-spacing:.06em">'+lg.label+'</span>'+
+        '<span style="font-weight:600;font-size:.78rem;color:'+lg.cor+'">'+( counts[lg.nivel]||0)+' ocorrência(s)</span>'+
+      '</div>'+
+      '<div style="font-size:.72rem;color:var(--t2)">'+lg.desc+'</div>'+
+    '</div>'
+  });
+  html+='</div></div>';
+
+  // ── Sumário de categorias ──
+  var cats={};ic.forEach(function(x){cats[x.cat]=(cats[x.cat]||[]);cats[x.cat].push(x)});
+  html+='<div class="card" style="margin-bottom:1rem"><div class="sec-t">&#9684; Resumo por Categoria</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.5rem">';
+  Object.entries(cats).sort(function(a,b){return b[1].length-a[1].length}).forEach(function(kv){
+    var nivelCor={'Critico':'#dc2626','Alto':'#f59e0b','Medio':'#f59e0b','Baixo':'#9ca3af','Atencao':'#22c55e'};
+    var maisGrave=kv[1].reduce(function(a,b){var ord={'Critico':5,'Alto':4,'Medio':3,'Baixo':2,'Atencao':1};return(ord[a.nivel]||0)>=(ord[b.nivel]||0)?a:b},{nivel:'Atencao'});
+    var cor=nivelCor[maisGrave.nivel]||'var(--t2)';
+    html+='<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:var(--r2);padding:.5rem .8rem;border-left:3px solid '+cor+'">'+
+      '<div style="font-weight:600;font-size:.8rem;color:#fff">'+kv[0]+'</div>'+
+      '<div style="font-size:.72rem;color:'+cor+';margin-top:.1rem">'+kv[1].length+' ocorrência(s)</div></div>'
+  });
+  html+='</div></div>';
+
+  // ── Detalhe por nível ──
+  ['Critico','Alto','Medio','Baixo','Atencao'].forEach(function(nivel){
+    var items=ic.filter(function(x){return x.nivel===nivel});if(!items.length)return;
+    var lg=LEGENDA.find(function(l){return l.nivel===nivel});if(!lg)return;
+    // Group items by type within this level
+    var byType={};items.forEach(function(it){byType[it.tipo]=(byType[it.tipo]||[]);byType[it.tipo].push(it)});
+    html+='<div style="margin-bottom:.8rem">';
+    html+='<div style="display:flex;align-items:center;gap:.5rem;padding:.5rem .8rem;background:'+lg.bg+';border-radius:var(--r2) var(--r2) 0 0;border:1px solid '+lg.cor+'22">'+
+      '<span style="background:'+lg.cor+';color:#fff;font-size:.68rem;font-weight:700;padding:.15rem .55rem;border-radius:3px;letter-spacing:.06em">'+lg.label+'</span>'+
+      '<span style="font-weight:600;color:'+lg.cor+';font-size:.82rem">'+items.length+' inconsistência(s)</span>'+
+    '</div>';
+    Object.entries(byType).forEach(function(kv2){
+      var grpItems=kv2[1];
+      html+='<div style="background:var(--nv2);border:1px solid rgba(255,255,255,.05);border-top:none;padding:.7rem .9rem">'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">'+
+          '<div style="font-size:.8rem;font-weight:600;color:'+lg.cor+'">'+kv2[0]+'</div>'+
+          '<div style="display:flex;align-items:center;gap:.5rem">'+
+            '<span style="font-size:.7rem;color:var(--t3)">'+grpItems.length+' colaborador(es)</span>'+
+            (grpItems[0].sug?'<span style="font-size:.7rem;color:var(--gd);font-style:italic">&#9658; '+grpItems[0].sug+'</span>':'')+
+          '</div>'+
+        '</div>';
+      if(grpItems[0].extra){
+        html+='<div style="font-size:.72rem;color:var(--t2);background:rgba(255,255,255,.03);border-radius:var(--r2);padding:.3rem .6rem;margin-bottom:.4rem">'+grpItems[0].extra+'</div>'
+      }
+      grpItems.forEach(function(it){
+        html+='<div style="display:flex;align-items:center;gap:.5rem;padding:.28rem 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:.78rem">'+
+          '<span style="font-weight:600;min-width:170px;cursor:pointer;color:var(--gd)" onclick="verColabDet('+it.i+')">'+eh(it.n)+'</span>'+
+          (it.depto?'<span style="font-size:.68rem;color:var(--t3);background:rgba(255,255,255,.04);padding:.08rem .4rem;border-radius:10px;white-space:nowrap">'+eh(it.depto)+'</span>':'')+
+          '<button class="btn bh bs" style="font-size:.62rem;padding:.1rem .35rem;margin-left:auto" onclick="verColabDet('+it.i+')">Ver</button>'+
+        '</div>'
+      });
       html+='</div>'
     });
-    html+='</div></div>'
+    html+='</div>'
   });
+
   el.innerHTML=html
 }
 
@@ -1730,18 +1902,134 @@ function renderIncons(emp){
 function rodarIA(){
   if(!empAtual){toast('Abra um projeto primeiro.',false);return}
   var colabs=empAtual.colabs||[];var ic=detectIncons(empAtual);
-  var atv=[];(empAtual.fases||[]).forEach(function(f){(f.atividades||[]).forEach(function(a){atv.push(a)})});
-  var done=atv.filter(function(a){return a.feito||a.st==='Concluído'}).length;
-  var ef=atv.length>0?Math.round(done/atv.length*100):0;
-  var sc2=colabs.filter(function(c){return!c.cargo&&!c.real}).length;
-  var txt='<p><strong>◈ Diagnóstico: '+eh(empAtual.nome)+'</strong></p>';
-  txt+='<p>Progresso: <strong>'+calcProg(empAtual)+'%</strong> · Eficiência: <strong>'+ef+'%</strong></p>';
-  if(ic.length>0){var ra=ic.filter(function(i){return i.nivel==='Alto'}).length;txt+='<p style="color:'+(ra>0?'var(--rd)':'var(--yw)')+'"><strong>'+(ra>0?'🔴':'🟡')+' Inconsistências:</strong> '+ic.length+' ('+ra+' alto risco).</p>'}
-  if(sc2>0)txt+='<p style="color:var(--yw)"><strong>⚠ Risco trabalhista:</strong> '+sc2+' sem cargo — regularize antes da estrutura salarial.</p>';
-  if(ef<50)txt+='<p style="color:var(--rd)"><strong>🔴 Performance crítica.</strong> Revisar cronograma urgente.</p>';
-  else if(ef<80)txt+='<p style="color:var(--yw)"><strong>🟡 Performance moderada.</strong> Monitorar fases críticas.</p>';
-  else txt+='<p style="color:var(--gr)"><strong>🟢 Performance adequada!</strong></p>';
-  var res=document.getElementById('ia-res');if(res){res.style.display='block';res.querySelector('.ai-out').innerHTML=txt}
+  var hoje=new Date();
+
+  // Análise salarial
+  var sals=colabs.map(function(c){return parseFloat(c.sal)||0}).filter(function(v){return v>0});
+  var totalSal=sals.reduce(function(a,b){return a+b},0);
+  var avgSal=sals.length?Math.round(totalSal/sals.length):0;
+  var minSalV=sals.length?Math.min.apply(null,sals):0;
+  var maxSalV=sals.length?Math.max.apply(null,sals):0;
+  var spread=avgSal>0?Math.round((maxSalV-minSalV)/avgSal*100):0;
+
+  // Por nível de inconsistência
+  var crit=ic.filter(function(x){return x.nivel==='Critico'});
+  var alto=ic.filter(function(x){return x.nivel==='Alto'});
+  var medio=ic.filter(function(x){return x.nivel==='Medio'});
+
+  // Departamentos
+  var deptos={};
+  colabs.forEach(function(c){var d=c.depto||'Não informado';if(!deptos[d])deptos[d]={count:0,totSal:0};deptos[d].count++;deptos[d].totSal+=parseFloat(c.sal)||0});
+  var deptList=Object.entries(deptos).sort(function(a,b){return b[1].count-a[1].count});
+
+  // Funções mais comuns
+  var funcCount={};
+  colabs.forEach(function(c){var fn=cap(c.real||c.cargo||'');if(fn){funcCount[fn]=(funcCount[fn]||0)+1}});
+  var topFuncs=Object.entries(funcCount).sort(function(a,b){return b[1]-a[1]}).slice(0,5);
+
+  // Jornadas
+  var jornadas={};
+  colabs.forEach(function(c){var j=c.jornada||'Não informada';jornadas[j]=(jornadas[j]||0)+1});
+
+  // Situações
+  var sits={};
+  colabs.forEach(function(c){var s=c.sit||'Não informada';sits[s]=(sits[s]||0)+1});
+
+  // Escolaridade
+  var escol={};
+  colabs.forEach(function(c){var e=c.escol||'Não informada';escol[e]=(escol[e]||0)+1});
+
+  // Calcular maturidade PCCS (0-100)
+  var scoreBase=100;
+  scoreBase-=(crit.length*5);scoreBase-=(alto.length*2);scoreBase-=(medio.length*0.5);
+  if(colabs.filter(function(c){return !c.cargo}).length>5)scoreBase-=10;
+  if(colabs.filter(function(c){return !c.depto}).length>colabs.length*0.3)scoreBase-=10;
+  var maturidade=Math.max(0,Math.min(100,Math.round(scoreBase)));
+  var maturLabel=maturidade>=80?'🟢 Alta':maturidade>=60?'🟡 Moderada':maturidade>=40?'🟠 Em desenvolvimento':'🔴 Crítica';
+
+  var txt='';
+  txt+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1rem">';
+  // Maturidade PCCS
+  txt+='<div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);padding:.9rem;text-align:center">'+
+    '<div style="font-size:2rem;font-weight:700;font-family:Cinzel,serif;color:var(--gd)">'+maturidade+'<span style="font-size:1rem">%</span></div>'+
+    '<div style="font-size:.72rem;color:var(--t2);text-transform:uppercase;letter-spacing:.05em">Maturidade PCCS</div>'+
+    '<div style="font-size:.78rem;margin-top:.3rem">'+maturLabel+'</div></div>';
+  // Saúde da Folha
+  txt+='<div style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:var(--r);padding:.9rem;text-align:center">'+
+    '<div style="font-size:1.2rem;font-weight:700;color:#60a5fa">R$ '+avgSal.toLocaleString('pt-BR')+'</div>'+
+    '<div style="font-size:.72rem;color:var(--t2);text-transform:uppercase;letter-spacing:.05em">Salário Médio</div>'+
+    '<div style="font-size:.75rem;margin-top:.2rem;color:var(--t3)">Spread: '+spread+'% | Total: R$ '+totalSal.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div></div>';
+  txt+='</div>';
+
+  // Diagnóstico geral
+  txt+='<p><strong>◈ Diagnóstico Organizacional — '+eh(empAtual.nome)+'</strong></p>';
+  txt+='<p style="color:var(--t2);margin-bottom:.6rem">Empresa com <strong>'+colabs.length+'</strong> colaboradores analisados. ';
+  if(crit.length>0)txt+='<span style="color:#dc2626"><strong>Atenção: '+crit.length+' inconsistência(s) CRÍTICA(s)</strong> requerem ação imediata antes da implantação do PCCS.</span> ';
+  else txt+='<span style="color:var(--gr)">Nenhuma inconsistência crítica identificada.</span> ';
+  txt+='</p>';
+
+  // Riscos por categoria
+  txt+='<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);border-radius:var(--r2);padding:.7rem .9rem;margin-bottom:.6rem">';
+  txt+='<strong style="font-size:.82rem">⚠ Análise de Riscos PCCS</strong><br>';
+  txt+='<div style="display:flex;gap:1rem;margin-top:.4rem;flex-wrap:wrap">';
+  [{l:'Críticos',v:crit.length,c:'#dc2626'},{l:'Altos',v:alto.length,c:'#f59e0b'},{l:'Médios',v:medio.length,c:'#9ca3af'}].forEach(function(r){
+    txt+='<span style="color:'+r.c+'"><strong>'+r.v+'</strong> '+r.l+'</span>'
+  });
+  txt+='</div></div>';
+
+  // Análise salarial
+  txt+='<div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.12);border-radius:var(--r2);padding:.7rem .9rem;margin-bottom:.6rem">';
+  txt+='<strong style="font-size:.82rem">&#128181; Análise Salarial</strong><br>';
+  txt+='<div style="font-size:.8rem;color:var(--t2);margin-top:.3rem">';
+  txt+='Menor: <strong>R$ '+minSalV.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</strong> | ';
+  txt+='Médio: <strong>R$ '+avgSal.toLocaleString('pt-BR')+'</strong> | ';
+  txt+='Maior: <strong>R$ '+maxSalV.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</strong> | ';
+  txt+='Spread: <strong>'+spread+'%</strong>';
+  if(spread>300)txt+='<br><span style="color:var(--yw)">⚠ Spread salarial elevado indica ausência de faixas estruturadas</span>';
+  txt+='</div></div>';
+
+  // Distribuição por departamento
+  txt+='<div style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.12);border-radius:var(--r2);padding:.7rem .9rem;margin-bottom:.6rem">';
+  txt+='<strong style="font-size:.82rem">&#9684; Top Departamentos</strong><br>';
+  txt+='<div style="margin-top:.3rem">';
+  deptList.slice(0,5).forEach(function(kv){
+    var pct=colabs.length>0?Math.round(kv[1].count/colabs.length*100):0;
+    txt+='<div style="font-size:.78rem;display:flex;gap:.5rem;margin-bottom:.2rem">'+
+      '<span style="min-width:160px;color:var(--t2)">'+eh(kv[0])+'</span>'+
+      '<span><strong>'+kv[1].count+'</strong> ('+pct+'%)</span>'+
+      '<span style="color:var(--gd)">R$ '+Math.round(kv[1].totSal/kv[1].count).toLocaleString('pt-BR')+'/médio</span>'+
+    '</div>'
+  });
+  txt+='</div></div>';
+
+  // Funções mais comuns
+  txt+='<div style="background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.12);border-radius:var(--r2);padding:.7rem .9rem;margin-bottom:.6rem">';
+  txt+='<strong style="font-size:.82rem">&#9671; Top Funções</strong><br>';
+  txt+='<div style="margin-top:.3rem;font-size:.78rem;color:var(--t2)">'+
+    topFuncs.map(function(kv){return '<span style="margin-right:.8rem"><strong style="color:#fff">'+kv[0]+'</strong> ('+kv[1]+')</span>'}).join('')+
+  '</div></div>';
+
+  // Escolaridade
+  txt+='<div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.12);border-radius:var(--r2);padding:.7rem .9rem;margin-bottom:.6rem">';
+  txt+='<strong style="font-size:.82rem">&#127891; Perfil de Escolaridade</strong><br>';
+  txt+='<div style="margin-top:.3rem;font-size:.78rem;color:var(--t2)">'+
+    Object.entries(escol).sort(function(a,b){return b[1]-a[1]}).map(function(kv){return '<span style="margin-right:.8rem"><strong style="color:#fff">'+kv[1]+'</strong> '+kv[0]+'</span>'}).join('')+
+  '</div></div>';
+
+  // Recomendações
+  txt+='<div style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);border-radius:var(--r2);padding:.7rem .9rem">';
+  txt+='<strong style="font-size:.82rem">&#9733; Recomendações Prioritárias para o PCCS</strong><br>';
+  txt+='<ol style="font-size:.8rem;color:var(--t2);margin-top:.4rem;padding-left:1.2rem">';
+  if(crit.length)txt+='<li>Regularizar imediatamente '+crit.length+' inconsistência(s) crítica(s) — risco legal</li>';
+  if(alto.filter(function(x){return x.cat==='Equidade Salarial'}).length)txt+='<li>Estruturar faixas salariais para corrigir equidade — '+alto.filter(function(x){return x.cat==='Equidade Salarial'}).length+' casos</li>';
+  if(alto.filter(function(x){return x.cat==='Estrutura Salarial'}).length)txt+='<li>Revisar compressão e inversão salarial na hierarquia</li>';
+  txt+='<li>Completar dados cadastrais faltantes (admissão, jornada, departamento)</li>';
+  txt+='<li>Realizar pesquisa salarial de mercado (P25/P50/P75) por cargo</li>';
+  txt+='<li>Definir critérios de progressão horizontal e vertical por faixa</li>';
+  txt+='<li>Constituir comitê PCCS para validação e governança do plano</li>';
+  txt+='</ol></div>';
+
+  var res=document.getElementById('ia-res');if(res){res.style.display='block';document.getElementById('ia-out').innerHTML=txt}
   var em=document.getElementById('ia-empty');if(em)em.style.display='none'
 }
 function rodarIACBO(){
@@ -2455,6 +2743,70 @@ var blocoAnexosPending=[];
 
 
 
+
+function rodarIAEstrutura(){
+  if(!empAtual){toast('Abra um projeto primeiro.',false);return}
+  var colabs=empAtual.colabs||[];
+  var funcs={};
+  colabs.forEach(function(c){var fn=cap(c.real||c.cargo||'');if(!fn)return;var sal=parseFloat(c.sal)||0;if(!sal)return;if(!funcs[fn])funcs[fn]=[];funcs[fn].push(sal)});
+  var avg=function(arr){return arr.length?Math.round(arr.reduce(function(a,b){return a+b},0)/arr.length):0};
+  var txt='<p><strong>&#9830; Análise da Estrutura Salarial — '+eh(empAtual.nome)+'</strong></p>';
+  txt+='<p style="color:var(--t2);margin-bottom:.7rem">Análise de distribuição salarial por função para base do PCCS.</p>';
+  txt+='<div style="overflow-x:auto"><table style="font-size:.78rem"><thead><tr><th>Função</th><th style="text-align:center">Qtd.</th><th>Mínimo</th><th>Médio</th><th>Máximo</th><th>Spread</th><th>Ação Recomendada</th></tr></thead><tbody>';
+  Object.entries(funcs).sort(function(a,b){return avg(b[1])-avg(a[1])}).forEach(function(kv){
+    var mn=Math.min.apply(null,kv[1]);var mx=Math.max.apply(null,kv[1]);var av=avg(kv[1]);
+    var sp=mn>0?Math.round((mx-mn)/mn*100):0;
+    var acao=sp>30?'Estruturar faixas salariais':sp===0?'Uniforme — ok':sp<10?'Pequena variação — ok':'Verificar critérios';
+    var cor=sp>30?'#f59e0b':sp===0?'var(--gr)':'var(--t2)';
+    txt+='<tr>'+
+      '<td style="font-weight:600">'+eh(kv[0])+'</td>'+
+      '<td style="text-align:center">'+kv[1].length+'</td>'+
+      '<td>R$ '+mn.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</td>'+
+      '<td style="color:var(--gd);font-weight:600">R$ '+av.toLocaleString('pt-BR')+'</td>'+
+      '<td>R$ '+mx.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</td>'+
+      '<td style="color:'+cor+'">'+sp+'%</td>'+
+      '<td style="font-size:.72rem;color:var(--t2)">'+acao+'</td>'+
+    '</tr>'
+  });
+  txt+='</tbody></table></div>';
+  var res=document.getElementById('ia-res');if(res){res.style.display='block';document.getElementById('ia-out').innerHTML=txt}
+  var em=document.getElementById('ia-empty');if(em)em.style.display='none'
+}
+function rodarIACarreira(){
+  if(!empAtual){toast('Abra um projeto primeiro.',false);return}
+  var colabs=empAtual.colabs||[];
+  var hoje=new Date();
+  var txt='<p><strong>&#9651; Análise de Plano de Carreira — '+eh(empAtual.nome)+'</strong></p>';
+  txt+='<p style="color:var(--t2);margin-bottom:.7rem">Identificação de oportunidades de progressão e riscos de retenção.</p>';
+  var grupos={longo:[],medio:[],curto:[],semData:[]};
+  colabs.forEach(function(c){
+    if(!c.adm){grupos.semData.push(c);return}
+    var adm=new Date(c.adm);var anos=Math.floor((hoje-adm)/(365.25*24*3600*1000));
+    if(anos>=5)grupos.longo.push({c:c,anos:anos});
+    else if(anos>=2)grupos.medio.push({c:c,anos:anos});
+    else grupos.curto.push({c:c,anos:anos})
+  });
+  txt+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem">';
+  [{l:'≥5 anos',v:grupos.longo.length,c:'#f59e0b',d:'Alta elegibilidade para progressão'},{l:'2-5 anos',v:grupos.medio.length,c:'#60a5fa',d:'Elegíveis para revisão'},{l:'<2 anos',v:grupos.curto.length,c:'var(--gr)',d:'Em adaptação'},{l:'Sem data',v:grupos.semData.length,c:'var(--t3)',d:'Dados incompletos'}].forEach(function(g){
+    txt+='<div style="background:rgba(255,255,255,.04);border-radius:var(--r2);padding:.6rem;text-align:center"><div style="font-size:1.5rem;font-weight:700;color:'+g.c+'">'+g.v+'</div><div style="font-size:.7rem;color:var(--t2)">'+g.l+'</div><div style="font-size:.65rem;color:var(--t3);margin-top:.15rem">'+g.d+'</div></div>'
+  });
+  txt+='</div>';
+  if(grupos.longo.length){
+    txt+='<div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:var(--r2);padding:.7rem .9rem;margin-bottom:.6rem">';
+    txt+='<strong style="font-size:.82rem;color:var(--yw)">&#9888; Colaboradores com ≥5 anos — Avaliar para progressão</strong><br>';
+    txt+='<div style="margin-top:.4rem">'+grupos.longo.slice(0,10).map(function(x){return'<div style="font-size:.78rem;display:flex;gap:.5rem;margin-bottom:.2rem"><span style="font-weight:600;min-width:160px">'+eh(x.c.nome)+'</span><span style="color:var(--t3)">'+eh(x.c.cargo||'')+'</span><span style="color:var(--yw)">'+x.anos+' anos</span></div>'}).join('')+'</div></div>'
+  }
+  txt+='<div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.15);border-radius:var(--r2);padding:.7rem .9rem">';
+  txt+='<strong style="font-size:.82rem">&#9733; Recomendações para Trilhas de Carreira</strong><br>';
+  txt+='<ol style="font-size:.8rem;color:var(--t2);margin-top:.4rem;padding-left:1.2rem">';
+  txt+='<li>Definir critérios claros de progressão: tempo de empresa, avaliação de desempenho e formação</li>';
+  txt+='<li>Criar grades de progressão horizontal (dentro do mesmo cargo) com percentuais definidos</li>';
+  txt+='<li>Estruturar plano de sucessão para cargos críticos e de liderança</li>';
+  txt+='<li>Mapear gap de competências para promoções verticais</li>';
+  txt+='</ol></div>';
+  var res=document.getElementById('ia-res');if(res){res.style.display='block';document.getElementById('ia-out').innerHTML=txt}
+  var em=document.getElementById('ia-empty');if(em)em.style.display='none'
+}
 </script>
 </body>
 </html>
