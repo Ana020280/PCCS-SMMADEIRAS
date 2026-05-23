@@ -864,6 +864,7 @@ input[type="date"].inp{color-scheme:dark}
 
 
 
+
 // PCCS 360 v3.1 — JavaScript Enhanced
 // Changelog, projeto por status, colaborador detalhe, fases melhoradas, tp9
 
@@ -956,7 +957,7 @@ function nav(vid){
 function openM(id){
   document.getElementById(id).classList.add('op');
   if(id==='memp')popConsulSel();
-  if(['mcargo','mpes','mfaixa','mmembro','mrop'].indexOf(id)>=0)popEmpSels()
+  if(['mcargo','mpes','mfaixa','mmembro'].indexOf(id)>=0)popEmpSels()
 }
 function closeM(id){document.getElementById(id).classList.remove('op')}
 document.querySelectorAll('.ov').forEach(function(o){o.addEventListener('click',function(e){if(e.target===o)o.classList.remove('op')})})
@@ -1765,13 +1766,24 @@ function openRop(){
   document.getElementById('rop-id').value='';
   document.getElementById('rop-data').value=new Date().toISOString().split('T')[0];
   ['rop-titulo','rop-sit','rop-passos'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''});
-  document.getElementById('rop-status').value='Em andamento';
-  var sel=document.getElementById('rop-emp');if(sel){popEmpSels();sel.value=empAtual.id}
-  var users=gst('users')||[];var cs=document.getElementById('rop-consul');if(cs){cs.innerHTML='<option value="">-- Selecionar --</option>';users.forEach(function(u){cs.innerHTML+='<option>'+eh(u.nome)+'</option>'})}
-  openM('mrop')
+  var stEl=document.getElementById('rop-status');if(stEl)stEl.value='Em andamento';
+  var tipoEl=document.getElementById('rop-tipo');if(tipoEl)tipoEl.value='Reunião de Trabalho';
+  // Fill company select with all companies
+  popEmpSels();
+  // Pre-select current company AFTER popEmpSels
+  var sel=document.getElementById('rop-emp');
+  if(sel&&empAtual){sel.value=empAtual.id}
+  // Fill consultant select
+  var users=gst('users')||[];var cs=document.getElementById('rop-consul');
+  if(cs){cs.innerHTML='<option value="">-- Selecionar --</option>';users.forEach(function(u){cs.innerHTML+='<option>'+eh(u.nome)+'</option>'})}
+  // Open modal WITHOUT calling popEmpSels again (skip the openM auto-call)
+  document.getElementById('mrop').classList.add('op');
+  // Restore correct selection after modal opens
+  if(sel&&empAtual){sel.value=empAtual.id}
 }
 function salvarRop(){
-  var empId=document.getElementById('rop-emp').value;var titulo=gv('rop-titulo');
+  var empId=document.getElementById('rop-emp').value||(empAtual?empAtual.id:'');
+  var titulo=gv('rop-titulo');
   if(!empId||!titulo){toast('Empresa e título obrigatórios.',false);return}
   var rops=gst('rops')||[];var id=document.getElementById('rop-id').value||('r'+Date.now());
   var rop={id:id,empId:empId,tipo:gv('rop-tipo'),titulo:cap(titulo),status:gv('rop-status'),data:gv('rop-data'),consul:gv('rop-consul'),sit:gv('rop-sit'),passos:gv('rop-passos'),criado:new Date().toISOString()};
@@ -2045,7 +2057,8 @@ function exportDashExcel(){
   dl('pccs360_dashboard_'+new Date().toISOString().split('T')[0]+'.csv',lines.join('\n'),'text/csv');
   toast('Excel exportado!')
 }
-function colabTab(id,btn){['ctab-dash','ctab-table'].forEach(function(t){var e=document.getElementById(t);if(e)e.style.display=t===id?'block':'none'});document.querySelectorAll('#colab-tabs .tab').forEach(function(t){t.classList.remove('on')});if(btn)btn.classList.add('on');if(id==='ctab-dash'&&empAtual)renderColabsDashboard(empAtual)}
+function colabTab(id,btn){['ctab-dash','ctab-table'].forEach(function(t){var e=document.getElementById(t);if(e)e.style.display=t===id?'block':'none'});document.querySelectorAll('#colab-tabs .tab').forEach(function(t){t.classList.remove('on')});if(btn)btn.classList.add('on');if(id==='ctab-dash'&&empAtual)renderColabsDashboard(empAtual);
+  if(id==='ctab-table'){var cbs=document.querySelectorAll('.colab-cb');cbs.forEach(function(cb){cb.checked=false});atualizarBtnExcluir();var cbT=document.getElementById('cb-todos');if(cbT)cbT.checked=false}}
 function atualizarBtnExcluir(){var cbs=document.querySelectorAll('.colab-cb:checked');var btn=document.getElementById('btn-excluir-sel');if(btn)btn.textContent='Excluir Selecionados ('+cbs.length+')'}
 function selecionarTodos(){var cbs=document.querySelectorAll('.colab-cb');var all=![...cbs].every(function(cb){return cb.checked});cbs.forEach(function(cb){cb.checked=all});atualizarBtnExcluir()}
 function excluirSelecionados(){
@@ -2436,6 +2449,7 @@ function calcProg(emp){
   return t>0?Math.round(d/t*100):0
 }
 var blocoAnexosPending=[];
+
 
 
 
