@@ -863,6 +863,7 @@ input[type="date"].inp{color-scheme:dark}
 
 
 
+
 // PCCS 360 v3.1 — JavaScript Enhanced
 // Changelog, projeto por status, colaborador detalhe, fases melhoradas, tp9
 
@@ -1685,8 +1686,43 @@ function detectIncons(emp){
 function renderIncons(emp){
   var el=document.getElementById('incons-list');if(!el)return;
   var list=detectIncons(emp);
-  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-ico">◎</div><p>Nenhuma inconsistência detectada.</p></div>';return}
-  el.innerHTML=list.map(function(ic){var cls=ic.nivel==='Alto'?'br':ic.nivel==='Médio'?'by':'bk';return '<div style="background:var(--nv2);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:.8rem 1rem;margin-bottom:.5rem;display:flex;align-items:center;gap:1rem"><span class="b '+cls+'">'+ic.nivel+'</span><div style="flex:1"><div style="font-size:.84rem;font-weight:600">'+eh(ic.n)+'</div><div style="font-size:.75rem;color:var(--t2)">'+ic.tipo+'</div></div><div style="font-size:.72rem;color:var(--gd)">'+ic.sug+'</div></div>'}).join('')
+  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-ico">◎</div><p>Nenhuma inconsistência detectada. Excelente!</p></div>';return}
+  var altos=list.filter(function(x){return x.nivel==='Alto'});
+  var medios=list.filter(function(x){return x.nivel==='Medio'||x.nivel==='Médio'});
+  var baixos=list.filter(function(x){return x.nivel==='Baixo'});
+  var html='<div style="display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap">';
+  html+='<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:var(--r);padding:.8rem 1.2rem;text-align:center"><div style="font-size:1.6rem;font-weight:700;color:var(--rd)">'+altos.length+'</div><div style="font-size:.65rem;color:var(--t2);text-transform:uppercase">Risco Alto</div></div>';
+  html+='<div style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);border-radius:var(--r);padding:.8rem 1.2rem;text-align:center"><div style="font-size:1.6rem;font-weight:700;color:var(--yw)">'+medios.length+'</div><div style="font-size:.65rem;color:var(--t2);text-transform:uppercase">Risco Médio</div></div>';
+  html+='<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);padding:.8rem 1.2rem;text-align:center"><div style="font-size:1.6rem;font-weight:700;color:var(--t2)">'+baixos.length+'</div><div style="font-size:.65rem;color:var(--t2);text-transform:uppercase">Risco Baixo</div></div>';
+  html+='<div style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);border-radius:var(--r);padding:.8rem 1.2rem;text-align:center"><div style="font-size:1.6rem;font-weight:700;color:var(--bl)">'+list.length+'</div><div style="font-size:.65rem;color:var(--t2);text-transform:uppercase">Total</div></div>';
+  html+='</div>';
+  // Group by type
+  var byType={};
+  list.forEach(function(ic){var t=ic.tipo.split('(')[0].split(' abaixo')[0].split(' diverge')[0].trim();if(!byType[t])byType[t]=[];byType[t].push(ic)});
+  Object.entries(byType).forEach(function(kv2){
+    var items=kv2[1];var niv=items[0].nivel;
+    var cls=niv==='Alto'?'br':niv==='Medio'||niv==='Médio'?'by':'bk';
+    html+='<div style="margin-bottom:.7rem;background:var(--nv2);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);overflow:hidden">';
+    html+='<div style="display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;border-bottom:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.02)">';
+    html+='<span class="b '+cls+'">'+niv+'</span>';
+    html+='<span style="font-weight:600;flex:1;font-size:.82rem">'+eh(kv2[0])+'</span>';
+    html+='<span style="font-size:.72rem;color:var(--t3)">'+items.length+' colaborador(es)</span>';
+    if(items[0].sug)html+='<span style="font-size:.7rem;color:var(--gd);font-style:italic">&#10097; '+eh(items[0].sug)+'</span>';
+    html+='</div>';
+    html+='<div style="padding:.5rem 1rem">';
+    items.forEach(function(ic){
+      var c2=emp.colabs?emp.colabs[ic.i]:null;
+      var depto=c2?c2.depto||'':ic.depto||'';
+      html+='<div style="display:flex;align-items:center;gap:.6rem;padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:.78rem">';
+      html+='<span style="font-weight:600;min-width:160px">'+eh(ic.n)+'</span>';
+      if(depto)html+='<span style="font-size:.7rem;color:var(--t3);background:rgba(255,255,255,.04);padding:.1rem .4rem;border-radius:10px">'+eh(depto)+'</span>';
+      if(ic.tipo!==kv2[0])html+='<span style="flex:1;color:var(--t2);font-size:.73rem">'+eh(ic.tipo.replace(kv2[0],'').trim())+'</span>';
+      html+='<button class="btn bh bs" style="font-size:.62rem;padding:.1rem .35rem" onclick="verColabDet('+ic.i+')">Ver</button>';
+      html+='</div>'
+    });
+    html+='</div></div>'
+  });
+  el.innerHTML=html
 }
 
 // ═══ IA ═══
@@ -1754,9 +1790,69 @@ function delRop(id){if(!confirm('Excluir relatório?'))return;sst('rops',(gst('r
 // ═══ ANEXOS DO PROJETO ═══
 function renderAnexosProj(emp){
   var el=document.getElementById('proj-anexos-list');if(!el)return;
-  var list=emp.anexos||[];
-  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-ico">◐</div><p>Nenhum anexo. Adicione arquivos ao projeto.</p></div>';return}
-  el.innerHTML=list.map(function(a,i){return '<div style="display:flex;align-items:center;gap:.8rem;padding:.6rem;background:var(--nv2);border-radius:var(--r2);margin-bottom:.4rem"><span style="font-size:1.2rem">📎</span><div style="flex:1"><div style="font-size:.84rem">'+eh(a.nome)+'</div><div style="font-size:.72rem;color:var(--t3)">'+a.data+' · '+(a.tam?Math.round(a.tam/1024)+'KB':'')+'</div></div><button class="btn bd bs" onclick="delAnexoProj('+i+')">✕</button></div>'}).join('')
+  var html='';
+  // General project attachments
+  var genAnexos=emp.anexos||[];
+  html+='<div class="card" style="margin-bottom:.8rem">';
+  html+='<div class="sec-t">&#128206; Arquivos Gerais do Projeto</div>';
+  if(genAnexos.length){
+    html+=genAnexos.map(function(ax,i){
+      return'<div style="display:flex;align-items:center;gap:.6rem;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.79rem">'+'<span style="font-size:1rem">&#128206;</span><span style="flex:1;font-weight:600">'+eh(ax.nome)+'</span>'+(ax.url?'<a href="'+ax.url+'" download="'+eh(ax.nome)+'" target="_blank" class="btn bh bs" style="font-size:.7rem">&#11015;</a>':'')+
+      '<button class="btn bd bs" style="font-size:.7rem" onclick="delAnexoProj('+i+')">&#10005;</button></div>'
+    }).join('')
+  }else{html+='<div style="font-size:.78rem;color:var(--t3);padding:.4rem 0">Nenhum arquivo geral.</div>'}
+  html+='</div>';
+  // Phase block attachments (from fases2)
+  if(typeof FP2!=='undefined'&&emp.fases2&&Object.keys(emp.fases2).length){
+    html+='<div class="sec-t" style="margin-bottom:.7rem">&#128203; Arquivos por Fase (Entregáveis)</div>';
+    FP2.forEach(function(fase,fi){
+      var fdata=(emp.fases2||{})[fi]||{};
+      var phaseAnexos=[];
+      (fase.blocos||[]).forEach(function(b){
+        var bd=fdata[b.k]||{};
+        (bd.anexos||[]).forEach(function(ax){
+          phaseAnexos.push(Object.assign({},ax,{bloco:b.n,link:ax.url||bd.link||'',blink:bd.link||''}))
+        });
+        if(bd.link)phaseAnexos.push({nome:'Link: '+bd.link,tipo:'link',bloco:b.n,url:bd.link,isLink:true})
+      });
+      if(!phaseAnexos.length)return;
+      html+='<div class="card" style="margin-bottom:.6rem">';
+      html+='<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem">';
+      html+='<div style="width:28px;height:28px;border-radius:50%;background:'+fase.cor+'22;border:1px solid '+fase.cor+'44;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:'+fase.cor+';font-family:Cinzel,serif;flex-shrink:0">F'+(fi+1)+'</div>';
+      html+='<span style="font-family:Cinzel,serif;font-size:.85rem;font-weight:600;color:'+fase.cor+'">'+eh(fase.n)+'</span>';
+      html+='<span style="font-size:.7rem;color:var(--t3)">'+phaseAnexos.length+' arquivo(s)</span>';
+      html+='</div>';
+      phaseAnexos.forEach(function(ax){
+        var icon=ax.isLink?'&#128279;':(ax.tipo&&ax.tipo.includes('pdf')?'&#128196;':ax.tipo&&ax.tipo.includes('image')?'&#128247;':'&#128196;');
+        html+='<div style="display:flex;align-items:center;gap:.6rem;padding:.35rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.78rem">';
+        html+=icon+' <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+eh(ax.nome)+'">'+eh(ax.nome)+'</span>';
+        html+='<span style="font-size:.68rem;color:var(--t3);padding:.1rem .4rem;background:rgba(255,255,255,.04);border-radius:10px">'+eh(ax.bloco||'')+'</span>';
+        if(ax.url)html+='<a href="'+ax.url+'" download="'+eh(ax.nome)+'" target="_blank" class="btn bh bs" style="font-size:.7rem">&#11015;</a>';
+        html+='</div>'
+      });
+      html+='</div>'
+    })
+  }
+  // Legacy fases attachments
+  if(emp.fases&&emp.fases.length){
+    var hasLegacy=emp.fases.some(function(f){return(f.atividades||[]).some(function(a){return(a.anexos||[]).length>0})});
+    if(hasLegacy){
+      html+='<div class="sec-t" style="margin-bottom:.7rem">&#128203; Arquivos por Etapa (Checklist)</div>';
+      emp.fases.forEach(function(f,fi){
+        (f.atividades||[]).forEach(function(a){
+          if(!(a.anexos||[]).length)return;
+          html+='<div style="margin-bottom:.4rem">';
+          html+='<div style="font-size:.72rem;color:var(--gd);margin-bottom:.2rem">F'+(fi+1)+' — '+eh(a.n||'')+'</div>';
+          a.anexos.forEach(function(ax){html+='<div style="font-size:.76rem;display:flex;align-items:center;gap:.4rem;padding:.2rem 0">&#128206; '+eh(ax.nome)+(ax.url?'<a href="'+ax.url+'" target="_blank" class="btn bh bs" style="font-size:.65rem">&#11015;</a>':'')+'</div>'});
+          html+='</div>'
+        })
+      })
+    }
+  }
+  if(!genAnexos.length&&(!emp.fases2||!Object.keys(emp.fases2).length)){
+    el.innerHTML='<div class="empty"><div class="empty-ico">&#128206;</div><p>Nenhum anexo. Adicione arquivos ao projeto.</p></div>';return
+  }
+  el.innerHTML=html
 }
 function addAnexoProj(input){
   if(!empAtual||!input.files.length)return;
@@ -1963,16 +2059,35 @@ function excluirSelecionados(){
   renderColabs(empAtual);renderDetStats(empAtual);toast(indices.length+' removido(s).')
 }
 function renderColabsDashboard(emp){
-  var el=document.getElementById('colab-dashboard');
-  if(!el)return;
+  var el=document.getElementById('colab-dashboard');if(!el)return;
   var colabs=emp.colabs||[];
-  if(!colabs.length){el.innerHTML='';return}
-  var m=getMoeda();
-  // ── Aggregate all financial data ──
-  var totSal=0,totGrat=0,totG40=0,totFora=0,totCom=0,totPre=0,totGeral=0;
-  var semSal=0,semDepto=0,semAdm=0,semCargo=0,salBaixo=0;
-  var vincs={},sits={},deptos={},jornadas={};
+  // Apply dashboard filters
+  var fDep2=(document.getElementById('dash-fil-depto')||{}).value||'';
+  var fSit2=(document.getElementById('dash-fil-sit')||{}).value||'';
+  var fVin2=(document.getElementById('dash-fil-vinc')||{}).value||'';
+  // Update depto filter options from FULL list (before filtering)
+  var allD=[...new Set((emp.colabs||[]).map(function(c){return c.depto}).filter(Boolean))].sort();
+  var dd=document.getElementById('dash-fil-depto');
+  if(dd){var cv=dd.value;dd.innerHTML='<option value="">Todos os departamentos</option>';allD.forEach(function(d){dd.innerHTML+='<option value="'+eh(d)+'"'+(cv===d?' selected':'')+'>'+eh(d)+'</option>'});dd.value=cv}
+  // Apply filters to colabs list
+  if(fDep2)colabs=colabs.filter(function(c){return c.depto===fDep2});
+  if(fSit2)colabs=colabs.filter(function(c){return(c.sit||'')===fSit2});
+  if(fVin2)colabs=colabs.filter(function(c){return(c.vinc||'')===fVin2});
+  if(!colabs.length){el.innerHTML='<div class="empty"><div class="empty-ico">&#128101;</div><p>Nenhum colaborador encontrado.</p></div>';return}
+  var fmtV=function(v){return fmtMoeda(v)};
+  // ── Calculate totals ──
+  var totSal=0,totGrat=0,totG40=0,totFora=0,totCom=0,totPre=0;
+  var semSal=0,semCargo=0,salBaixo=0;
+  var vincs={},sits={},deptos={};
   var salarios=[];
+  function minSalFn(j){
+    if(!j)return 1412;var jl=j.toLowerCase();
+    if(jl.indexOf('horista')>=0||jl.indexOf('diarista')>=0)return 0;
+    if(jl.indexOf('meio')>=0||jl.indexOf('parcial')>=0||jl.indexOf('aprendiz')>=0||jl.indexOf('estagi')>=0)return 706;
+    if(jl.indexOf('40h')>=0)return 1284;if(jl.indexOf('36h')>=0)return 1156;
+    if(jl.indexOf('30h')>=0)return 963;if(jl.indexOf('20h')>=0)return 642;
+    return 1412
+  }
   colabs.forEach(function(c){
     var sal=parseFloat(c.sal)||0;
     var gra=parseFloat(c.gratif)||0;
@@ -1980,135 +2095,137 @@ function renderColabsDashboard(emp){
     var vfr=parseFloat(c.vfora)||0;
     var com=parseFloat(c.comissao)||0;
     var pre=parseFloat(c.premiao)||0;
-    var tot=sal+gra+g40+vfr+com+pre;
-    totSal+=sal;totGrat+=gra;totG40+=g40;totFora+=vfr;totCom+=com;totPre+=pre;totGeral+=tot;
-    if(sal>0)salarios.push(sal);
-    // Inconsistencies
+    totSal+=sal;totGrat+=gra;totG40+=g40;totFora+=vfr;totCom+=com;totPre+=pre;
+    if(sal>0)salarios.push({val:sal,nome:c.nome||''});
+    var ms=minSalFn(c.jornada);
     if(!sal||sal<=0)semSal++;
-    if(!c.depto)semDepto++;
-    if(!c.adm)semAdm++;
-    if(!c.cargo)semCargo++;
-    if(sal>0&&sal<1412)salBaixo++;
-    // Groupings
-    var v=c.vinc||'Não informado';vincs[v]=(vincs[v]||0)+1;
-    var s=c.sit||'Não informado';sits[s]=(sits[s]||0)+1;
-    var d=c.depto||'Não informado';deptos[d]=(deptos[d]||0)+{totSal:0,count:0};
-    if(!deptos[d]){deptos[d]={count:0,totSal:0,totGeral:0}}
-    deptos[d].count++;deptos[d].totSal+=sal;deptos[d].totGeral+=tot;
-    var j=c.jornada||'Não informado';jornadas[j]=(jornadas[j]||{count:0});jornadas[j].count++;
+    if(!c.cargo&&!c.real)semCargo++;
+    if(ms>0&&sal>0&&sal<ms)salBaixo++;
+    var v=c.vinc||'Nao informado';if(!vincs[v])vincs[v]=0;vincs[v]++;
+    var s=c.sit||'Nao informado';if(!sits[s])sits[s]=0;sits[s]++;
+    // ── FIX: proper department accumulation ──
+    var dep=c.depto||'Nao informado';
+    if(!deptos[dep])deptos[dep]={count:0,totSal:0,totGrat:0,totG40:0,totFora:0,totGeral:0};
+    deptos[dep].count++;
+    deptos[dep].totSal+=sal;
+    deptos[dep].totGrat+=gra;
+    deptos[dep].totG40+=g40;
+    deptos[dep].totFora+=vfr;
+    deptos[dep].totGeral+=sal+gra+g40+vfr+com+pre;
   });
+  var totGeral=totSal+totGrat+totG40+totFora+totCom+totPre;
   var n=colabs.length;
-  var avgSal=salarios.length?Math.round(salarios.reduce(function(a,b){return a+b},0)/salarios.length):0;
-  var minSal=salarios.length?Math.min.apply(null,salarios):0;
-  var maxSal=salarios.length?Math.max.apply(null,salarios):0;
-  var fmtV=function(v){return fmtMoeda(v)};
-  // ── Build HTML ──
+  var salVals=salarios.map(function(x){return x.val});
+  var avgSal=salVals.length?Math.round(salVals.reduce(function(a,b){return a+b},0)/salVals.length):0;
+  var minSal=salVals.length?Math.min.apply(null,salVals):0;
+  var maxSal=salVals.length?Math.max.apply(null,salVals):0;
+  var minNome=salarios.filter(function(x){return x.val===minSal})[0];
+  var maxNome=salarios.filter(function(x){return x.val===maxSal})[0];
+  // ── Same function different salary ──
+  var funcSals2={};
+  colabs.forEach(function(c){var fn=cap(c.real||c.cargo||'');if(!fn)return;var sal=parseFloat(c.sal)||0;if(!sal)return;if(!funcSals2[fn])funcSals2[fn]=[];funcSals2[fn].push(sal)});
+  var funcIncons=Object.entries(funcSals2).filter(function(kv){
+    if(kv[1].length<2)return false;
+    var mn=Math.min.apply(null,kv[1]);var mx=Math.max.apply(null,kv[1]);
+    return mn>0&&(mx-mn)/mn>0.30
+  });
+  // ── HTML ──
   var html='';
-  // ── KPI Cards ──
-  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.6rem;margin-bottom:1rem">';
-  html+=kpiCard(fmtV(totSal),'Total Folha Base','gd','&#128181;');
-  html+=kpiCard(fmtV(totGeral),'Total Remuneração','bl','&#127942;');
-  html+=kpiCard(fmtV(avgSal),'Salário Médio','yw','&#9830;');
-  html+=kpiCard(fmtV(minSal),'Menor Salário','t2','&#9661;');
-  html+=kpiCard(fmtV(maxSal),'Maior Salário','gr','&#9651;');
+  // KPI cards
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.6rem;margin-bottom:.8rem">';
+  html+=kpiCard(fmtV(totSal),'Total Sal. Base','gd','&#128181;');
+  html+=kpiCard(fmtV(totGrat),'Total Gratif.','bl','&#11088;');
+  html+=kpiCard(fmtV(totG40),'Total 40% Gratif.','yw','&#9670;');
+  html+=kpiCard(fmtV(totFora),'Total por Fora','pu','&#128179;');
+  html+=kpiCard(fmtV(totGeral),'TOTAL GERAL','gr','&#9651;');
+  html+=kpiCard(fmtV(avgSal),'Sal. Médio','t2','&#9830;');
+  html+=kpiCard(fmtV(minSal)+(minNome?' <small style="font-size:.5rem;color:var(--t3);display:block">'+eh(minNome.nome.split(' ')[0])+'</small>':''),'Menor Sal.','t3','&#9661;');
+  html+=kpiCard(fmtV(maxSal)+(maxNome?' <small style="font-size:.5rem;color:var(--t3);display:block">'+eh(maxNome.nome.split(' ')[0])+'</small>':''),'Maior Sal.','gr','&#9651;');
   html+=kpiCard(n,'Colaboradores','t2','&#128101;');
   html+=kpiCard(semSal,'Sem Salário',semSal>0?'rd':'gr','&#9888;');
-  html+=kpiCard(salBaixo,'Abaixo Mínimo',salBaixo>0?'rd':'gr','&#9940;');
+  html+=kpiCard(salBaixo,'Abaixo Mín.*',salBaixo>0?'yw':'gr','&#9940;');
+  html+=kpiCard(funcIncons.length,'Funções c/ variação',funcIncons.length>0?'yw':'gr','&#9878;');
   html+='</div>';
-  // ── Remuneração Breakdown ──
-  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1rem">';
-  // Left: Breakdown
-  html+='<div class="card"><div class="sec-t">&#9830; Composição da Folha</div>';
-  var items=[['Salário Base',totSal,'var(--gd)'],['Gratificação',totGrat,'#60a5fa'],['40% Gratificação',totG40,'var(--yw)'],['R$ por Fora',totFora,'#a78bfa'],['Comissão',totCom,'var(--gr)'],['Premiação',totPre,'#f472b6']];
-  items.forEach(function(it){
-    if(it[1]<=0)return;
-    var pct=totGeral>0?Math.round(it[1]/totGeral*100):0;
-    html+='<div style="margin-bottom:.5rem"><div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.2rem">'+
-      '<span style="color:var(--t2)">'+it[0]+'</span>'+
-      '<span style="color:'+it[2]+';font-weight:600">'+fmtV(it[1])+' <span style="color:var(--t3);font-weight:400">('+pct+'%)</span></span></div>'+
-      '<div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden">'+
-        '<div style="height:100%;width:'+pct+'%;background:'+it[2]+';border-radius:3px;transition:width .5s"></div>'+
-      '</div></div>'
-  });
-  html+='<div style="border-top:1px solid rgba(255,255,255,.08);margin-top:.5rem;padding-top:.5rem;display:flex;justify-content:space-between;font-size:.82rem"><strong>TOTAL GERAL</strong><strong style="color:var(--gd)">'+fmtV(totGeral)+'</strong></div>';
+  html+='<p style="font-size:.7rem;color:var(--t3);margin-bottom:.8rem">* Mínimo proporcional à jornada: 44h=R$1.412 | 40h=R$1.284 | 30h=R$963 | Meio Período=R$706</p>';
+  // Composicao
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">';
+  html+='<div class="card"><div class="sec-t">&#9830; Composição Total da Folha</div>';
+  var items=[['Salário Base',totSal,'var(--gd)'],['Gratificações',totGrat,'#60a5fa'],['40% Gratificação',totG40,'var(--yw)'],['R$ por Fora',totFora,'#a78bfa'],['Comissão',totCom,'var(--gr)'],['Premiação',totPre,'#f472b6']];
+  items.forEach(function(it){if(it[1]<=0)return;var pct=totGeral>0?Math.round(it[1]/totGeral*100):0;html+='<div style="margin-bottom:.45rem"><div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.18rem"><span style="color:var(--t2)">'+it[0]+'</span><span style="color:'+it[2]+';font-weight:600">'+fmtV(it[1])+'<span style="color:var(--t3);font-weight:400"> '+pct+'%</span></span></div><div style="height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+it[2]+';border-radius:3px"></div></div></div>'});
+  html+='<div style="border-top:1px solid rgba(255,255,255,.1);margin-top:.5rem;padding-top:.5rem;display:flex;justify-content:space-between"><strong>TOTAL GERAL</strong><strong style="color:var(--gd)">'+fmtV(totGeral)+'</strong></div>';
   html+='</div>';
-  // Right: Situação + Vínculo
+  // Situacao + Vinculo
   html+='<div style="display:flex;flex-direction:column;gap:.6rem">';
   html+='<div class="card"><div class="sec-t">&#9679; Por Situação</div>';
-  Object.entries(sits).sort(function(a,b){return b[1]-a[1]}).slice(0,6).forEach(function(kv){
-    var pct=Math.round(kv[1]/n*100);
-    var cor=kv[0]==='Trabalhando'?'var(--gr)':kv[0]==='Desligado'?'var(--rd)':kv[0]==='Férias'?'var(--bl)':'var(--yw)';
-    html+='<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem;font-size:.78rem">'+
-      '<div style="width:8px;height:8px;border-radius:50%;background:'+cor+';flex-shrink:0"></div>'+
-      '<span style="flex:1;color:var(--t2)">'+eh(kv[0])+'</span>'+
-      '<span style="font-weight:600">'+kv[1]+'</span>'+
-      '<span style="color:var(--t3);width:35px;text-align:right">'+pct+'%</span>'+
-    '</div>'
-  });
+  Object.entries(sits).sort(function(a,b){return b[1]-a[1]}).forEach(function(kv2){var pct=Math.round(kv2[1]/n*100);var cor=kv2[0]==='Trabalhando'?'var(--gr)':kv2[0]==='Desligado'?'var(--rd)':'var(--yw)';html+='<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem;font-size:.78rem"><div style="width:8px;height:8px;border-radius:50%;background:'+cor+';flex-shrink:0"></div><span style="flex:1;color:var(--t2)">'+eh(kv2[0])+'</span><span style="font-weight:600">'+kv2[1]+'</span><span style="color:var(--t3);width:32px;text-align:right">'+pct+'%</span></div>'});
   html+='</div>';
   html+='<div class="card"><div class="sec-t">&#9632; Por Vínculo</div>';
-  Object.entries(vincs).sort(function(a,b){return b[1]-a[1]}).forEach(function(kv){
-    var pct=Math.round(kv[1]/n*100);
-    html+='<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem;font-size:.78rem">'+
-      '<span style="flex:1;color:var(--t2)">'+eh(kv[0])+'</span>'+
-      '<span style="font-weight:600">'+kv[1]+'</span>'+
-      '<span style="color:var(--t3);width:35px;text-align:right">'+pct+'%</span>'+
-    '</div>'
-  });
+  Object.entries(vincs).sort(function(a,b){return b[1]-a[1]}).forEach(function(kv2){var pct=Math.round(kv2[1]/n*100);html+='<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem;font-size:.78rem"><span style="flex:1;color:var(--t2)">'+eh(kv2[0])+'</span><span style="font-weight:600">'+kv2[1]+'</span><span style="color:var(--t3);width:32px;text-align:right">'+pct+'%</span></div>'});
   html+='</div>';
   html+='</div></div>';
-  // ── Por Departamento / Centro de Custo ──
-  html+='<div class="card" style="margin-bottom:1rem"><div class="sec-t">&#9671; Folha por Departamento</div>';
-  var deptList=Object.entries(deptos).sort(function(a,b){return b[1].totSal-a[1].totSal});
-  html+='<div style="overflow-x:auto"><table style="font-size:.78rem"><thead><tr>'+
-    '<th>Departamento</th><th>Colaboradores</th><th>Folha Base</th><th>Total Rem.</th><th>Média Sal.</th><th>% da Folha</th>'+
-  '</tr></thead><tbody>';
-  deptList.forEach(function(kv){
-    var d=kv[1];var pct=totSal>0?Math.round(d.totSal/totSal*100):0;
-    var avg2=d.count>0?Math.round(d.totSal/d.count):0;
+  // ── Folha por Departamento (FIXED) ──
+  html+='<div class="card" style="margin-bottom:.8rem"><div class="sec-t">&#9671; Folha por Departamento</div><div style="overflow-x:auto"><table style="font-size:.78rem"><thead><tr>'+
+    '<th>Departamento</th><th style="text-align:center">Qtd.</th><th>Sal. Base</th><th>Gratif.</th><th>40% Gratif</th><th>R$ por Fora</th><th>TOTAL</th><th>Média</th><th>% Folha</th></tr></thead><tbody>';
+  Object.entries(deptos).sort(function(a,b){return b[1].totSal-a[1].totSal}).forEach(function(kv2){
+    var dep=kv2[1];  // use dep to avoid shadowing outer variable
+    var pct=totSal>0?Math.round(dep.totSal/totSal*100):0;
+    var avg2=dep.count>0?Math.round(dep.totSal/dep.count):0;
     html+='<tr>'+
-      '<td style="font-weight:600">'+eh(kv[0])+'</td>'+
-      '<td style="text-align:center">'+d.count+'</td>'+
-      '<td style="color:var(--gd)">'+fmtV(d.totSal)+'</td>'+
-      '<td style="color:var(--t2)">'+fmtV(d.totGeral)+'</td>'+
+      '<td style="font-weight:600">'+eh(kv2[0])+'</td>'+
+      '<td style="text-align:center">'+dep.count+'</td>'+
+      '<td style="color:var(--gd)">'+fmtV(dep.totSal)+'</td>'+
+      '<td style="color:var(--t2)">'+fmtV(dep.totGrat)+'</td>'+
+      '<td style="color:var(--yw)">'+fmtV(dep.totG40)+'</td>'+
+      '<td style="color:#a78bfa">'+fmtV(dep.totFora)+'</td>'+
+      '<td style="font-weight:700">'+fmtV(dep.totGeral)+'</td>'+
       '<td>'+fmtV(avg2)+'</td>'+
-      '<td><div style="display:flex;align-items:center;gap:.4rem">'+
-        '<div style="width:60px;height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden">'+
-          '<div style="height:100%;width:'+pct+'%;background:var(--gd);border-radius:3px"></div></div>'+
-        '<span style="color:var(--gd);font-weight:600">'+pct+'%</span>'+
-      '</div></td>'+
+      '<td><div style="display:flex;align-items:center;gap:.3rem">'+
+        '<div style="width:40px;height:5px;background:rgba(255,255,255,.08);border-radius:3px"><div style="height:100%;width:'+pct+'%;background:var(--gd);border-radius:3px"></div></div>'+
+        '<span style="color:var(--gd);font-weight:600">'+pct+'%</span></div></td>'+
     '</tr>'
   });
   // Totals row
   html+='<tr style="background:rgba(201,168,76,.1);border-top:2px solid rgba(201,168,76,.3)">'+
-    '<td style="font-weight:700">TOTAL</td><td style="text-align:center;font-weight:700">'+n+'</td>'+
+    '<td style="font-weight:700">TOTAL</td>'+
+    '<td style="text-align:center;font-weight:700">'+n+'</td>'+
     '<td style="color:var(--gd);font-weight:700">'+fmtV(totSal)+'</td>'+
-    '<td style="color:var(--gd);font-weight:700">'+fmtV(totGeral)+'</td>'+
+    '<td style="color:var(--t2);font-weight:700">'+fmtV(totGrat)+'</td>'+
+    '<td style="color:var(--yw);font-weight:700">'+fmtV(totG40)+'</td>'+
+    '<td style="color:#a78bfa;font-weight:700">'+fmtV(totFora)+'</td>'+
+    '<td style="color:var(--gd);font-weight:700;font-size:.9rem">'+fmtV(totGeral)+'</td>'+
     '<td style="font-weight:700">'+fmtV(avgSal)+'</td><td>100%</td></tr>';
   html+='</tbody></table></div></div>';
-  // ── Inconsistências Financeiras ──
+  // ── Funcoes com variacao ──
+  if(funcIncons.length){
+    html+='<div class="card" style="margin-bottom:.8rem"><div class="sec-t" style="color:var(--yw)">&#9878; Funções com Variação Salarial > 30%</div>';
+    funcIncons.forEach(function(kv2){var mn=Math.min.apply(null,kv2[1]);var mx=Math.max.apply(null,kv2[1]);var diff=Math.round((mx-mn)/mn*100);
+      html+='<div style="display:flex;align-items:center;gap:.8rem;padding:.5rem;background:rgba(245,158,11,.05);border-radius:var(--r2);margin-bottom:.4rem;font-size:.79rem"><span style="flex:1;font-weight:600">'+eh(kv2[0])+'</span><span style="color:var(--t2)">'+kv2[1].length+' colaboradores</span><span style="color:var(--yw)">'+fmtV(mn)+' → '+fmtV(mx)+'</span><span class="b by" style="font-size:.65rem">'+diff+'% variação</span></div>'
+    });
+    html+='</div>'
+  }
+  // ── Inconsistencias financeiras ──
   var inconsList=[];
   colabs.forEach(function(c,i){
-    var sal=parseFloat(c.sal)||0;
-    if(!sal)inconsList.push({nome:c.nome,tipo:'Sem salário informado',nivel:'Alto',idx:i});
-    else if(sal<1412)inconsList.push({nome:c.nome,tipo:'Salário abaixo do mínimo (R$ 1.412)',nivel:'Alto',idx:i,val:sal});
-    if(!c.cargo)inconsList.push({nome:c.nome,tipo:'Sem cargo CTPS',nivel:'Alto',idx:i});
-    if(!c.depto)inconsList.push({nome:c.nome,tipo:'Sem departamento',nivel:'Médio',idx:i});
-    if(!c.jornada)inconsList.push({nome:c.nome,tipo:'Jornada não informada',nivel:'Médio',idx:i});
-    if(!c.adm)inconsList.push({nome:c.nome,tipo:'Data de admissão ausente',nivel:'Médio',idx:i});
-    if(c.g40==='Sim'&&sal<=0)inconsList.push({nome:c.nome,tipo:'40% Gratif. marcado mas sem salário base',nivel:'Alto',idx:i});
+    var sal=parseFloat(c.sal)||0;var ms=minSalFn(c.jornada);
+    if(!sal)inconsList.push({nome:c.nome,tipo:'Sem salário informado',nivel:'Alto',idx:i,depto:c.depto||''});
+    else if(ms>0&&sal<ms)inconsList.push({nome:c.nome,tipo:'Sal. R$ '+sal.toLocaleString('pt-BR',{minimumFractionDigits:2})+' abaixo do mínimo ('+( c.jornada||'44h')+' → R$ '+ms.toLocaleString('pt-BR')+')',nivel:'Alto',idx:i,depto:c.depto||''});
+    if(!c.cargo&&!c.real)inconsList.push({nome:c.nome,tipo:'Sem cargo CTPS',nivel:'Alto',idx:i,depto:c.depto||''});
+    if(!c.depto)inconsList.push({nome:c.nome,tipo:'Sem departamento',nivel:'Médio',idx:i,depto:''});
+    if(!c.jornada)inconsList.push({nome:c.nome,tipo:'Jornada não informada',nivel:'Médio',idx:i,depto:c.depto||''});
   });
   if(inconsList.length){
-    html+='<div class="card"><div class="sec-t" style="color:var(--rd)">&#9888; Inconsistências Identificadas ('+inconsList.length+')</div>';
+    var altos=inconsList.filter(function(x){return x.nivel==='Alto'}).length;
+    html+='<div class="card"><div class="sec-t" style="color:var(--rd)">&#9888; Inconsistências Financeiras ('+inconsList.length+')</div>';
+    html+='<div style="display:flex;gap:.5rem;margin-bottom:.5rem"><span class="b br">Alto: '+altos+'</span><span class="b by">Médio: '+(inconsList.length-altos)+'</span></div>';
     html+='<div style="max-height:220px;overflow-y:auto">';
     inconsList.forEach(function(ic){
-      var cls=ic.nivel==='Alto'?'var(--rd)':'var(--yw)';
-      html+='<div style="display:flex;align-items:center;gap:.6rem;padding:.4rem .5rem;border-bottom:1px solid rgba(255,255,255,.04);font-size:.78rem">'+
-        '<span style="width:6px;height:6px;border-radius:50%;background:'+cls+';flex-shrink:0"></span>'+
-        '<span style="flex:1;font-weight:600">'+eh(ic.nome)+'</span>'+
-        '<span style="color:var(--t2)">'+ic.tipo+'</span>'+
-        '<span style="font-size:.65rem;padding:.12rem .4rem;border-radius:10px;background:rgba(255,255,255,.06);color:'+cls+'">'+ic.nivel+'</span>'+
-        '<button class="btn bh bs" style="font-size:.65rem;padding:.1rem .4rem" onclick="verColabDet('+ic.idx+')">Ver</button>'+
+      var cor=ic.nivel==='Alto'?'var(--rd)':'var(--yw)';
+      html+='<div style="display:flex;align-items:center;gap:.6rem;padding:.38rem .5rem;border-bottom:1px solid rgba(255,255,255,.04);font-size:.77rem">'+
+        '<span style="width:6px;height:6px;border-radius:50%;background:'+cor+';flex-shrink:0"></span>'+
+        '<span style="font-weight:600;min-width:130px">'+eh(ic.nome)+'</span>'+
+        (ic.depto?'<span style="font-size:.65rem;color:var(--t3);min-width:80px">'+eh(ic.depto)+'</span>':'')+
+        '<span style="flex:1;color:var(--t2)">'+ic.tipo+'</span>'+
+        '<button class="btn bh bs" style="font-size:.62rem;padding:.1rem .35rem" onclick="verColabDet('+ic.idx+')">Ver</button>'+
       '</div>'
     });
     html+='</div></div>'
@@ -2319,6 +2436,7 @@ function calcProg(emp){
   return t>0?Math.round(d/t*100):0
 }
 var blocoAnexosPending=[];
+
 
 
 
