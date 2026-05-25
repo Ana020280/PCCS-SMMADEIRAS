@@ -609,18 +609,28 @@ input[type="date"].inp{color-scheme:dark}
       <div class="fr" style="margin-top:.6rem">
     <div class="fg">
       <label>Logo da Empresa (para documentos)</label>
-      <label class="btn bh bs" style="cursor:pointer">🖼 Upload Logo Empresa
-        <input type="file" accept="image/*" style="display:none" onchange="uploadEmpLogo(this,'emp-logo-preview')">
-      </label>
-      <img id="emp-logo-preview" style="display:none;max-height:50px;margin-top:.4rem;border-radius:4px">
+      <div style="display:flex;gap:.4rem;align-items:center;flex-wrap:wrap">
+        <label class="btn bh bs" style="cursor:pointer">&#128247; Upload Logo Empresa
+          <input type="file" accept="image/*" style="display:none" onchange="uploadEmpLogo(this,'emp-logo-preview','emp-logo-data')">
+        </label>
+        <button class="btn bd bs" id="btn-del-logo-emp" style="display:none" onclick="removerLogo('emp-logo-preview','emp-logo-data','btn-del-logo-emp')" title="Remover logo">&#10005; Remover</button>
+      </div>
+      <div id="emp-logo-preview-wrap" style="margin-top:.4rem;display:none;position:relative;display:inline-block">
+        <img id="emp-logo-preview" style="max-height:60px;border-radius:4px;display:block">
+      </div>
       <input type="hidden" id="emp-logo-data">
     </div>
     <div class="fg">
       <label>Logo Instituto Primazia (para documentos)</label>
-      <label class="btn bh bs" style="cursor:pointer">🖼 Upload Logo Primazia
-        <input type="file" accept="image/*" style="display:none" onchange="uploadEmpLogo(this,'emp-logo-inst-preview')">
-      </label>
-      <img id="emp-logo-inst-preview" style="display:none;max-height:50px;margin-top:.4rem;border-radius:4px">
+      <div style="display:flex;gap:.4rem;align-items:center;flex-wrap:wrap">
+        <label class="btn bh bs" style="cursor:pointer">&#128247; Upload Logo Primazia
+          <input type="file" accept="image/*" style="display:none" onchange="uploadEmpLogo(this,'emp-logo-inst-preview','emp-logo-inst-data')">
+        </label>
+        <button class="btn bd bs" id="btn-del-logo-inst" style="display:none" onclick="removerLogo('emp-logo-inst-preview','emp-logo-inst-data','btn-del-logo-inst')" title="Remover logo">&#10005; Remover</button>
+      </div>
+      <div style="margin-top:.4rem">
+        <img id="emp-logo-inst-preview" style="max-height:60px;border-radius:4px;display:none">
+      </div>
       <input type="hidden" id="emp-logo-inst-data">
     </div>
   </div>
@@ -967,6 +977,7 @@ input[type="date"].inp{color-scheme:dark}
 
 
 
+
 // PCCS 360 v3.1 — JavaScript Enhanced
 // Changelog, projeto por status, colaborador detalhe, fases melhoradas, tp9
 
@@ -1132,7 +1143,14 @@ function salvarEmp(){
   }
 }
 function limpaEmpForm(){['emp-id','emp-nome','emp-setor','emp-lider','emp-resp','emp-ini','emp-fim'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''});empEditId=null}
-function editEmp(id){var em=(gst('emps')||[]).find(function(e){return e.id===id});if(!em)return;empEditId=id;document.getElementById('emp-nome').value=em.nome||'';document.getElementById('emp-setor').value=em.setor||'';document.getElementById('emp-lider').value=em.lider||'';document.getElementById('emp-resp').value=em.resp||'';document.getElementById('emp-ini').value=em.ini||'';document.getElementById('emp-fim').value=em.fim||'';document.getElementById('emp-st').value=em.st||'Não iniciado';openM('memp');setTimeout(function(){var s=document.getElementById('emp-consul');if(s)s.value=em.consul||''},100)}
+function editEmp(id){var em=(gst('emps')||[]).find(function(e){return e.id===id});if(!em)return;empEditId=id;document.getElementById('emp-nome').value=em.nome||'';document.getElementById('emp-setor').value=em.setor||'';document.getElementById('emp-lider').value=em.lider||'';document.getElementById('emp-resp').value=em.resp||'';document.getElementById('emp-ini').value=em.ini||'';document.getElementById('emp-fim').value=em.fim||'';document.getElementById('emp-st').value=em.st||'Não iniciado';openM('memp');setTimeout(function(){
+    var s=document.getElementById('emp-consul');if(s)s.value=em.consul||'';
+    // Restore logos
+    var lp=document.getElementById('emp-logo-preview');var ld=document.getElementById('emp-logo-data');
+    if(em.logoEmp&&lp&&ld){lp.src=em.logoEmp;lp.style.display='block';ld.value=em.logoEmp;var db=document.getElementById('btn-del-logo-emp');if(db)db.style.display='inline-flex'}
+    var lp2=document.getElementById('emp-logo-inst-preview');var ld2=document.getElementById('emp-logo-inst-data');
+    if(em.logoInst&&lp2&&ld2){lp2.src=em.logoInst;lp2.style.display='block';ld2.value=em.logoInst;var db2=document.getElementById('btn-del-logo-inst');if(db2)db2.style.display='inline-flex'}
+  },100)}
 function delEmp(id){if(!confirm('Excluir projeto?'))return;sst('emps',(gst('emps')||[]).filter(function(e){return e.id!==id}));toast('Excluído.');renderEmps();if(document.getElementById('vdash').classList.contains('on'))renderDash()}
 
 // ═══ PROGRESS UTILS ═══
@@ -1930,81 +1948,101 @@ function detectIncons(emp){
 function renderIncons(emp){
   var el=document.getElementById('incons-list');if(!el)return;
   var ic=detectIncons(emp);
-  
-  var LEGENDA=[
-    {nivel:'Critico',label:'CRÍTICO',cor:'#dc2626',bg:'rgba(220,38,38,.12)',desc:'Risco legal imediato — ação obrigatória e urgente (CLT, multas, ações trabalhistas)'},
-    {nivel:'Alto',label:'ALTO',cor:'#f59e0b',bg:'rgba(245,158,11,.1)',desc:'Risco trabalhista significativo — compromete a implantação do PCCS'},
-    {nivel:'Medio',label:'MÉDIO',cor:'#f59e0b',bg:'rgba(245,158,11,.06)',desc:'Dados incompletos que prejudicam análises e estruturação do plano'},
-    {nivel:'Baixo',label:'BAIXO',cor:'#9ca3af',bg:'rgba(156,163,175,.08)',desc:'Dados secundários — relevantes para PCCS completo e análise salarial'},
-    {nivel:'Atencao',label:'ATENÇÃO',cor:'#22c55e',bg:'rgba(34,197,94,.06)',desc:'Oportunidades de melhoria no plano de carreira e remuneração indireta'}
+
+  // ── LEGENDA ──
+  var NIVEIS=[
+    {k:'Critico', label:'CRÍTICO', cor:'#dc2626', bg:'rgba(220,38,38,.1)', ico:'🔴',
+     desc:'Risco legal imediato — ação obrigatória (CLT, multas, ações trabalhistas)'},
+    {k:'Alto',    label:'ALTO',    cor:'#f59e0b', bg:'rgba(245,158,11,.1)', ico:'🟠',
+     desc:'Risco trabalhista — compromete a implantação do PCCS'},
+    {k:'Medio',   label:'MÉDIO',   cor:'#facc15', bg:'rgba(250,204,21,.08)', ico:'🟡',
+     desc:'Dados incompletos — prejudicam análises e a estruturação do plano'},
+    {k:'Baixo',   label:'BAIXO',   cor:'#9ca3af', bg:'rgba(156,163,175,.08)', ico:'🔵',
+     desc:'Dados secundários — relevantes para o PCCS completo'},
+    {k:'Atencao', label:'ATENÇÃO', cor:'#22c55e', bg:'rgba(34,197,94,.06)', ico:'🟢',
+     desc:'Oportunidades de melhoria no plano de carreira'}
   ];
 
   if(!ic.length){
-    el.innerHTML='<div class="empty"><div class="empty-ico">&#9728;</div><p>Nenhuma inconsistência detectada. Excelente!</p></div>';return
+    el.innerHTML='<div class="card" style="text-align:center;padding:2rem"><div style="font-size:2.5rem;margin-bottom:.5rem">✅</div><p style="color:var(--gr);font-weight:600">Nenhuma inconsistência detectada!</p><p style="color:var(--t2);font-size:.82rem;margin-top:.3rem">O cadastro está em conformidade com os requisitos do PCCS.</p></div>';
+    return
   }
 
-  // Counts per level
+  // ── Sumário executivo ──
   var counts={};ic.forEach(function(x){counts[x.nivel]=(counts[x.nivel]||0)+1});
-
   var html='';
-  // ── Legenda ──
-  html+='<div class="card" style="margin-bottom:1rem"><div class="sec-t">&#9679; Legenda de Classificação PCCS</div>';
-  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.5rem">';
-  LEGENDA.forEach(function(lg){
-    html+='<div style="background:'+lg.bg+';border:1px solid '+lg.cor+'33;border-radius:var(--r2);padding:.6rem .9rem">'+
-      '<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.2rem">'+
-        '<span style="background:'+lg.cor+';color:#fff;font-size:.62rem;font-weight:700;padding:.12rem .45rem;border-radius:3px;letter-spacing:.06em">'+lg.label+'</span>'+
-        '<span style="font-weight:600;font-size:.78rem;color:'+lg.cor+'">'+( counts[lg.nivel]||0)+' ocorrência(s)</span>'+
+  html+='<div class="card" style="margin-bottom:1rem">';
+  html+='<div class="sec-t">📋 Legenda e Resumo</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.5rem;margin-bottom:.8rem">';
+  NIVEIS.forEach(function(n){
+    html+='<div style="background:'+n.bg+';border:1px solid '+n.cor+'33;border-radius:var(--r2);padding:.55rem .8rem">'+
+      '<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.15rem">'+
+        n.ico+' <span style="font-weight:700;font-size:.78rem;color:'+n.cor+'">'+n.label+'</span>'+
+        '<span style="margin-left:auto;font-size:.9rem;font-weight:700;color:'+n.cor+'">'+(counts[n.k]||0)+'</span>'+
       '</div>'+
-      '<div style="font-size:.72rem;color:var(--t2)">'+lg.desc+'</div>'+
+      '<div style="font-size:.68rem;color:var(--t2)">'+n.desc+'</div>'+
     '</div>'
   });
+  html+='</div>';
+  html+='<div style="display:flex;gap:.5rem;flex-wrap:wrap">';
+  html+='<button class="btn bh bs" onclick="exportInconsXLS(empAtual)">📊 Exportar Excel</button>';
+  html+='<button class="btn bh bs" onclick="exportInconsPDF(empAtual)">📄 Gerar Relatório PDF</button>';
   html+='</div></div>';
 
-  // ── Sumário de categorias ──
-  var cats={};ic.forEach(function(x){cats[x.cat]=(cats[x.cat]||[]);cats[x.cat].push(x)});
-  html+='<div class="card" style="margin-bottom:1rem"><div class="sec-t">&#9684; Resumo por Categoria</div>';
-  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.5rem">';
-  Object.entries(cats).sort(function(a,b){return b[1].length-a[1].length}).forEach(function(kv){
-    var nivelCor={'Critico':'#dc2626','Alto':'#f59e0b','Medio':'#f59e0b','Baixo':'#9ca3af','Atencao':'#22c55e'};
-    var maisGrave=kv[1].reduce(function(a,b){var ord={'Critico':5,'Alto':4,'Medio':3,'Baixo':2,'Atencao':1};return(ord[a.nivel]||0)>=(ord[b.nivel]||0)?a:b},{nivel:'Atencao'});
-    var cor=nivelCor[maisGrave.nivel]||'var(--t2)';
-    html+='<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:var(--r2);padding:.5rem .8rem;border-left:3px solid '+cor+'">'+
-      '<div style="font-weight:600;font-size:.8rem;color:#fff">'+kv[0]+'</div>'+
-      '<div style="font-size:.72rem;color:'+cor+';margin-top:.1rem">'+kv[1].length+' ocorrência(s)</div></div>'
-  });
-  html+='</div></div>';
+  // ── Inconsistências agrupadas por nível e tipo ──
+  NIVEIS.forEach(function(niv){
+    var items=ic.filter(function(x){return x.nivel===niv.k});if(!items.length)return;
+    var byType={};
+    items.forEach(function(it){
+      var key=it.cat||it.tipo;
+      if(!byType[key])byType[key]=[];
+      byType[key].push(it)
+    });
 
-  // ── Detalhe por nível ──
-  ['Critico','Alto','Medio','Baixo','Atencao'].forEach(function(nivel){
-    var items=ic.filter(function(x){return x.nivel===nivel});if(!items.length)return;
-    var lg=LEGENDA.find(function(l){return l.nivel===nivel});if(!lg)return;
-    // Group items by type within this level
-    var byType={};items.forEach(function(it){byType[it.tipo]=(byType[it.tipo]||[]);byType[it.tipo].push(it)});
     html+='<div style="margin-bottom:.8rem">';
-    html+='<div style="display:flex;align-items:center;gap:.5rem;padding:.5rem .8rem;background:'+lg.bg+';border-radius:var(--r2) var(--r2) 0 0;border:1px solid '+lg.cor+'22">'+
-      '<span style="background:'+lg.cor+';color:#fff;font-size:.68rem;font-weight:700;padding:.15rem .55rem;border-radius:3px;letter-spacing:.06em">'+lg.label+'</span>'+
-      '<span style="font-weight:600;color:'+lg.cor+';font-size:.82rem">'+items.length+' inconsistência(s)</span>'+
+    // Level header
+    html+='<div style="display:flex;align-items:center;gap:.5rem;padding:.55rem 1rem;background:'+niv.bg+';border:1px solid '+niv.cor+'33;border-radius:var(--r) var(--r) 0 0">'+
+      niv.ico+' <span style="font-weight:700;font-size:.85rem;color:'+niv.cor+'">'+niv.label+'</span>'+
+      '<span style="font-size:.78rem;color:'+niv.cor+';opacity:.8">— '+items.length+' ocorrência(s)</span>'+
     '</div>';
-    Object.entries(byType).forEach(function(kv2){
-      var grpItems=kv2[1];
-      html+='<div style="background:var(--nv2);border:1px solid rgba(255,255,255,.05);border-top:none;padding:.7rem .9rem">'+
-        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">'+
-          '<div style="font-size:.8rem;font-weight:600;color:'+lg.cor+'">'+kv2[0]+'</div>'+
-          '<div style="display:flex;align-items:center;gap:.5rem">'+
-            '<span style="font-size:.7rem;color:var(--t3)">'+grpItems.length+' colaborador(es)</span>'+
-            (grpItems[0].sug?'<span style="font-size:.7rem;color:var(--gd);font-style:italic">&#9658; '+grpItems[0].sug+'</span>':'')+
-          '</div>'+
-        '</div>';
-      if(grpItems[0].extra){
-        html+='<div style="font-size:.72rem;color:var(--t2);background:rgba(255,255,255,.03);border-radius:var(--r2);padding:.3rem .6rem;margin-bottom:.4rem">'+grpItems[0].extra+'</div>'
+
+    // Groups within this level
+    Object.entries(byType).forEach(function(kv){
+      var grp=kv[1];var tipo=kv[0];
+      html+='<div style="background:var(--nv2);border:1px solid rgba(255,255,255,.05);border-top:none">';
+      // Type header
+      html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);background:rgba(255,255,255,.02)">'+
+        '<span style="font-weight:600;font-size:.8rem">'+eh(tipo)+'</span>'+
+        '<span style="font-size:.72rem;color:var(--t3)">'+grp.length+' colaborador(es)</span>'+
+      '</div>';
+      if(grp[0]&&grp[0].sug){
+        html+='<div style="padding:.3rem 1rem;font-size:.72rem;color:var(--gd);background:rgba(201,168,76,.04)">'+
+          '💡 '+eh(grp[0].sug)+'</div>'
       }
-      grpItems.forEach(function(it){
-        html+='<div style="display:flex;align-items:center;gap:.5rem;padding:.28rem 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:.78rem">'+
-          '<span style="font-weight:600;min-width:170px;cursor:pointer;color:var(--gd)" onclick="verColabDet('+it.i+')">'+eh(it.n)+'</span>'+
-          (it.depto?'<span style="font-size:.68rem;color:var(--t3);background:rgba(255,255,255,.04);padding:.08rem .4rem;border-radius:10px;white-space:nowrap">'+eh(it.depto)+'</span>':'')+
-          '<button class="btn bh bs" style="font-size:.62rem;padding:.1rem .35rem;margin-left:auto" onclick="verColabDet('+it.i+')">Ver</button>'+
-        '</div>'
+      if(grp[0]&&grp[0].extra){
+        html+='<div style="padding:.25rem 1rem;font-size:.72rem;color:var(--t3)">'+eh(grp[0].extra)+'</div>'
+      }
+      // Each collaborator — clickable to open inline edit
+      grp.forEach(function(it){
+        var c2=emp.colabs?emp.colabs[it.i]:null;
+        var depto=c2?c2.depto||'-':it.depto||'-';
+        var sal=c2?parseFloat(c2.sal)||0:0;
+        // Determine which field to edit based on category
+        var editField=getEditFieldForIncons(it);
+        html+='<div style="border-bottom:1px solid rgba(255,255,255,.03)">';
+        html+='<div style="display:flex;align-items:center;gap:.6rem;padding:.45rem 1rem;cursor:pointer;transition:background .15s" '+
+          'onclick="toggleInconsEdit(\'incons-edit-'+it.i+'-'+it.nivel+'-'+grp.indexOf(it)+'\')"'+
+          ' onmouseover="this.style.background=\'rgba(255,255,255,.03)\'" onmouseout="this.style.background=\'\'">';
+        html+='<span style="font-weight:600;min-width:160px;font-size:.8rem;color:var(--gd)">'+eh(it.n)+'</span>';
+        html+='<span style="font-size:.7rem;color:var(--t3);background:rgba(255,255,255,.04);padding:.1rem .4rem;border-radius:10px;white-space:nowrap">'+eh(depto)+'</span>';
+        if(sal>0)html+='<span style="font-size:.7rem;color:var(--t2);margin-left:.3rem">R$ '+sal.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</span>';
+        html+='<span style="margin-left:auto;font-size:.7rem;color:var(--gd)">✏️ Editar</span>';
+        html+='</div>';
+        // Inline edit panel (hidden by default)
+        html+='<div id="incons-edit-'+it.i+'-'+it.nivel+'-'+grp.indexOf(it)+'" style="display:none;padding:.6rem 1rem 1rem;background:rgba(255,255,255,.02);border-top:1px solid rgba(255,255,255,.04)">';
+        html+=buildInconsEditPanel(it,emp,editField);
+        html+='</div>';
+        html+='</div>'
       });
       html+='</div>'
     });
@@ -2012,6 +2050,155 @@ function renderIncons(emp){
   });
 
   el.innerHTML=html
+}
+
+function toggleInconsEdit(id){
+  var el=document.getElementById(id);
+  if(!el)return;
+  var isOpen=el.style.display!=='none';
+  // Close all others first
+  document.querySelectorAll('[id^="incons-edit-"]').forEach(function(e){e.style.display='none'});
+  if(!isOpen)el.style.display='block'
+}
+
+function getEditFieldForIncons(it){
+  var cat=it.cat||'';var tipo=it.tipo||'';
+  if(cat==='Remuneração'||tipo.indexOf('sal')>=0||tipo.indexOf('Sal')>=0)return 'sal';
+  if(cat==='Cargo/Função'||tipo.indexOf('cargo')>=0||tipo.indexOf('Cargo')>=0)return 'cargo';
+  if(tipo.indexOf('CBO')>=0||tipo.indexOf('cbo')>=0)return 'cbo';
+  if(tipo.indexOf('departamento')>=0||tipo.indexOf('Departamento')>=0)return 'depto';
+  if(tipo.indexOf('admissão')>=0||tipo.indexOf('admissao')>=0)return 'adm';
+  if(tipo.indexOf('jornada')>=0||tipo.indexOf('Jornada')>=0)return 'jornada';
+  if(tipo.indexOf('CPF')>=0||tipo.indexOf('cpf')>=0)return 'cpf';
+  if(cat==='Equidade Salarial'||tipo.indexOf('variação')>=0)return 'sal';
+  return 'all'
+}
+
+function buildInconsEditPanel(it,emp,field){
+  var c2=emp.colabs?emp.colabs[it.i]:null;if(!c2)return '<p style="font-size:.78rem;color:var(--t3)">Colaborador não encontrado.</p>';
+  var html='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.5rem">';
+  var mkField=function(label,id,val,type){
+    type=type||'text';
+    return'<div><label style="font-size:.68rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em">'+label+'</label>'+
+      '<input type="'+type+'" value="'+eh(val||'')+'" data-field="'+id+'" data-idx="'+it.i+'" '+
+      'style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:var(--r2);padding:.32rem .6rem;color:#fff;font-size:.78rem;font-family:inherit;margin-top:.18rem" '+
+      'onchange="salvarCampoIncons(this)">'+
+    '</div>'
+  };
+  var mkSel=function(label,id,val,opts){
+    var os=opts.map(function(o){return'<option value="'+o+'"'+(o===val?' selected':'')+'>'+o+'</option>'}).join('');
+    return'<div><label style="font-size:.68rem;color:var(--t3);text-transform:uppercase;letter-spacing:.05em">'+label+'</label>'+
+      '<select data-field="'+id+'" data-idx="'+it.i+'" '+
+      'style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:var(--r2);padding:.32rem .6rem;color:#fff;font-size:.78rem;font-family:inherit;margin-top:.18rem" '+
+      'onchange="salvarCampoIncons(this)"><option value="">Selecionar</option>'+os+'</select>'+
+    '</div>'
+  };
+
+  // Always show key fields; highlight the problematic one
+  html+=mkField('Salário Base (R$)','sal',c2.sal,'number');
+  html+=mkField('Cargo CTPS','cargo',c2.cargo);
+  html+=mkField('Função Real','real',c2.real);
+  html+=mkField('CBO','cbo',c2.cbo);
+  html+=mkField('Departamento','depto',c2.depto);
+  html+=mkSel('Jornada','jornada',c2.jornada,['44h Semanais','40h Semanais','36h Semanais','30h Semanais','20h Semanais','12x36','Meio Período','Horista','Diarista','Aprendiz','Estagiário']);
+  html+=mkField('Data Admissão','adm',c2.adm,'date');
+  html+=mkField('CPF','cpf',c2.cpf);
+  html+='</div>';
+  html+='<div style="margin-top:.5rem;display:flex;gap:.4rem">';
+  html+='<button class="btn bg bs" onclick="salvarTodoCampoIncons('+it.i+',this)">✓ Salvar Alterações</button>';
+  html+='<button class="btn bh bs" onclick="verColabDet('+it.i+')">📋 Ver Cadastro Completo</button>';
+  html+='<button class="btn bd bs" onclick="toggleInconsEdit(\'incons-edit-'+it.i+'-'+it.nivel+'-0\')">✕</button>';
+  html+='</div>';
+  return html
+}
+
+function salvarCampoIncons(input){
+  // Real-time highlight of changed field
+  input.style.borderColor='var(--gd)';
+  input.style.background='rgba(201,168,76,.08)'
+}
+
+function salvarTodoCampoIncons(idx,btn){
+  var emps=gst('emps')||[];var empIdx=emps.findIndex(function(e){return e.id===empAtual.id});if(empIdx<0)return;
+  var colabs=emps[empIdx].colabs||[];if(!colabs[idx])return;
+  // Find all inputs/selects in the same edit panel
+  var panel=btn.closest('[id^="incons-edit-"]')||btn.parentElement;
+  var inputs=panel?panel.querySelectorAll('[data-field][data-idx]'):[];
+  inputs.forEach(function(inp){
+    var field=inp.dataset.field;var val=inp.value.trim();
+    if(field&&field!=='')colabs[idx][field]=val
+  });
+  emps[empIdx].colabs=colabs;sst('emps',emps);empAtual=emps[empIdx];
+  renderIncons(empAtual);renderDetStats(empAtual);
+  logAudit('Correção','Inconsistências','Campo(s) do colaborador '+( colabs[idx].nome||'')+ ' corrigido(s)');
+  toast('✓ Alterações salvas!')
+}
+
+function exportInconsXLS(emp){
+  if(!emp){toast('Abra um projeto.',false);return}
+  var ic=detectIncons(emp);
+  if(!ic.length){toast('Nenhuma inconsistência.',false);return}
+  var lines=['Nível,Categoria,Colaborador,Departamento,Tipo,Salário Atual,Sugestão'];
+  ic.forEach(function(it){
+    var c2=emp.colabs?emp.colabs[it.i]:null;
+    var sal=c2?parseFloat(c2.sal)||0:0;
+    lines.push('"'+(it.nivel||'')+'",'
+      +'"'+(it.cat||'')+'",'
+      +'"'+(it.n||'')+'",'
+      +'"'+(it.depto||'')+'",'
+      +'"'+(it.tipo||'')+'",'
+      +'"'+(sal?'R$ '+sal.toLocaleString('pt-BR',{minimumFractionDigits:2}):'-')+'",'
+      +'"'+(it.sug||'')+'"')
+  });
+  dl('inconsistencias_'+emp.nome+'_'+new Date().toISOString().split('T')[0]+'.csv',lines.join('\n'),'text/csv');
+  toast('Excel exportado!')
+}
+
+function exportInconsPDF(emp){
+  if(!emp){toast('Abra um projeto.',false);return}
+  var ic=detectIncons(emp);
+  var hoje=new Date().toLocaleDateString('pt-BR');
+  var w=window.open('','_blank');
+  var CORES={Critico:'#dc2626',Alto:'#f59e0b',Medio:'#facc15',Baixo:'#9ca3af',Atencao:'#22c55e'};
+  var crit=ic.filter(function(x){return x.nivel==='Critico'}).length;
+  var alto=ic.filter(function(x){return x.nivel==='Alto'}).length;
+  var s='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Inconsistências PCCS — '+emp.nome+'</title>';
+  s+='<style>body{font-family:Arial,sans-serif;font-size:10pt;color:#111;padding:1.5cm}';
+  s+='h1{font-size:14pt;color:#0d1b2e;border-bottom:3px solid #c9a84c;padding-bottom:.4rem;margin-bottom:.8rem}';
+  s+='.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:9pt;font-weight:700;color:#fff}';
+  s+='.grupo{margin-bottom:1rem;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden}';
+  s+='.grupo-header{padding:6px 12px;font-weight:700;font-size:10pt}';
+  s+='table{width:100%;border-collapse:collapse;font-size:9pt}';
+  s+='th{background:#0d1b2e;color:#fff;padding:5px 8px;text-align:left}';
+  s+='td{padding:4px 8px;border-bottom:1px solid #f0f0f0}';
+  s+='tr:nth-child(even) td{background:#fafafa}';
+  s+='@media print{button{display:none}}</style></head><body>';
+  s+='<h1>Relatório de Inconsistências — PCCS</h1>';
+  s+='<p><strong>Empresa:</strong> '+emp.nome+' | <strong>Data:</strong> '+hoje+'</p>';
+  s+='<div style="display:flex;gap:8px;margin:8px 0">';
+  s+='<span class="badge" style="background:#dc2626">'+crit+' Críticos</span>';
+  s+='<span class="badge" style="background:#f59e0b">'+alto+' Altos</span>';
+  s+='<span class="badge" style="background:#6b7280">'+ic.length+' Total</span>';
+  s+='</div>';
+  ['Critico','Alto','Medio','Baixo','Atencao'].forEach(function(niv){
+    var items=ic.filter(function(x){return x.nivel===niv});if(!items.length)return;
+    var cor=CORES[niv]||'#6b7280';
+    var labels={Critico:'CRÍTICO',Alto:'ALTO',Medio:'MÉDIO',Baixo:'BAIXO',Atencao:'ATENÇÃO'};
+    s+='<div class="grupo"><div class="grupo-header" style="background:'+cor+'22;color:'+cor+'">'+labels[niv]+' — '+items.length+' ocorrência(s)</div>';
+    s+='<table><tr><th>Colaborador</th><th>Departamento</th><th>Tipo</th><th>Sugestão</th></tr>';
+    items.forEach(function(it){
+      var c2=emp.colabs?emp.colabs[it.i]:null;
+      var depto=c2?c2.depto||'-':it.depto||'-';
+      s+='<tr><td><strong>'+eh(it.n)+'</strong></td><td>'+eh(depto)+'</td><td>'+eh(it.tipo)+'</td><td style="font-size:8pt;color:#555">'+eh(it.sug||'')+'</td></tr>'
+    });
+    s+='</table></div>'
+  });
+  s+='<p style="margin-top:1rem;font-size:8pt;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:.5rem">PCCS 360 · Instituto Primazia · '+hoje+'</p>';
+  s+='<button onclick="window.print()" style="margin-top:.5rem">🖨 Imprimir</button>';
+  s+='</body></html>';
+  w.document.write(s);w.document.close();
+  setTimeout(function(){w.print()},600);
+  logAudit('Relatório','Inconsistências','PDF gerado para '+emp.nome)
 }
 
 // ═══ IA ═══
@@ -3141,18 +3328,31 @@ function importCargoCSV(input){
     return cargos.filter(function(c){return c.emp===emp.id}).length
   }
 
-function uploadEmpLogo(input,previewId){
+function uploadEmpLogo(input,previewId,dataId){
   if(!input.files[0])return;
   var reader=new FileReader();
   reader.onload=function(e){
-    var prev=document.getElementById(previewId);if(prev){prev.src=e.target.result;prev.style.display='block'}
-    // Store in hidden input
-    var hiddenId=previewId.replace('-preview','-data');
-    var hidden=document.getElementById(hiddenId);if(hidden)hidden.value=e.target.result;
-    toast('Logo carregada!')
+    var prev=document.getElementById(previewId);
+    if(prev){prev.src=e.target.result;prev.style.display='block'}
+    var hidden=document.getElementById(dataId||previewId.replace('-preview','-data'));
+    if(hidden)hidden.value=e.target.result;
+    // Show delete button
+    var delBtn=previewId==='emp-logo-preview'?document.getElementById('btn-del-logo-emp'):document.getElementById('btn-del-logo-inst');
+    if(delBtn)delBtn.style.display='inline-flex';
+    toast('Logo carregada! Clique em Salvar para confirmar.')
   };
   reader.readAsDataURL(input.files[0]);input.value=''
 }
+function removerLogo(previewId,dataId,btnId){
+  var prev=document.getElementById(previewId);
+  if(prev){prev.src='';prev.style.display='none'}
+  var hidden=document.getElementById(dataId);
+  if(hidden)hidden.value='';
+  var btn=document.getElementById(btnId);
+  if(btn)btn.style.display='none';
+  toast('Logo removida.')
+}
+
 
 
 </script>
