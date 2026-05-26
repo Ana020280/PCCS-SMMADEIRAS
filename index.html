@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PCCS 360 · Instituto Primazia</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
 function verColabDet(i){
   if(!empAtual)return;var c=(empAtual.colabs||[])[i];if(!c)return;
   var el=document.getElementById('mcolab-det');if(!el){toast('Modal nao disponivel',false);return}
@@ -861,8 +862,8 @@ function nav(vid){
   document.querySelectorAll('.view').forEach(function(v){v.classList.remove('on')});
   var el=document.getElementById(vid);if(el)el.classList.add('on');
   document.querySelectorAll('.ni').forEach(function(n){n.classList.toggle('on',n.dataset.v===vid)});
-  var renders={vdash:renderDash,vanal:renderAnal,vemp:renderEmps,vusers:renderUsers,vcargos:renderCargos,vpes:renderPes,vest:renderEst,vgov:renderGov,vlog:renderChangelog};
-  if(renders[vid])renders[vid]();
+  var renders={vdash:renderDash,vanal:function(){},vemp:renderEmps,vusers:renderUsers,vcargos:renderCargos,vpes:renderPes,vest:renderEst,vgov:renderGov,vlog:renderChangelog};
+  try{if(renders[vid])renders[vid]();}catch(e){console.warn('render',vid,e)}
   window.scrollTo(0,0)
 }
 
@@ -1313,6 +1314,42 @@ function exportColabs(){
   var h='Nome,CPF,Sexo,Nascimento,Admissão,Cargo CTPS,Função Real,CBO,Departamento,Centro Custo,Salário,Situação\n';
   var csv=h+(empAtual.colabs||[]).map(function(c){return '"'+(c.nome||'')+'","'+(c.cpf||'')+'","'+(c.sexo||'')+'","'+(c.nasc?fd(c.nasc):'')+'","'+(c.adm?fd(c.adm):'')+'","'+(c.cargo||'')+'","'+(c.real||'')+'","'+(c.cbo||'')+'","'+(c.depto||'')+'","'+(c.cc||'')+'","'+(c.sal||'')+'","'+(c.sit||'')+'"'}).join('\n');
   dl('colaboradores_'+empAtual.nome+'.csv',csv,'text/csv');toast('CSV exportado!')
+}
+
+
+// ═══ RENDER FUNÇÕES AUSENTES (corrigidas) ═══
+function renderCargos(){
+  var t=document.getElementById('cargos-tbody');if(!t)return;
+  var list=gst('cargos')||[];var emps=gst('emps')||[];
+  t.innerHTML=list.length?list.map(function(c,i){
+    var en=emps.find(function(e){return e.id===c.empId});
+    return '<tr><td style="font-weight:600">'+eh(c.nome||'-')+'</td><td>'+eh(c.cbo||'-')+'</td><td>'+eh(c.fam||'-')+'</td><td>'+eh(c.niv||'-')+'</td><td>'+eh(en?en.nome:'-')+'</td><td><button class="btn bd bs" onclick="delCargo(''+c.id+'')">✕</button></td></tr>'
+  }).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:1.5rem">Nenhum cargo. Clique em "+ Novo Cargo".</td></tr>'
+}
+function renderPes(){
+  var t=document.getElementById('pes-tbody');if(!t)return;
+  var list=gst('pes')||[];var emps=gst('emps')||[];
+  t.innerHTML=list.length?list.map(function(p,i){
+    var en=emps.find(function(e){return e.id===p.empId});
+    return '<tr><td style="font-weight:600">'+eh(p.cargo||'-')+'</td><td>'+eh(en?en.nome:'-')+'</td><td style="color:var(--gd)">'+fmt(p.p25)+'</td><td style="color:var(--gr)">'+fmt(p.p50)+'</td><td style="color:var(--yw)">'+fmt(p.p75)+'</td><td style="font-size:.75rem;color:var(--t2)">'+eh(p.fonte||'-')+'</td></tr>'
+  }).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:1.5rem">Nenhuma pesquisa salarial.</td></tr>'
+}
+function renderEst(){
+  var t=document.getElementById('est-tbody');if(!t)return;
+  var list=gst('faixas')||[];var emps=gst('emps')||[];
+  t.innerHTML=list.length?list.map(function(f,i){
+    var amp=f.min>0?Math.round((f.max-f.min)/f.min*100):0;
+    return '<tr><td style="font-weight:600">'+eh(f.fam||'-')+'</td><td>'+eh(f.niv||'-')+'</td><td style="color:var(--rd)">'+fmt(f.min)+'</td><td style="color:var(--gd)">'+fmt(f.mid)+'</td><td style="color:var(--gr)">'+fmt(f.max)+'</td><td><span class="b by">'+amp+'%</span></td></tr>'
+  }).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:1.5rem">Nenhuma faixa salarial.</td></tr>'
+}
+function renderGov(){
+  var t=document.getElementById('gov-tbody');if(!t)return;
+  var list=gst('membros')||[];var emps=gst('emps')||[];
+  t.innerHTML=list.length?list.map(function(m,i){
+    var en=emps.find(function(e){return e.id===m.empId});
+    return '<tr><td style="font-weight:600">'+eh(m.nome||'-')+'</td><td>'+eh(m.cargo||'-')+'</td><td>'+eh(en?en.nome:'-')+'</td><td>'+eh(m.papel||'-')+'</td><td><button class="btn bd bs" onclick="delMembro(''+m.id+'')">✕</button></td></tr>'
+  }).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--t3);padding:1.5rem">Nenhum membro.</td></tr>'
+  var gr=document.getElementById('gov-reg');if(gr)gr.value=gst('govReg')||''
 }
 
 // ═══ IMPORTAÇÃO ═══
