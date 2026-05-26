@@ -4,26 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PCCS 360 · Instituto Primazia</title>
-<!-- Firebase SDKs (compat) -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-<script>
-// Inicializa Firebase com config inline (evita conflito com firebase-config.js)
-(function(){
-  try{
-    if(typeof firebase!=='undefined'&&!firebase.apps.length){
-      // Tenta carregar config do firebase-config.js se disponível
-      if(typeof firebaseConfig!=='undefined'){
-        firebase.initializeApp(firebaseConfig);
-        window._pccsDB=firebase.firestore();
-        console.log('☁ Firebase conectado');
-      }
-    } else if(typeof firebase!=='undefined'&&firebase.apps.length){
-      window._pccsDB=firebase.firestore();
-    }
-  }catch(e){console.warn('Firebase offline:',e)}
-})();
-</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
 function verColabDet(i){
   if(!empAtual)return;var c=(empAtual.colabs||[])[i];if(!c)return;
@@ -549,7 +529,7 @@ input[type="date"].inp{color-scheme:dark}
 
 <!-- USUÁRIOS -->
 <div class="view" id="vusers">
-  <div class="phdr"><div><h2>Gestão de <em>Usuários</em></h2><p>Até 15 usuários com níveis de acesso</p></div><div class="phdr-r" id="add-user-btn"><button class="btn bh bs" onclick="abrirGuiaAcesso()">🔑 Como Compartilhar Acesso</button> <button class="btn bg" onclick="openM('muser')">+ Novo Usuário</button></div></div>
+  <div class="phdr"><div><h2>Gestão de <em>Usuários</em></h2><p>Até 15 usuários com níveis de acesso</p></div><div class="phdr-r" id="add-user-btn"><button class="btn bg" onclick="openM('muser')">+ Novo Usuário</button></div></div>
   <div class="content"><div class="ugrid" id="users-grid"></div></div>
 </div>
 
@@ -804,100 +784,14 @@ input[type="date"].inp{color-scheme:dark}
 
 <div class="toast" id="toast"><span id="t-ico">&#10003;</span><span id="t-msg">Salvo!</span></div>
 
-<!-- VISUALIZADOR -->
-<div class="ov" id="mviewer" style="z-index:9999">
-  <div class="modal" style="max-width:920px;width:95vw;max-height:94vh;display:flex;flex-direction:column">
-    <div class="mhdr">
-      <h3 id="viewer-titulo">📄 Visualizador</h3>
-      <div style="display:flex;gap:.5rem;align-items:center">
-        <a id="viewer-download" href="#" download style="font-size:.75rem;color:var(--gd);text-decoration:none;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);padding:.3rem .7rem;border-radius:6px">⬇ Baixar</a>
-        <button class="mcl" onclick="closeM('mviewer')">✕</button>
-      </div>
-    </div>
-    <div id="viewer-body" style="flex:1;overflow:auto;min-height:420px;background:#0a1525;border-radius:var(--r2);display:flex;align-items:center;justify-content:center">
-      <div style="color:var(--t3)">Selecione um arquivo para visualizar</div>
-    </div>
-  </div>
-</div>
-
-<!-- GUIA ACESSO -->
-<div class="ov" id="mguia-acesso">
-  <div class="modal" style="max-width:560px">
-    <div class="mhdr"><h3>🔑 Como Dar Acesso a Outros Usuários</h3><button class="mcl" onclick="closeM('mguia-acesso')">✕</button></div>
-    <div style="font-size:.84rem;line-height:1.8">
-      <div style="background:var(--nv2);border-radius:var(--r2);padding:1rem;margin-bottom:.8rem">
-        <p style="color:var(--gd);font-weight:600;margin-bottom:.6rem">Passo a passo:</p>
-        <p><strong>1.</strong> Vá em <strong>Usuários → + Novo Usuário</strong></p>
-        <p><strong>2.</strong> Defina o nível de acesso:</p>
-        <div style="margin:.5rem 0 .5rem 1rem;display:flex;flex-direction:column;gap:.3rem">
-          <div><span class="b bg2">Administrador</span> — acesso total, cria/edita/exclui tudo</div>
-          <div><span class="b by">Editor</span> — edita projetos e colaboradores</div>
-          <div><span class="b bk">Visualizador</span> — somente leitura</div>
-        </div>
-        <p><strong>3.</strong> Envie o link do sistema:</p>
-        <div style="background:var(--nv3);border-radius:6px;padding:.5rem .8rem;font-family:monospace;color:var(--gd);margin:.3rem 0;word-break:break-all">https://pccs-sm-madeiras.web.app</div>
-        <p><strong>4.</strong> A pessoa acessa com e-mail e senha que você cadastrou</p>
-      </div>
-      <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:var(--r2);padding:.6rem .8rem;font-size:.78rem">
-        ☁️ <strong>Os dados ficam na nuvem.</strong> Qualquer dispositivo com o link verá os mesmos dados em tempo real.
-      </div>
-    </div>
-    <div style="display:flex;justify-content:flex-end;gap:.6rem;margin-top:1rem">
-      <button class="btn bh" onclick="closeM('mguia-acesso')">Fechar</button>
-      <button class="btn bg" onclick="navigator.clipboard&&navigator.clipboard.writeText('https://pccs-sm-madeiras.web.app').then(function(){toast('Link copiado! ☁')});closeM('mguia-acesso')">📋 Copiar Link do Sistema</button>
-    </div>
-  </div>
-</div>
-
 <script>
 
-// PCCS 360 v4.1 — Sync em Nuvem + Visualizador + Inconsistências Detalhadas
+// PCCS 360 v3.1 — JavaScript Enhanced
+// Changelog, projeto por status, colaborador detalhe, fases melhoradas, tp9
+
 var K='p36_';
-
 function gst(k){try{return JSON.parse(localStorage.getItem(K+k))||null}catch(e){return null}}
-function sst(k,v){
-  try{localStorage.setItem(K+k,JSON.stringify(v))}catch(e){}
-  // Sync Firebase em background
-  try{
-    if(window._pccsDB&&window._pccsSessao){
-      window._pccsDB.collection('pccs360').doc(k).set({
-        data:JSON.stringify(v),upd:Date.now(),uid:window._pccsSessao||'u'
-      }).catch(function(){});
-    }
-  }catch(e){}
-}
-
-function syncCloud(){
-  try{
-    if(!window._pccsDB)return;
-    ['emps','users','cargos','pes','faixas','membros','rops'].forEach(function(k){
-      window._pccsDB.collection('pccs360').doc(k).get().then(function(doc){
-        if(doc.exists){
-          var d=doc.data();
-          if(d&&d.upd&&d.data){
-            var localUpd=parseInt(localStorage.getItem(K+k+'_t')||'0');
-            if(d.upd>localUpd){
-              localStorage.setItem(K+k,d.data);
-              localStorage.setItem(K+k+'_t',d.upd);
-            }
-          }
-        }
-      }).catch(function(){});
-    });
-    // Listener em tempo real
-    window._pccsDB.collection('pccs360').doc('emps').onSnapshot(function(doc){
-      if(doc.exists&&doc.metadata&&!doc.metadata.hasPendingWrites){
-        var d=doc.data();
-        if(d&&d.uid&&window._pccsSessao&&d.uid!==window._pccsSessao){
-          localStorage.setItem(K+'emps',d.data);
-          localStorage.setItem(K+'emps_t',d.upd||0);
-          if(document.getElementById('vdash')&&document.getElementById('vdash').classList.contains('on'))renderDash();
-          toast('☁ Dados sincronizados de outro dispositivo!');
-        }
-      }
-    });
-  }catch(e){}
-}
+function sst(k,v){try{localStorage.setItem(K+k,JSON.stringify(v))}catch(e){}}
 
 var CORES=['#c9a84c','#3b82f6','#22c55e','#8b5cf6','#ef4444','#f59e0b','#06b6d4','#ec4899'];
 var sessao=null, empAtual=null, colabDetDocs=[];
@@ -940,7 +834,7 @@ function init(){
   if(!gst('rops'))sst('rops',[]);
   if(!gst('changelog'))sst('changelog',[{id:'cl1',tipo:'Nova Funcionalidade',desc:'Sistema PCCS 360 lançado com Dashboard, Fases, Kanban, Performance, Importação Excel/CSV, IA Organizacional e Relatórios Operacionais.',resp:'Instituto Primazia',data:now(),status:'Implementado'}]);
   var s=gst('sessao');
-  if(s){var u=(gst('users')||[]).find(function(x){return x.id===s.id&&x.senha===s.senha});if(u){sessao=u;window._pccsSessao=u.id;iniciarApp();setTimeout(syncCloud,800);return}}
+  if(s){var u=(gst('users')||[]).find(function(x){return x.id===s.id&&x.senha===s.senha});if(u){sessao=u;iniciarApp();return}}
 }
 
 // ═══ AUTH ═══
@@ -948,10 +842,7 @@ function entrar(){
   var e=gv('le'),s=gv('ls');
   var u=(gst('users')||[]).find(function(x){return x.email===e&&x.senha===s});
   if(!u){document.getElementById('lerr').textContent='E-mail ou senha incorretos.';return}
-  sessao=u;window._pccsSessao=u.id;sst('sessao',u);
-  document.getElementById('lerr').textContent='';
-  iniciarApp();
-  setTimeout(syncCloud,800);
+  sessao=u;sst('sessao',u);document.getElementById('lerr').textContent='';iniciarApp()
 }
 function logout(){sessao=null;sst('sessao',null);document.getElementById('vlogin').style.display='flex';document.getElementById('vapp').style.display='none';document.getElementById('ls').value=''}
 function iniciarApp(){
@@ -1264,7 +1155,18 @@ function abrirAtv(eid,fi,ai){
   document.getElementById('a-st').value=a.st||'Nao iniciado';
   renderAtvAnexos();openM('matv')
 }
-function _oldRenderAtvAnexos_removed(){}
+function renderAtvAnexos(){
+  var el=document.getElementById('atv-anexos-list');if(!el)return;
+  el.innerHTML=atvAnexosPending.map(function(ax,i){
+    var icon=ax.tipo&&ax.tipo.includes('pdf')?'PDF':ax.tipo&&ax.tipo.includes('image')?'IMG':'DOC';
+    return '<div style="display:inline-flex;align-items:center;gap:.3rem;background:var(--nv3);border:1px solid rgba(255,255,255,.08);border-radius:var(--r2);padding:.2rem .45rem;font-size:.73rem;margin:.2rem">'+
+      '<span style="color:var(--gd);font-size:.65rem">'+icon+'</span>'+
+      '<span style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+eh(ax.nome)+'</span>'+
+      (ax.url?'<a href="'+ax.url+'" download="'+eh(ax.nome)+'" target="_blank" style="color:var(--gd);text-decoration:none">&#11015;</a>':'')+
+      '<button onclick="atvAnexosPending.splice('+i+',1);renderAtvAnexos()" style="background:none;border:none;color:var(--t3);cursor:pointer;padding:0;font-size:.8rem">x</button>'+
+    '</div>'
+  }).join('')
+}
 function addAtvAnexo(input){
   Array.from(input.files).forEach(function(f){
     if(f.size<5*1024*1024){var r=new FileReader();r.onload=function(e){atvAnexosPending.push({nome:f.name,tipo:f.type,tam:f.size,data:now(),url:e.target.result});renderAtvAnexos()};r.readAsDataURL(f)}
@@ -1348,7 +1250,12 @@ function renderDeptos(emp){
   var list=emp.deptos||[];
   t.innerHTML=list.length?list.map(function(d,i){var n=(emp.colabs||[]).filter(function(c){return c.depto===d.nome}).length;return '<tr><td>'+eh(d.nome)+'</td><td>'+eh(d.resp||'-')+'</td><td>'+n+'</td><td><button class="btn bd bs" onclick="delDepto('+i+')">✕</button></td></tr>'}).join(''):'<tr><td colspan="4" style="text-align:center;color:var(--t3);padding:1.5rem">Nenhum departamento.</td></tr>'
 }
-function _renderIncons_old_removed(){}
+function renderIncons(emp){
+  var el=document.getElementById('incons-list');if(!el)return;
+  var list=detectIncons(emp);
+  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-ico">◎</div><p>Nenhuma inconsistência detectada.</p></div>';return}
+  el.innerHTML=list.map(function(ic){var cls=ic.nivel==='Alto'?'br':ic.nivel==='Médio'?'by':'bk';return '<div style="background:var(--nv2);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:.8rem 1rem;margin-bottom:.5rem;display:flex;align-items:center;gap:1rem"><span class="b '+cls+'">'+ic.nivel+'</span><div style="flex:1"><div style="font-size:.84rem;font-weight:600">'+eh(ic.n)+'</div><div style="font-size:.75rem;color:var(--t2)">'+ic.tipo+'</div></div><div style="font-size:.72rem;color:var(--gd)">'+ic.sug+'</div></div>'}).join('')
+}
 
 // ═══ IA ═══
 function rodarIA(){
@@ -1409,220 +1316,6 @@ function exportColabs(){
 }
 
 // ═══ IMPORTAÇÃO ═══
-
-// ═══ DETECTAR INCONSISTÊNCIAS DETALHADAS ═══
-function detectIncons(emp){
-  var list=[];
-  var colabs=emp.colabs||[];
-
-  // 1. Sem cargo
-  colabs.forEach(function(c){
-    if(!c.cargo&&!c.real&&c.sit!=='Desligado'){
-      list.push({nivel:'Alto',n:'Sem cargo definido',tipo:'Vínculo trabalhista',sug:'Regularizar',
-        detalhe:'▶ '+c.nome+' não tem cargo CTPS nem função real. Risco trabalhista.',
-        acao:'Colaboradores → editar '+c.nome+' → Cargo CTPS'});
-    }
-  });
-
-  // 2. Sem salário
-  var semSal=colabs.filter(function(c){return !c.sal&&c.sit!=='Desligado'});
-  if(semSal.length){
-    list.push({nivel:'Alto',n:''+semSal.length+' colaborador(es) sem salário cadastrado',tipo:'Estrutura salarial',sug:'Completar',
-      detalhe:'▶ '+semSal.map(function(c){return c.nome}).join(', '),
-      acao:'Colaboradores → editar cada pessoa → preencher Salário Base'});
-  }
-
-  // 3. Mesmo CBO, salários muito diferentes
-  var cbos={};
-  colabs.forEach(function(c){if(c.cbo&&c.sal){if(!cbos[c.cbo])cbos[c.cbo]=[];cbos[c.cbo].push({nome:c.nome,sal:parseFloat(c.sal)||0})}});
-  Object.keys(cbos).forEach(function(cbo){
-    var g=cbos[cbo];if(g.length<2)return;
-    var sals=g.map(function(x){return x.sal}).filter(function(s){return s>0});
-    if(!sals.length)return;
-    var mn=Math.min.apply(null,sals),mx=Math.max.apply(null,sals);
-    if(mn>0&&(mx/mn)>1.5){
-      list.push({nivel:'Alto',n:'Equidade salarial — CBO '+cbo+' — variação de '+Math.round((mx/mn-1)*100)+'%',tipo:'Equidade salarial',sug:'Revisar',
-        detalhe:'▶ '+g.map(function(x){return x.nome+' (R$'+x.sal+')'}).join(' | '),
-        acao:'Pesquisa Salarial → verificar faixa para CBO '+cbo});
-    }
-  });
-
-  // 4. Mesma função, salários diferentes
-  var funcs={};
-  colabs.forEach(function(c){if(c.real&&c.sal){var key=(c.real).trim().toLowerCase();if(!funcs[key])funcs[key]=[];funcs[key].push({nome:c.nome,sal:parseFloat(c.sal)||0,real:c.real})}});
-  Object.keys(funcs).forEach(function(key){
-    var g=funcs[key];if(g.length<2)return;
-    var sals=g.map(function(x){return x.sal}).filter(function(s){return s>0});
-    if(!sals.length)return;
-    var mn=Math.min.apply(null,sals),mx=Math.max.apply(null,sals);
-    if(mn>0&&(mx/mn)>1.3){
-      list.push({nivel:'Médio',n:'Função "'+g[0].real+'" com salários desiguais',tipo:'Equidade salarial',sug:'Equalizar',
-        detalhe:'▶ '+g.map(function(x){return x.nome+' (R$'+x.sal+')'}).join(' | '),
-        acao:'Estrutura Salarial → criar faixa para "'+g[0].real+'" e alinhar'});
-    }
-  });
-
-  // 5. Sem CBO
-  var semCbo=colabs.filter(function(c){return !c.cbo&&c.cargo&&c.sit!=='Desligado'});
-  if(semCbo.length){
-    list.push({nivel:'Médio',n:''+semCbo.length+' colaborador(es) sem CBO',tipo:'Mapeamento de cargos',sug:'Preencher',
-      detalhe:'▶ '+semCbo.map(function(c){return c.nome+' ('+c.cargo+')'}).join(', '),
-      acao:'Banco de Cargos → adicionar CBO a cada cargo'});
-  }
-
-  // 6. Atividades atrasadas
-  var hoje=new Date();var atrs=[];
-  (emp.fases||[]).forEach(function(f,fi){
-    (f.atividades||[]).forEach(function(a){
-      if(a.prev&&new Date(a.prev)<hoje&&!a.feito&&a.st!=='Concluído')
-        atrs.push('F'+(fi+1)+': '+a.n.substring(0,30)+(a.resp?' ('+a.resp+')':''));
-    });
-  });
-  if(atrs.length){
-    list.push({nivel:'Alto',n:''+atrs.length+' atividade(s) com prazo vencido',tipo:'Cronograma',sug:'Reagendar',
-      detalhe:'▶ '+atrs.slice(0,4).join(' | ')+(atrs.length>4?' e mais '+(atrs.length-4)+'...':''),
-      acao:'Fases → Kanban → coluna "Atrasado"'});
-  }
-
-  // 7. Depts sem responsável
-  var semResp=(emp.deptos||[]).filter(function(d){return !d.resp});
-  if(semResp.length){
-    list.push({nivel:'Baixo',n:''+semResp.length+' departamento(s) sem responsável',tipo:'Estrutura organizacional',sug:'Definir',
-      detalhe:'▶ '+semResp.map(function(d){return d.nome}).join(', '),
-      acao:'Aba Departamentos → editar e adicionar responsável'});
-  }
-
-  return list;
-}
-
-// ═══ RENDER INCONSISTÊNCIAS DETALHADAS ═══
-function renderIncons(emp){
-  var el=document.getElementById('incons-list');if(!el)return;
-  var list=detectIncons(emp);
-  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-ico">◎</div><p>✅ Nenhuma inconsistência detectada!</p></div>';return}
-  var nA=list.filter(function(i){return i.nivel==='Alto'}).length;
-  var nM=list.filter(function(i){return i.nivel==='Médio'}).length;
-  var nB=list.filter(function(i){return i.nivel==='Baixo'}).length;
-  el.innerHTML=
-    '<div style="display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap">'+
-      '<span class="b br">🔴 '+nA+' Alto</span>'+
-      '<span class="b by">🟡 '+nM+' Médio</span>'+
-      '<span class="b bk">⚪ '+nB+' Baixo</span>'+
-      '<span style="font-size:.72rem;color:var(--t3);align-self:center;margin-left:.5rem">'+list.length+' inconsistências no total</span>'+
-    '</div>'+
-    list.map(function(ic){
-      var cor=ic.nivel==='Alto'?'var(--rd)':ic.nivel==='Médio'?'var(--yw)':'var(--t3)';
-      var cls=ic.nivel==='Alto'?'br':ic.nivel==='Médio'?'by':'bk';
-      return '<div style="background:var(--nv2);border:1px solid rgba(255,255,255,.07);border-left:3px solid '+cor+';border-radius:var(--r);padding:.9rem 1rem;margin-bottom:.6rem">'+
-        '<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem">'+
-          '<span class="b '+cls+'">'+ic.nivel+'</span>'+
-          '<span style="font-size:.85rem;font-weight:600">'+eh(ic.n)+'</span>'+
-          '<span style="font-size:.7rem;color:var(--t3);margin-left:auto">'+eh(ic.tipo)+'</span>'+
-        '</div>'+
-        '<div style="font-size:.78rem;color:var(--t2);background:var(--nv3);padding:.4rem .6rem;border-radius:6px;margin-bottom:.35rem">'+eh(ic.detalhe)+'</div>'+
-        '<div style="font-size:.75rem;color:var(--gr)">✅ <strong>Como corrigir:</strong> '+eh(ic.acao)+'</div>'+
-      '</div>'
-    }).join('')
-}
-
-// ═══ VISUALIZADOR DE ARQUIVOS ═══
-function abrirAnexoObj(nome,tipo,url){
-  abrirAnexo({nome:nome,tipo:tipo||'',url:url||''});
-}
-function abrirAnexo(ax){
-  if(!ax){toast('Arquivo não disponível',false);return}
-  var vm=document.getElementById('mviewer');if(!vm){toast('Abrindo...');window.open(ax.url,'_blank');return}
-  document.getElementById('viewer-titulo').textContent='📄 '+ax.nome;
-  var dl=document.getElementById('viewer-download');
-  var body=document.getElementById('viewer-body');
-  var tipo=(ax.tipo||'').toLowerCase();
-  var nome2=(ax.nome||'').toLowerCase();
-  if(ax.url){
-    dl.href=ax.url;dl.download=ax.nome||'arquivo';
-    if(tipo.includes('image')||nome2.match(/\.(jpg|jpeg|png|gif|webp|bmp)$/)){
-      body.innerHTML='<img src="'+ax.url+'" style="max-width:100%;max-height:72vh;object-fit:contain;border-radius:8px">';
-    } else if(tipo.includes('pdf')||nome2.endsWith('.pdf')){
-      body.innerHTML='<iframe src="'+ax.url+'" style="width:100%;height:72vh;border:none;border-radius:8px"></iframe>';
-    } else if(nome2.match(/\.(xlsx|xls)$/)){
-      body.innerHTML='<div style="color:var(--t2);padding:1rem;font-size:.85rem">⏳ Carregando planilha...</div>';
-      try{
-        var b64=ax.url.split(',')[1];var bin=atob(b64);var arr=new Uint8Array(bin.length);
-        for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
-        var wb=XLSX.read(arr,{type:'array'});
-        var html=XLSX.utils.sheet_to_html(wb.Sheets[wb.SheetNames[0]]);
-        body.innerHTML='<div style="overflow:auto;width:100%;height:72vh;padding:.5rem"><style>table{border-collapse:collapse;font-size:.78rem;color:#fff}td,th{border:1px solid rgba(255,255,255,.12);padding:.2rem .5rem;background:var(--nv2)}</style>'+html+'</div>';
-      }catch(e){body.innerHTML='<div style="color:var(--t2);padding:2rem;text-align:center">Não foi possível renderizar.<br><button class="btn bg bs" style="margin-top:1rem" onclick="document.getElementById(\'viewer-download\').click()">⬇ Baixar</button></div>'}
-    } else {
-      body.innerHTML='<div style="color:var(--t2);padding:2rem;text-align:center;font-size:.85rem">📄 <strong>'+eh(ax.nome)+'</strong><br><br>Clique para baixar este arquivo.<br><a class="btn bg bs" href="'+ax.url+'" download="'+eh(ax.nome||'arquivo')+'" style="margin-top:1rem;display:inline-flex">⬇ Baixar Arquivo</a></div>';
-    }
-  } else {
-    if(dl)dl.href='#';
-    body.innerHTML='<div style="color:var(--t2);padding:2rem;text-align:center;font-size:.85rem">📎 <strong>'+eh(ax.nome)+'</strong><br><br>Arquivo cadastrado como referência mas não foi carregado.<br><small>Edite a atividade e re-anexe o arquivo para visualizar.</small></div>';
-  }
-  openM('mviewer');
-}
-
-function renderAtvAnexos(){
-  var el=document.getElementById('atv-anexos-list');if(!el)return;
-  el.innerHTML=atvAnexosPending.map(function(ax,i){
-    var icon=(ax.tipo||'').includes('pdf')?'📄':(ax.tipo||'').includes('image')?'🖼️':'📎';
-    return '<div style="display:inline-flex;align-items:center;gap:.3rem;background:var(--nv3);border:1px solid rgba(255,255,255,.08);border-radius:var(--r2);padding:.2rem .5rem;font-size:.73rem;margin:.2rem">'+
-      '<span>'+icon+'</span>'+
-      '<span style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+eh(ax.nome)+'">'+eh(ax.nome)+'</span>'+
-      (ax.url?'<button onclick="abrirAnexo(atvAnexosPending['+i+'])" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.2);color:var(--gd);cursor:pointer;padding:0 .3rem;font-size:.7rem;border-radius:4px">👁</button>':'')+
-      (ax.url?'<a href="'+ax.url+'" download="'+eh(ax.nome)+'" style="color:var(--t3);text-decoration:none">⬇</a>':'')+
-      '<button onclick="atvAnexosPending.splice('+i+',1);renderAtvAnexos()" style="background:none;border:none;color:var(--t3);cursor:pointer;padding:0;font-size:.8rem">✕</button>'+
-    '</div>'
-  }).join('')
-}
-
-// ═══ ANEXOS PROJETO ═══
-function addAnexoProj(input){
-  if(!empAtual||!input.files.length)return;
-  var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;
-  if(!emps[idx].anexos)emps[idx].anexos=[];
-  var total=input.files.length;var cnt=0;
-  Array.from(input.files).forEach(function(f){
-    if(f.size<5*1024*1024){
-      var r=new FileReader();r.onload=function(ev){
-        emps[idx].anexos.push({nome:f.name,tipo:f.type,tam:f.size,data:now(),url:ev.target.result});
-        cnt++;if(cnt===total){sst('emps',emps);empAtual=emps[idx];renderAnexosProj(empAtual);toast('Arquivo(s) adicionado(s)!')}
-      };r.readAsDataURL(f);
-    }else{
-      emps[idx].anexos.push({nome:f.name,tipo:f.type,tam:f.size,data:now()});
-      cnt++;if(cnt===total){sst('emps',emps);empAtual=emps[idx];renderAnexosProj(empAtual);toast('Arquivo(s) adicionado(s)!')}
-    }
-  });input.value='';
-}
-function renderAnexosProj(emp){
-  var el=document.getElementById('proj-anexos-list');if(!el)return;
-  var all=[];
-  (emp.fases||[]).forEach(function(f,fi){
-    (f.atividades||[]).forEach(function(a){
-      (a.anexos||[]).forEach(function(ax){all.push({ax:ax,local:'F'+(fi+1)+' → '+a.n.substring(0,25)})});
-    });
-  });
-  (emp.anexos||[]).forEach(function(ax){all.push({ax:ax,local:'Projeto (geral)'})});
-  if(!all.length){el.innerHTML='<div class="empty"><div class="empty-ico">◈</div><p>Nenhum anexo. Adicione acima ou nas atividades das fases.</p></div>';return}
-  el.innerHTML='<div class="tw"><table><thead><tr><th>Arquivo</th><th>Localização</th><th>Data</th><th>Ações</th></tr></thead><tbody>'+
-    all.map(function(item){
-      var ax=item.ax;
-      var icon=(ax.tipo||'').includes('pdf')?'📄':(ax.tipo||'').includes('image')?'🖼️':'📎';
-      return '<tr>'+
-        '<td>'+icon+' <strong>'+eh(ax.nome||'-')+'</strong></td>'+
-        '<td style="font-size:.75rem;color:var(--t2)">'+eh(item.local)+'</td>'+
-        '<td style="font-size:.75rem">'+eh(ax.data||'-')+'</td>'+
-        '<td><div style="display:flex;gap:.3rem">'+
-          (ax.url?'<button class="btn bg bs" style="font-size:.72rem" onclick="abrirAnexo({nome:\''+ax.nome.replace(/'/g,"\\'")+'\',"tipo":"'+(ax.tipo||'')+'","url":\''+ax.url.substring(0,50)+'\'})">👁 Abrir</button>':'<span style="font-size:.72rem;color:var(--t3)">Sem arq.</span>')+
-        '</div></td>'+
-      '</tr>'
-    }).join('')+
-  '</tbody></table></div>'
-}
-
-// ═══ GUIA ACESSO ═══
-function abrirGuiaAcesso(){openM('mguia-acesso')}
-
 // END
 
 
